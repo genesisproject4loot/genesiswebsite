@@ -35,8 +35,8 @@ function Head(): ReactElement {
   return (
     <HTMLHead>
       {/* Primary Meta Tags */}
-      <title>Loot</title>
-      <meta name="title" content="Loot" />
+      <title>Genesis Project (for Loot)</title>
+      <meta name="title" content="Genesis Project (for Loot)" />
       <meta
         name="description"
         content="Loot is randomized adventurer gear generated and stored on chain."
@@ -96,7 +96,7 @@ function Header() {
       {/* Main logo */}
       <div className={styles.header__logo}>
         <Link href="/">
-          <a>Loot</a>
+          <a>Genesis Project (for Loot)</a>
         </Link>
       </div>
 

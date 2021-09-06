@@ -33,9 +33,9 @@ export default function Home(): ReactElement {
     <Layout>
       <div>
         <div className={styles.home__cta}>
+          <img src="genesisadventurer.png" width="80%"></img>
           {/* CTA title */}
-          <h1>Genesis Mana <br/>(for Adventurers)</h1>
-
+          <h1>Genesis Project <br/>(for Loot)</h1>
           {/* Quicklinks */}
           <ul>
             {quicklinks.map(({ name, url }, i) => {
@@ -51,9 +51,9 @@ export default function Home(): ReactElement {
 
           {/* CTA Description */}
           <p>
-            Genesis Mana is randomized adventurer gear generated and stored on chain.
-            <br /> Stats, images, and other functionality are intentionally
-            omitted for others to interpret. <br /> Genesis Mana will be redeemed to create Genesis Adventurers.
+            The Genesis Project is a community of  builders, designers, mathematicians and storytellers on a mission to discover the origin story of the Loot universe.
+            <br /><br />
+            Whether by chance, inevitability or divine design, the data reveals a hidden scaffolding behind the game, hiding in plain sight — <b>within the seemingly random Loot bags, there is a clear and singular Order to the Loot Universe.</b>
           </p>
         </div>
 
