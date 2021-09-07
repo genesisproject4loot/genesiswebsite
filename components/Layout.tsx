@@ -87,8 +87,6 @@ function Header() {
   const { pathname } = useRouter();
   // All links
   const links = [
-    { name: "FAQ", path: "/faq" },
-    { name: "Resources", path: "/resources" },
   ];
 
   return (
@@ -96,7 +94,7 @@ function Header() {
       {/* Main logo */}
       <div className={styles.header__logo}>
         <Link href="/">
-          <a>Genesis Project (for Loot)</a>
+          <a><img src="genesis-icon.png" height="35px"></img> Genesis Project (for Loot)</a>
         </Link>
       </div>
 
@@ -134,18 +132,22 @@ function Header() {
  */
 function Footer(): ReactElement {
   return (
-    <div className={styles.footer}>
-      <p>
-        This website is{" "}
-        <a
-          href="https://github.com/lootproject/website"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          open-source
-        </a>
-        .
-      </p>
-    </div>
+    <>
+    </>
   );
+  // return (
+  //   <div className={styles.footer}>
+  //     <p>
+  //       This website is{" "}
+  //       <a
+  //         href="https://github.com/lootproject/website"
+  //         target="_blank"
+  //         rel="noopener noreferrer"
+  //       >
+  //         open-source
+  //       </a>
+  //       .
+  //     </p>
+  //   </div>
+  // );
 }
