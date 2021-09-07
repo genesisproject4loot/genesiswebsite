@@ -85,9 +85,6 @@ function Head(): ReactElement {
 function Header() {
   // Collect current path for active links
   const { pathname } = useRouter();
-  // All links
-  const links = [
-  ];
 
   return (
     <div className={styles.header}>
@@ -98,30 +95,6 @@ function Header() {
         </Link>
       </div>
 
-      {/* Navigation */}
-      <div className={styles.header__links}>
-        <ul>
-          {links.map(({ name, path }, i) => {
-            // For each link, render link
-            return (
-              <li key={i}>
-                <Link href={path}>
-                  <a
-                    className={
-                      pathname === path
-                        ? // Active class if pathname matches current path
-                          styles.header__links_active
-                        : undefined
-                    }
-                  >
-                    {name}
-                  </a>
-                </Link>
-              </li>
-            );
-          })}
-        </ul>
-      </div>
     </div>
   );
 }
