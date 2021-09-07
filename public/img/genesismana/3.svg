@@ -1,1 +1,10 @@
-<svg xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMinYMin meet" viewBox="0 0 350 350"><style>.base { fill: white; font-family: serif; font-size: 14px; widht: 350px} .italic {font-style: italic}</style><rect width="100%" height="100%" fill="#B45FBB" /><text x="10" y="20" class="base">Order: Titans</text><text x="10" y="40" class="base">Equipment Type: Head Armor</text><text x="10" y="320" class="base italic">Distilled from Loot bag #0</text><text x="10" y="340" class="base italic">Lost Head Armor of Titans</text></svg>
+<svg xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMinYMin meet" viewBox="0 0 350 350">
+<style>.base { fill: white; font-family: serif; font-size: 14px; widht: 350px} .italic {font-style: italic}</style>
+
+<rect width="100%" height="100%" fill="#C07A28" />
+<text x="10" y="20" class="base">Order: Fury</text>
+<text x="10" y="40" class="base">Equipment Type: Hand Armor</text>
+<text x="10" y="320" class="base italic">Distilled from Loot Bag #7461</text>
+<text x="10" y="340" class="base italic">Ornate Gauntlets of Fury</text>
+
+</svg>

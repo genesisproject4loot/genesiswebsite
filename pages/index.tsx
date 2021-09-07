@@ -114,9 +114,12 @@ export default function Home(): ReactElement {
             <li><b>Why:</b> If you collect all 8 Genesis Mana from a single order, the original items that equipped a &ldquo;Genesis Adventurer&rdquo; of your order, then you can mint a Genesis Adventurer.</li>
           </ul>
           <div className={[styles.btn, styles.cta].join(' ')}><Link href="#">Distill Genesis Mana</Link></div>
-          <div className={styles.examples}>
-            <span>Example Genesis Mana:</span>
-          </div>
+        </div>
+        <div className={styles.home__feature}>
+          <span>Example Genesis Mana:</span>
+          <img src="img/genesismana/1.svg" width="350px"/>
+          <img src="img/genesismana/2.svg" width="350px"/>
+          <img src="img/genesismana/3.svg" width="350px"/>
         </div>
 
         <div className={styles.home__chapters}>
