@@ -13,6 +13,7 @@ export default function Layout({
   children: ReactElement | ReactElement[];
 }) {
   return (
+
     <div>
       {/* Meta */}
       <Head />
@@ -32,6 +33,7 @@ export default function Layout({
  * @returns {ReactElement} HTML Head component
  */
 function Head(): ReactElement {
+
   return (
     <HTMLHead>
       {/* Primary Meta Tags */}
@@ -73,6 +75,22 @@ function Head(): ReactElement {
       <link
         href="https://fonts.googleapis.com/css2?family=EB+Garamond:wght@400;700&display=swap"
         rel="stylesheet"
+      />
+
+      <script
+        async
+        src="https://www.googletagmanager.com/gtag/js?id=G-CB1BCE90W3"
+      />
+
+      <script
+        dangerouslySetInnerHTML={{
+          __html: `
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', 'G-CB1BCE90W3', { page_path: window.location.pathname });
+          `,
+        }}
       />
     </HTMLHead>
   );
