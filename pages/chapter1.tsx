@@ -2,6 +2,7 @@
 import Layout from "@components/Layout"; // Layout wrapper
 import { defaultBags } from "@utils/constants"; // Bags to render
 import styles from "@styles/pages/Home.module.scss"; // Styles
+import Link from "next/link"
 
 // Types
 import type { ReactElement } from "react";
@@ -68,12 +69,12 @@ Can you resurrect a Genesis Adventurer of Brilliance before it’s too late?
           <ul>
             <li><b>Who:</b> Loot Bag holders</li>
             <li><b>What:</b> an NFT of a single item from your bag</li>
-            <li><b>What to Do:</b> "Distill" Genesis Mana from any item in your bag that has an Order ("Of ___"). Genesis Mana is essentially a Mint Pass for a Genesis Adventurer</li>
+            <li><b>What to Do:</b> &ldquo;Distill&rdquo; Genesis Mana from any item in your bag that has an Order (&ldquo;Of ___&rdquo;). Genesis Mana is essentially a Mint Pass for a Genesis Adventurer</li>
             <li><b>Price:</b> Free</li>
             <li><b>How:</b> From Etherscan</li>
-            <li><b>Why:</b> If you collect all 8 Genesis Mana from a single order, the original items that equipped a "Genesis Adventurer" of your order, then you can mint a Genesis Adventurer.</li>
+            <li><b>Why:</b> If you collect all 8 Genesis Mana from a single order, the original items that equipped a &ldquo;Genesis Adventurer&rdquo; of your order, then you can mint a Genesis Adventurer.</li>
           </ul>
-          <div className="btn"><a href="/chapter1">Mint the NFT</a></div>
+          <div className="btn"><Link href="/chapter1">Mint the NFT</Link></div>
         </div>
       </div>
     </Layout>

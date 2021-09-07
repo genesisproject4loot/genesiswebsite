@@ -2,7 +2,7 @@
 import Layout from "@components/Layout"; // Layout wrapper
 import { defaultBags } from "@utils/constants"; // Bags to render
 import styles from "@styles/pages/Home.module.scss"; // Styles
-
+import Link from "next/link"
 // Types
 import type { ReactElement } from "react";
 
@@ -56,16 +56,16 @@ export default function Home(): ReactElement {
           </p>
           <div>
             <ul>
-              <li><div class="btn"><a href="#chapter1">Chapter 1</a></div></li>
-              <li><div class="btn"><a href="#chapter2">Chapter 2</a></div></li>
-              <li><div class="btn"><a href="#chapter3">Chapter 3</a></div></li>
+              <li><div className={styles.btn}><a href="#chapter1">Chapter 1</a></div></li>
+              <li><div className={styles.btn}><a href="#chapter2">Chapter 2</a></div></li>
+              <li><div className={styles.btn}><a href="#chapter3">Chapter 3</a></div></li>
             </ul>
           </div>
         </div>
         <div className={styles.home__chapters}>
           <hr/>
           <h2>In the Beginning</h2>
-          <blockquote>
+          <blockquote className={styles.center}>
           <p>
           <i>With pieces, a puzzle
           <br/>
@@ -79,18 +79,17 @@ export default function Home(): ReactElement {
           <br/><br/>
           But what lays behind?  What came before?  What was this world like in the beginning, before the bags were shuffled?
           <br/><br/>
-          Through a statistical analysis of the data, our team at The Genesis Project has unearthed a breakthrough discovery — the "genesis state" of the Loot universe.
+          Through a statistical analysis of the data, our team at The Genesis Project has unearthed a breakthrough discovery — the &ldquo;genesis state&rdquo; of the Loot universe.
           <br/><br/>
           Based on the item data and fundamental logic of the smart contract, the evidence has led us to a hair-raising epiphany hidden in the data and the smart contract:
           <br/><br/>
-          <i>In the beginning, before the bags were shuffled, these Loot bags were carried by 2,540 original Adventurers — "Genesis Adventures" — <a href="16-orders.png" target="_blank">organized across 16 Orders.</a></i>
+          <i>In the beginning, before the bags were shuffled, these Loot bags were carried by 2,540 original Adventurers — &ldquo;Genesis Adventures&rdquo; — <a href="16-orders.png" target="_blank">organized across 16 Orders.</a></i>
           <br/><br/>
           Read <a href="#">here</a> for a detailed history of our data exploration, statistical modeling, and linguistic analysis.
           </p>
         </div>
         <div className={styles.home__chapters}>
-          <hr/>
-          <a name="chapter1"></a>
+          <hr id="chapter1"/>
           <h2>Chapter 1 : Genesis Mana</h2>
           <blockquote>
           <p>
@@ -119,17 +118,16 @@ Can you resurrect a Genesis Adventurer of Brilliance before it’s too late?
           <ul>
             <li><b>Who:</b> Loot Bag holders</li>
             <li><b>What:</b> an NFT of a single item from your bag</li>
-            <li><b>What to Do:</b> "Distill" Genesis Mana from any item in your bag that has an Order ("Of ___"). Genesis Mana is essentially a Mint Pass for a Genesis Adventurer</li>
+            <li><b>What to Do:</b> &ldquo;Distill&rdquo; Genesis Mana from any item in your bag that has an Order (&ldquo;Of ___&rdquo;). Genesis Mana is essentially a Mint Pass for a Genesis Adventurer</li>
             <li><b>Price:</b> Free</li>
             <li><b>How:</b> From Etherscan</li>
-            <li><b>Why:</b> If you collect all 8 Genesis Mana from a single order, the original items that equipped a "Genesis Adventurer" of your order, then you can mint a Genesis Adventurer.</li>
+            <li><b>Why:</b> If you collect all 8 Genesis Mana from a single order, the original items that equipped a &ldquo;Genesis Adventurer&rdquo; of your order, then you can mint a Genesis Adventurer.</li>
           </ul>
-          <div class="btn"><a href="/chapter1">Begin the Quest</a></div>
+          <div className={styles.btn}><Link href="/chapter1">Begin the Quest</Link></div>
         </div>
 
         <div className={styles.home__chapters}>
-          <hr/>
-          <a name="chapter2"></a>
+          <hr id="chapter2"/>
           <h2>Chapter 2 : The Genesis Adventurers</h2>
           <p>
           You’ve collected a complete set of Genesis Loot, one for Each Item Type, all of the same Order.
@@ -142,8 +140,8 @@ Can you resurrect a Genesis Adventurer of Brilliance before it’s too late?
           </p>
           <ul>
             <li><b>Who:</b>  Genesis Mana holders</li>
-            <li><b>What:</b> an NFT of a "perfect" bag, originally brought to the Loot universe by a "Genesis Adventurer"</li>
-            <li><b>What to Do:</b> "Resurrect" Genesis Adventurers from a complete set of 8 items from any of the 16 Orders <li> This means one Weapon, one Head Armor, one Chest Armor, etc all from the same Order ("Of ____")</li></li>
+            <li><b>What:</b> an NFT of a &ldquo;perfect&rdquo; bag, originally brought to the Loot universe by a &ldquo;Genesis Adventurer&rdquo;</li>
+            <li><b>What to Do:</b> &ldquo;Resurrect&rdquo; Genesis Adventurers from a complete set of 8 items from any of the 16 Orders <li> This means one Weapon, one Head Armor, one Chest Armor, etc all from the same Order (&ldquo;Of ____&rdquo;)</li></li>
             <li><b>Price:</b> Free</li>
             <li><b>How:</b>
               <li>Buy GMs on OpenSea and resurrect a GA yourself</li>
@@ -155,12 +153,11 @@ Can you resurrect a Genesis Adventurer of Brilliance before it’s too late?
               <li>For yourself — For every Genesis Adventurer you resurrect, you get 10,000 $AMANA</li>
             </li>
           </ul>
-          <div class="disabled btn"><a>Begin the Quest</a></div>
+          <div className={[styles.btn, styles.disabled].join(" ")}><a>Begin the Quest</a></div>
         </div>
 
         <div className={styles.home__chapters}>
-          <hr/>
-          <a name="chapter3"></a>
+          <hr id="chapter3"/>
           <h2>Chapter 3 : $AMANA</h2>
           <p>
           Genesis Adventurer
