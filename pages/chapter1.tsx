@@ -1,6 +1,5 @@
 // Imports
 import Layout from "@components/Layout"; // Layout wrapper
-import { defaultBags } from "@utils/constants"; // Bags to render
 import styles from "@styles/pages/Home.module.scss"; // Styles
 import Link from "next/link"
 
