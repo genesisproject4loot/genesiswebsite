@@ -1,6 +1,5 @@
 // Imports
 import Layout from "@components/Layout"; // Layout wrapper
-import { defaultBags } from "@utils/constants"; // Bags to render
 import styles from "@styles/pages/Home.module.scss"; // Styles
 import Link from "next/link"
 // Types
@@ -19,15 +18,6 @@ export default function Home(): ReactElement {
       url: "https://mirror.xyz"
     },
   ];
-
-  /**
-   * Selects 3 random bags from defaultBags
-   * @returns {Record<string, string>[]} randomized bags
-   */
-  const getRandomThreeBags = () => {
-    const shuffled = defaultBags.sort(() => 0.5 - Math.random());
-    return shuffled.slice(0, 3);
-  };
 
   return (
     <Layout>
@@ -124,7 +114,7 @@ export default function Home(): ReactElement {
             <li><b>Why:</b> If you collect all 8 Genesis Mana from a single order, the original items that equipped a &ldquo;Genesis Adventurer&rdquo; of your order, then you can mint a Genesis Adventurer.</li>
           </ul>
           <div className={[styles.btn, styles.cta].join(' ')}><Link href="/chapter1">Distill Genesis Mana</Link></div>
-          <div>
+          <div className={styles.examples}>
             <span>Example Genesis Mana:</span>
           </div>
         </div>

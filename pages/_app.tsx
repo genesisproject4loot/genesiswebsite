@@ -7,6 +7,6 @@ import type { AppProps } from "next/app";
 
 
 // Export application
-export default function LootRNG({ Component, pageProps }: AppProps) {
+export default function GenesisProject({ Component, pageProps }: AppProps) {
   return <Component {...pageProps} />;
 }
