@@ -80,14 +80,10 @@ export default function Home(): ReactElement {
           But what lays behind?  What came before?  What was this world like in the beginning, before the bags were shuffled?
           <br/><br/>
           Through a statistical analysis of the data, our team at The Genesis Project has unearthed a breakthrough discovery — the "genesis state" of the Loot universe.
-          </p>
-          <div width="100%">
-            <a href="16-orders.png"><img src="16-orders.png" width="70%"/></a>
-          </div>
-          <p>
+          <br/><br/>
           Based on the item data and fundamental logic of the smart contract, the evidence has led us to a hair-raising epiphany hidden in the data and the smart contract:
           <br/><br/>
-          <i>In the beginning, before the bags were shuffled, these Loot bags were carried by 2,540 original Adventurers — "Genesis Adventures" — organized across 16 Orders.</i>
+          <i>In the beginning, before the bags were shuffled, these Loot bags were carried by 2,540 original Adventurers — "Genesis Adventures" — <a href="16-orders.png" target="_blank">organized across 16 Orders.</a></i>
           <br/><br/>
           Read <a href="#">here</a> for a detailed history of our data exploration, statistical modeling, and linguistic analysis.
           </p>
