@@ -59,13 +59,52 @@
     padding: 20px 0 40px;
   }
   blockquote {
+    position: relative;
     background: #8e8e8e;
-    padding: 30px 25px;
     color: #fff;
     border-radius: 5px;
+    padding: 40px 30px 30px 60px;
+
     p {
       color: #fff;
       font-size: 20px;
+    }
+    span.author {
+      position: relative;
+      display: block;
+      text-align: right;
+      margin-top: 5px;
+      color: #CCC;
+      font-size:20px;
+
+      i {
+        position: relative;
+        background: #8e8e8e;
+        padding-left: 5px;
+        font-style: italic;
+        z-index: 5;
+      }
+      &::before {
+        display: block;
+        content: "";
+        position: absolute;
+        top: 50%;
+        left: 0;
+        width: 100%;
+        height: 1px;
+        background: #ccc;
+        z-index: 1;
+      }
+    }
+    &::before {
+      display: block;
+      position: absolute;
+      top: -10px;
+      left: 10px;
+      content: "“";
+      font-family: "EB Garamond", serif, sans-serif;
+      font-size: 120px;
+      color: #CCC;
     }
   }
 
@@ -114,9 +153,8 @@
       }
     }
   }
-
-  div {
-    padding-top: 25px;
+  div.cta {
+    padding: 25px 0;
     text-align: center;
 
     a:hover {

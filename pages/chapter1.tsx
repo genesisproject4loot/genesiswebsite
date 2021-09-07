@@ -74,7 +74,7 @@ Can you resurrect a Genesis Adventurer of Brilliance before it’s too late?
             <li><b>How:</b> From Etherscan</li>
             <li><b>Why:</b> If you collect all 8 Genesis Mana from a single order, the original items that equipped a &ldquo;Genesis Adventurer&rdquo; of your order, then you can mint a Genesis Adventurer.</li>
           </ul>
-          <div className="btn"><Link href="/chapter1">Mint the NFT</Link></div>
+          <div className="btn"><Link href="#">Mint the NFT</Link></div>
         </div>
       </div>
     </Layout>
