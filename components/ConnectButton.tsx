@@ -25,8 +25,8 @@ import {
   magic,
   portis,
   torus
-} from '../connectors'
-import { Spinner } from '../components/Spinner'
+} from '../utils/connectors'
+import { Spinner } from 'Spinner'
 
 enum ConnectorNames {
   Injected = 'Injected',
