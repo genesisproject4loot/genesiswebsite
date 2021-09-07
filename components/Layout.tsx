@@ -52,7 +52,7 @@ function Head(): ReactElement {
         property="og:description"
         content="The Genesis Project is a community of builders, designers, mathematicians and storytellers on a mission to discover the origin story of the Loot universe."
       />
-      <meta property="og:image" content="https://genesisproject.xyz/16-orders.png" />
+      <meta property="og:image" content="https://genesisproject.xyz/genesisadventurer.png" />
 
       {/* Twitter */}
       <meta property="twitter:card" content="summary_large_image" />
@@ -62,7 +62,7 @@ function Head(): ReactElement {
         property="twitter:description"
         content="The Genesis Project is a community of builders, designers, mathematicians and storytellers on a mission to discover the origin story of the Loot universe."
       />
-      <meta property="twitter:image" content="https://genesisproject.xyz/16-orders.png" />
+      <meta property="twitter:image" content="https://genesisproject.xyz/genesisadventurer.png" />
 
       {/* Font */}
       <link rel="preconnect" href="https://fonts.googleapis.com" />
