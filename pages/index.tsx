@@ -45,7 +45,7 @@ export default function Home(): ReactElement {
             Join us on our quest to restore the original Orders of Loot and resurrect the Genesis Adventurers.
           </p>
           <div>
-            <ul>
+            <ul className={styles.btns}>
               <li><div className={styles.btn}><a href="#chapter1">Chapter 1</a></div></li>
               <li><div className={styles.btn}><a href="#chapter2">Chapter 2</a></div></li>
               <li><div className={styles.btn}><a href="#chapter3">Chapter 3</a></div></li>
@@ -105,7 +105,7 @@ export default function Home(): ReactElement {
           </p>
           <span className={styles.author}><i>The Discovery Awaits</i></span>
           </blockquote>
-          <ul>
+          <ul className={styles.bytwo}>
             <li><b>Who:</b> Loot Bag holders</li>
             <li><b>What:</b> an NFT of a single item from your bag</li>
             <li><b>What to Do:</b> &ldquo;Distill&rdquo; Genesis Mana from any item in your bag that has an Order (&ldquo;Of ___&rdquo;). Genesis Mana is essentially a Mint Pass for a Genesis Adventurer</li>
@@ -117,9 +117,9 @@ export default function Home(): ReactElement {
         </div>
         <div className={styles.home__feature}>
           <span>Example Genesis Mana:</span>
-          <img src="img/genesismana/1.svg" width="350px"/>
-          <img src="img/genesismana/2.svg" width="350px"/>
-          <img src="img/genesismana/3.svg" width="350px"/>
+          <img src="img/genesismana/1.svg" />
+          <img src="img/genesismana/2.svg" />
+          <img src="img/genesismana/3.svg" />
         </div>
 
         <div className={styles.home__chapters}>
@@ -137,7 +137,7 @@ export default function Home(): ReactElement {
             </p>
             <span className={styles.author}><i>The Resurrection Begins</i></span>
           </blockquote>
-          <ul>
+          <ul className={styles.bytwo}>
             <li><b>Who:</b>  Genesis Mana holders</li>
             <li><b>What:</b> an NFT of a &ldquo;perfect&rdquo; bag, originally brought to the Loot universe by a &ldquo;Genesis Adventurer&rdquo;</li>
             <li><b>What to Do:</b> &ldquo;Resurrect&rdquo; Genesis Adventurers from a complete set of 8 items from any of the 16 Orders <li> This means one Weapon, one Head Armor, one Chest Armor, etc all from the same Order (&ldquo;Of ____&rdquo;)</li></li>
@@ -180,7 +180,7 @@ export default function Home(): ReactElement {
             </p>
             <span className={styles.author}><i>The Ancestral Mana Returns</i></span>
           </blockquote>
-          <ul>
+          <ul className={styles.bytwo}>
             <li><b>Who:</b> Players who participate in resurrecting Genesis Adventurers, either individually or as teams or within the official DAOs of their Order.</li>
             <li><b>What:</b> A tradeable ERC-20 Token, complimentary to $AGLD</li>
             <li><b>Why:</b> While Adventure Gold ($AGLD) is used to BUY things in the game, Adventure Mana ($AMANA) is used to DO things in the adventures ahead.</li>
