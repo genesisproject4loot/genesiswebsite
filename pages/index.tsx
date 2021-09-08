@@ -152,7 +152,7 @@ export default function Home(): ReactElement {
             <li><b>Why:</b>
               <ul>
                 <li>For your team — The more Genesis Adventurers that your Order resurrects, the stronger your team will be in the games ahead</li>
-                <li>For yourself — For every Genesis Adventurer you resurrect, you get 10,000 $AMANA</li>
+                <li>For yourself — For every Genesis Adventurer you resurrect, you get a bag of $AMANA</li>
               </ul>
             </li>
           </ul>
