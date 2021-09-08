@@ -110,6 +110,10 @@
         background: #ccc;
         z-index: 1;
       }
+      a {
+        font-size: 20px;
+        color: #CCC;
+      }
     }
     &::before {
       display: block;

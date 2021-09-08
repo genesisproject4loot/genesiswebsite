@@ -93,7 +93,7 @@ export default function Home(): ReactElement {
           <br/>
           From entropy, Order</i>
           </p>
-          <span className={styles.author}><i>timshel - The Historian</i></span>
+          <span className={styles.author}><i><a href="//twitter.com/timshelxyz">@timshelxyz</a> - The Historian</i></span>
           </blockquote>
           <p>
           At hyperspeed since nearly the moment the Loot Project emerged, a community of builders has come together to develop a series of incredible projects and derivatives that move the ecosystem forward.
