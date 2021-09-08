@@ -60,10 +60,10 @@ export default function Home(): ReactElement {
               <li>
                 <div className={styles.btn}><a href="#chapter2">Chapter 2</a></div>
                 <div className={[styles.moreinfo, styles.inactive].join(' ')}>
-                  <a disabled target="_blank" rel="noopener noreferrer">
+                  <a href="#" onClick={(e) => {e.preventDefault() }} target="_blank" rel="noopener noreferrer">
                     OpenSea
                   </a>
-                  <a target="_blank" rel="noopener noreferrer">
+                  <a href="#" onClick={(e) => {e.preventDefault() }} target="_blank" rel="noopener noreferrer">
                     Etherscan
                   </a>
                 </div>
@@ -71,10 +71,10 @@ export default function Home(): ReactElement {
               <li>
                 <div className={styles.btn}><a href="#chapter3">Chapter 3</a></div>
                 <div className={[styles.moreinfo, styles.inactive].join(' ')}>
-                  <a disabled target="_blank" rel="noopener noreferrer">
+                  <a href="#" onClick={(e) => {e.preventDefault() }}  target="_blank" rel="noopener noreferrer">
                     OpenSea
                   </a>
-                  <a target="_blank" rel="noopener noreferrer">
+                  <a href="#" onClick={(e) => {e.preventDefault() }} target="_blank" rel="noopener noreferrer">
                     Etherscan
                   </a>
                 </div>
