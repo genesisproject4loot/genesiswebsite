@@ -13,8 +13,8 @@ export default function Home(): ReactElement {
       url: "https://twitter.com/GenesisLoot",
     },
     {
-      name: "Mirror",
-      url: "https://mirror.xyz"
+      name: "Medium",
+      url: "https://medium.com/@timshelxyz?p=dddb50ab18b7"
     },
   ];
 
