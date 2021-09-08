@@ -159,7 +159,7 @@ export default function Home(): ReactElement {
             <p>
             You’ve collected a complete set of Genesis Loot, one for each item type, all of the same Order.
             <br/><br/>
-            You carry this precious Genesis Loot on your wallet, and climb to the top of the mountain to attempt to resurrect a Genesis Adventurer.
+            You carry this precious Genesis Loot on your back, and climb to the top of the mountain to attempt to resurrect a Genesis Adventurer.
             <br/><br/>
             You throw the bag in the fire.
             <br/><br/>
@@ -177,7 +177,7 @@ export default function Home(): ReactElement {
             <li>Trade GMs with others to resurrect a GA yourself.</li>
             <li>Team up with others to pool your GMs and collectively resurrect one or many GAs and share them fractionally.</li>
           </ul>
-          The more Genesis Adventurers you resurrect, the strong you and/or your team will be in the games ahead. Furthermore, for every Genesis Adventurer you resurrect, you have the right to claim a bag of Adventure Mana ($AMANA).
+          The more Genesis Adventurers you resurrect, the stronger you and/or your team will be in the games ahead. Furthermore, for every Genesis Adventurer you resurrect, you have the right to claim a bag of Adventure Mana ($AMANA).
           </p>
           <br/><br/>
           <div className={[styles.btn, styles.disabled, styles.cta].join(" ")}><a>Resurrect Genesis Adventurer</a></div>
