@@ -122,10 +122,7 @@ function Header() {
  * @returns {ReactElement} Footer
  */
 function Footer(): ReactElement {
-  return (
-    <>
-    </>
-  );
+
   return (
     <div className={styles.footer}>
       <p>
@@ -136,6 +133,15 @@ function Footer(): ReactElement {
           rel="noopener noreferrer"
         >
           open-source
+        </a>
+        .
+        Along with{" "}
+        <a
+          href="https://github.com/genesisproject4loot/genesismana"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          Chapter 1's contract
         </a>
         .
       </p>
