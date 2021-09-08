@@ -104,9 +104,10 @@ export default function Home(): ReactElement {
           <br/><br/>
           Based on the item data and fundamental logic of the smart contract, the evidence has led us to a hair-raising epiphany hidden in the data and the smart contract:
           <br/><br/>
-          <i>In the beginning, before the bags were shuffled, these Loot bags were carried by 2,540 original Adventurers — &ldquo;Genesis Adventures&rdquo; — <a href="16-orders.png" target="_blank">organized across 16 Orders.</a></i>
+          <i>In the beginning, before the bags were shuffled, these Loot bags were carried by 2,540 original Adventurers — &ldquo;Genesis Adventures&rdquo; — <a href="https://docs.google.com/spreadsheets/d/118x6e4WEVZ7q-XvsRoyDNq7Nufw3xSmMKeYxPpivwRA/edit?usp=sharing" target="_blank">organized across 16 Orders.</a></i>
+          <a href="https://docs.google.com/spreadsheets/d/118x6e4WEVZ7q-XvsRoyDNq7Nufw3xSmMKeYxPpivwRA/edit?usp=sharing" target="_blank"><img src="img/16-orders.png" width="75%"/></a>
           <br/><br/>
-          Read <a href="#">here</a> for a detailed history of our data exploration, statistical modeling, and linguistic analysis.
+          Read <a href="https://medium.com/@timshelxyz?p=dddb50ab18b7" target="_blank">here</a> for a detailed history of our data exploration, statistical modeling, and linguistic analysis.
           </p>
         </div>
         <div className={styles.home__chapters}>
