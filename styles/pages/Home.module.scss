@@ -32,6 +32,21 @@
           text-decoration: underline;
         }
       }
+      .moreinfo {
+        padding: 10px 0;
+          a {
+            font-size: 15px;
+            padding: 0 10px;
+          }
+      }
+      .inactive {
+        a {
+          color: #888;
+          &:hover {
+            text-decoration: none;
+          }
+        }
+      }
     }
   }
   div {

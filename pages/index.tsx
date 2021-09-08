@@ -8,7 +8,6 @@ import type { ReactElement } from "react";
 export default function Home(): ReactElement {
   // Quicklinks to render
   const quicklinks: Record<string, string>[] = [
-    { name: "OpenSea", url: "https://opensea.io/collection/genesismana" },
     {
       name: "Twitter",
       url: "https://twitter.com/GenesisLoot",
@@ -17,11 +16,8 @@ export default function Home(): ReactElement {
       name: "Mirror",
       url: "https://mirror.xyz"
     },
-    {
-      name: "Etherscan",
-      url: "https://mirror.xyz"
-    },
   ];
+
 
   return (
     <Layout>
@@ -50,9 +46,39 @@ export default function Home(): ReactElement {
           </p>
           <div>
             <ul className={styles.btns}>
-              <li><div className={styles.btn}><a href="#chapter1">Chapter 1</a></div></li>
-              <li><div className={styles.btn}><a href="#chapter2">Chapter 2</a></div></li>
-              <li><div className={styles.btn}><a href="#chapter3">Chapter 3</a></div></li>
+              <li>
+                <div className={styles.btn}><a href="#chapter1">Chapter 1</a></div>
+                <div className={styles.moreinfo}>
+                  <a href="https://opensea.io/collection/genesis-mana" target="_blank" rel="noopener noreferrer">
+                    OpenSea
+                  </a>
+                  <a href="https://etherscan.io/address/0xf4b6040a4b1b30f1d1691699a8f3bf957b03e463#writeContract" target="_blank" rel="noopener noreferrer">
+                    Etherscan
+                  </a>
+                </div>
+              </li>
+              <li>
+                <div className={styles.btn}><a href="#chapter2">Chapter 2</a></div>
+                <div className={[styles.moreinfo, styles.inactive].join(' ')}>
+                  <a disabled target="_blank" rel="noopener noreferrer">
+                    OpenSea
+                  </a>
+                  <a target="_blank" rel="noopener noreferrer">
+                    Etherscan
+                  </a>
+                </div>
+              </li>
+              <li>
+                <div className={styles.btn}><a href="#chapter3">Chapter 3</a></div>
+                <div className={[styles.moreinfo, styles.inactive].join(' ')}>
+                  <a disabled target="_blank" rel="noopener noreferrer">
+                    OpenSea
+                  </a>
+                  <a target="_blank" rel="noopener noreferrer">
+                    Etherscan
+                  </a>
+                </div>
+              </li>
             </ul>
           </div>
         </div>
@@ -116,7 +142,7 @@ export default function Home(): ReactElement {
           Upon collecting 8 Genesis Mana from a single Order, corresponding to all 8 item types (i.e. weapon, head armor, chest armor, etc), a Genesis Adventurer can be resurrected.
           </p>
           <br/><br/>
-          <div className={[styles.btn, styles.cta].join(' ')}><Link href="#">Distill Genesis Mana</Link></div>
+          <div className={[styles.btn, styles.cta].join(' ')}><Link href="https://etherscan.io/address/0xf4b6040a4b1b30f1d1691699a8f3bf957b03e463#writeContract">Distill Genesis Mana</Link></div>
         </div>
         <div className={styles.home__feature}>
           <span>Example Genesis Mana:</span>
