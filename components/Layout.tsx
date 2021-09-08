@@ -141,7 +141,7 @@ function Footer(): ReactElement {
           target="_blank"
           rel="noopener noreferrer"
         >
-          Chapter 1's contract
+          Chapter 1&apos;s contract
         </a>
         .
       </p>

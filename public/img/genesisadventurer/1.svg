@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMinYMin meet" viewBox="0 0 350 350">
+<style>.base { fill: white; font-family: serif; font-size: 14px; widht: 350px} .italic {font-style: italic}</style>
+
+<rect width="100%" height="100%" fill="#000" />
+<rect y="300" width="350" height="50" fill="#36662A"/>
+
+<text x="10" y="20" class="base">Quarterstaff of Brilliance</text>
+<text x="10" y="40" class="base">Holy Chestplate of Brilliance</text>
+<text x="10" y="60" class="base">Rune Glow Helm of Brilliance</text>
+<text x="10" y="80" class="base">Silk Sash of Brilliance</text>
+<text x="10" y="100" class="base">Divine Slippers of Brilliance</text>
+<text x="10" y="120" class="base">Gloves of Brilliance</text>
+<text x="10" y="140" class="base">Death Glow Amulet of Brilliance</text>
+<text x="10" y="160" class="base">Bronze Ring of Brilliance</text>
+
+<text x="10" y="330" class="base italic">Genesis Adventurer of Brilliance</text>
+</svg>

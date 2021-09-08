@@ -182,6 +182,12 @@ export default function Home(): ReactElement {
           <br/><br/>
           <div className={[styles.btn, styles.disabled, styles.cta].join(" ")}><a>Resurrect Genesis Adventurer</a></div>
         </div>
+        <div className={styles.home__feature}>
+          <span>Example Genesis Adventurer:</span>
+          <img src="img/genesisadventurer/1.svg" />
+          <img src="img/genesisadventurer/2.svg" />
+          <img src="img/genesisadventurer/3.svg" />
+        </div>
 
         <div className={styles.home__chapters}>
           <hr id="chapter3"/>
