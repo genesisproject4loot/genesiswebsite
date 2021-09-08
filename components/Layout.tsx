@@ -126,19 +126,19 @@ function Footer(): ReactElement {
     <>
     </>
   );
-  // return (
-  //   <div className={styles.footer}>
-  //     <p>
-  //       This website is{" "}
-  //       <a
-  //         href="https://github.com/lootproject/website"
-  //         target="_blank"
-  //         rel="noopener noreferrer"
-  //       >
-  //         open-source
-  //       </a>
-  //       .
-  //     </p>
-  //   </div>
-  // );
+  return (
+    <div className={styles.footer}>
+      <p>
+        This website is{" "}
+        <a
+          href="https://github.com/genesisproject4loot/genesiswebsite"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          open-source
+        </a>
+        .
+      </p>
+    </div>
+  );
 }

@@ -11,10 +11,14 @@ export default function Home(): ReactElement {
     { name: "OpenSea", url: "https://opensea.io/collection/genesismana" },
     {
       name: "Twitter",
-      url: "https://twitter.com/lootproject",
+      url: "https://twitter.com/GenesisLoot",
     },
     {
       name: "Mirror",
+      url: "https://mirror.xyz"
+    },
+    {
+      name: "Etherscan",
       url: "https://mirror.xyz"
     },
   ];
@@ -92,12 +96,12 @@ export default function Home(): ReactElement {
           <br/>
           You carefully look into your Wallet and notice something new: Genesis Mana.
           <br/><br/>
-          You now have a new piece of Genesis Mana in your bag: the Holy Chestplate of Brilliance.
+          You now have a new piece of Genesis Mana in your bag for the Order of Brilliance.
           Where did this come from?  Who wore this?
-          It strikes you — this ancient item came from one of the original Adventurers — <b>a Genesis Adventurer.</b>
+          It strikes you — this ancient energy came from one of the original Adventurers — <b>a Genesis Adventurer.</b>
           <br/><br/>
           What else were they wearing when they arrived in this realm? What else did they carry?
-          In the times ahead, the Order of Brilliance will need a champion, a hero. You carry her Chestplate in your bag and can feel her calling to you through the ages.
+          In the times ahead, the Order of Brilliance will need a champion, a hero. You carry the energy from her Chestplate in your bag and can feel her calling to you through the ages.
           <br/><br/>
           <i>Find me the rest of my loot.  I am here.  Bring me back.</i>
           <br/><br/>
@@ -105,14 +109,13 @@ export default function Home(): ReactElement {
           </p>
           <span className={styles.author}><i>The Discovery Awaits</i></span>
           </blockquote>
-          <ul className={styles.bytwo}>
-            <li><b>Who:</b> Loot Bag holders</li>
-            <li><b>What:</b> an NFT of a single item from your bag</li>
-            <li><b>What to Do:</b> &ldquo;Distill&rdquo; Genesis Mana from any item in your bag that has an Order (&ldquo;Of ___&rdquo;). Genesis Mana is essentially a Mint Pass for a Genesis Adventurer</li>
-            <li><b>Price:</b> Free</li>
-            <li><b>How:</b> From Etherscan</li>
-            <li><b>Why:</b> If you collect all 8 Genesis Mana from a single order, the original items that equipped a &ldquo;Genesis Adventurer&rdquo; of your order, then you can mint a Genesis Adventurer.</li>
-          </ul>
+          <p>
+          For Loot Bag holders, distill Genesis Mana (mint an ERC721 NFT) from any item in your bag that has an Order (item with suffix &ldquo;of ____&rdquo;).
+          <br/><br/>
+          Genesis Mana is essentially a Mint Pass for a Genesis Adventurer.
+          Upon collecting 8 Genesis Mana from a single Order, corresponding to all 8 item types (i.e. weapon, head armor, chest armor, etc), a Genesis Adventurer can be resurrected.
+          </p>
+          <br/><br/>
           <div className={[styles.btn, styles.cta].join(' ')}><Link href="#">Distill Genesis Mana</Link></div>
         </div>
         <div className={styles.home__feature}>
@@ -127,7 +130,7 @@ export default function Home(): ReactElement {
           <h2>Chapter 2 : The Genesis Adventurers</h2>
           <blockquote>
             <p>
-            You’ve collected a complete set of Genesis Loot, one for Each Item Type, all of the same Order.
+            You’ve collected a complete set of Genesis Loot, one for each item type, all of the same Order.
             <br/><br/>
             You carry this precious Genesis Loot on your wallet, and climb to the top of the mountain to attempt to resurrect a Genesis Adventurer.
             <br/><br/>
@@ -137,25 +140,19 @@ export default function Home(): ReactElement {
             </p>
             <span className={styles.author}><i>The Resurrection Begins</i></span>
           </blockquote>
-          <ul className={styles.bytwo}>
-            <li><b>Who:</b>  Genesis Mana holders</li>
-            <li><b>What:</b> an NFT of a &ldquo;perfect&rdquo; bag, originally brought to the Loot universe by a &ldquo;Genesis Adventurer&rdquo;</li>
-            <li><b>What to Do:</b> &ldquo;Resurrect&rdquo; Genesis Adventurers from a complete set of 8 items from any of the 16 Orders <li> This means one Weapon, one Head Armor, one Chest Armor, etc all from the same Order (&ldquo;Of ____&rdquo;)</li></li>
-            <li><b>Price:</b> Free</li>
-            <li><b>How:</b>
-              <ul>
-                <li>Buy GMs on OpenSea and resurrect a GA yourself</li>
-                <li>Trade GMs with others to resurrect a GA yourself</li>
-                <li>Team up with others to pool your GMs and collectively resurrect one or many GAs and share them fractionally + share the resulting $AMANA according to a shared agreement you set up</li>
-              </ul>
-            </li>
-            <li><b>Why:</b>
-              <ul>
-                <li>For your team — The more Genesis Adventurers that your Order resurrects, the stronger your team will be in the games ahead</li>
-                <li>For yourself — For every Genesis Adventurer you resurrect, you get a bag of $AMANA</li>
-              </ul>
-            </li>
+          <p>
+          For Genesis Mana holders, resurrect a Genesis Adventurers (mint an ERC721 NFT) from a complete set of 8 items from any of the 16 Orders.
+          This means one Weapon, one Head Armor, one Chest Armor, etc all from the same Order (item with suffix &ldquo;of ____&rdquo;).
+          <br/><br/>
+          There is no wrong way to complete your collection but here are some suggestions:
+          <ul>
+            <li>Buy GMs on OpenSea and resurrect a GA yourself.</li>
+            <li>Trade GMs with others to resurrect a GA yourself.</li>
+            <li>Team up with others to pool your GMs and collectively resurrect one or many GAs and share them fractionally.</li>
           </ul>
+          The more Genesis Adventurers you resurrect, the strong you and/or your team will be in the games ahead. Furthermore, for every Genesis Adventurer you resurrect, you have the right to claim a bag of Adventure Mana ($AMANA).
+          </p>
+          <br/><br/>
           <div className={[styles.btn, styles.disabled, styles.cta].join(" ")}><a>Resurrect Genesis Adventurer</a></div>
         </div>
 
@@ -168,7 +165,7 @@ export default function Home(): ReactElement {
             <br/><br/>
             Your bag of Genesis Mana is intact, but transformed.
             <br/><br/>
-            You remove it from the ash and discover a bag of $AMANA.
+            You remove it from the ash and discover a bag of Adventure Mana ($AMANA).
             <br/><br/>
             It tingles with energy and magic.
             <br/><br/>
@@ -180,12 +177,13 @@ export default function Home(): ReactElement {
             </p>
             <span className={styles.author}><i>The Ancestral Mana Returns</i></span>
           </blockquote>
-          <ul className={styles.bytwo}>
-            <li><b>Who:</b> Players who participate in resurrecting Genesis Adventurers, either individually or as teams or within the official DAOs of their Order.</li>
-            <li><b>What:</b> A tradeable ERC-20 Token, complimentary to $AGLD</li>
-            <li><b>Why:</b> While Adventure Gold ($AGLD) is used to BUY things in the game, Adventure Mana ($AMANA) is used to DO things in the adventures ahead.</li>
-          </ul>
-          <div className={[styles.btn, styles.disabled, styles.cta].join(" ")}><a>Claim Adventure Mana</a></div>
+          <p>
+          For Genesis Adventurer holders (individuals or teams), retrieve your $AMANA (an ERC20 token).
+          <br/><br/>
+          While Adventure Gold ($AGLD) is used to BUY things in the game, Adventure Mana ($AMANA) is used to DO things in the adventures ahead.
+          </p>
+          <br/><br/>
+          <div className={[styles.btn, styles.disabled, styles.cta].join(" ")}><a>Retrieve Adventure Mana</a></div>
         </div>
       </div>
     </Layout>
