@@ -40,7 +40,7 @@ export default function Home(): ReactElement {
 
           {/* CTA Description */}
           <p>
-            The Genesis Project is a community of builders, designers, mathematicians and storytellers on a mission to discover the origin story of the Loot universe.
+            The Genesis Project is a community of builders, designers, mathematicians and storytellers on a mission to discover the origin story of <a href="https://www.lootproject.com/" target="_blank" rel="noopener noreferrer">the Loot universe</a>.
             <br /><br />
             Join us on our quest to restore the original Orders of Loot and resurrect the Genesis Adventurers.
           </p>
