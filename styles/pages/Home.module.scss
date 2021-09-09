@@ -248,6 +248,9 @@
     h1 {
       line-height: 4.5rem;
     }
+    ul {
+      margin: 25px auto 25px;
+    }
     ul.btns {
       li {
         display: block;
@@ -261,14 +264,6 @@
     }
     blockquote {
       margin: 20px 10px;
-    }
-    ul {
-
-      &.bytwo {
-        columns: 1;
-        -webkit-columns: 1;
-        -moz-columns: 1;
-      }
     }
     .btn {
       a {
