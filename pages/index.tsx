@@ -52,7 +52,7 @@ export default function Home(): ReactElement {
             <ul className={styles.btns}>
               <li>
                 <div className={styles.btn}><a href="#chapter1">Chapter 1</a></div>
-                <div className={[styles.moreinfo, styles.inactive].join(' ')}>
+                <div className={[styles.moreinfo].join(' ')}>
                   <a href="https://opensea.io/collection/genesis-mana" onClick={(e) => {e.preventDefault() }} target="_blank" rel="noopener noreferrer">
                     OpenSea
                   </a>
@@ -147,7 +147,7 @@ export default function Home(): ReactElement {
           Upon collecting 8 Genesis Mana from a single Order, corresponding to all 8 item types (i.e. weapon, head armor, chest armor, etc), a Genesis Adventurer can be resurrected.
           </p>
           <br/><br/>
-          <div className={[styles.btn, styles.disabled, styles.cta].join(' ')}><Link href="https://etherscan.io/address/0xf4b6040a4b1b30f1d1691699a8f3bf957b03e463#writeContract">Distill Genesis Mana</Link></div>
+          <div className={[styles.btn, styles.cta].join(' ')}><Link href="https://etherscan.io/address/0xf4b6040a4b1b30f1d1691699a8f3bf957b03e463#writeContract">Distill Genesis Mana</Link></div>
         </div>
         <div className={styles.home__feature}>
           <span>Example Genesis Mana:</span>
