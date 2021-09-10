@@ -53,7 +53,7 @@ export default function Home(): ReactElement {
               <li>
                 <div className={styles.btn}><a href="#chapter1">Chapter 1</a></div>
                 <div className={[styles.moreinfo].join(' ')}>
-                  <a href="https://opensea.io/collection/genesis-mana" onClick={(e) => {e.preventDefault() }} target="_blank" rel="noopener noreferrer">
+                  <a href="https://opensea.io/collection/genesis-mana" target="_blank" rel="noopener noreferrer">
                     OpenSea
                   </a>
                   <a href="https://etherscan.io/address/0xf4b6040a4b1b30f1d1691699a8f3bf957b03e463#writeContract" target="_blank" rel="noopener noreferrer">
