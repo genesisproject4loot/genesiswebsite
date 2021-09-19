@@ -51,7 +51,7 @@ export default function Home(): ReactElement {
           <div>
             <ul className={styles.btns}>
               <li>
-                <div className={styles.btn}><a href="#chapter1">Chapter 1</a></div>
+                <div className={styles.btn}><a href="#chapter1">Chapter 1: Genesis Mana</a></div>
                 <div className={[styles.moreinfo].join(' ')}>
                   <a href="https://opensea.io/collection/genesis-mana" target="_blank" rel="noopener noreferrer">
                     OpenSea
@@ -59,21 +59,27 @@ export default function Home(): ReactElement {
                   <a href="https://etherscan.io/address/0xf4b6040a4b1b30f1d1691699a8f3bf957b03e463#writeContract" target="_blank" rel="noopener noreferrer">
                     Etherscan
                   </a>
+                  <a href="https://twitter.com/genesisloot/status/1436084847827570689?s=21" target="_blank" rel="noopener noreferrer">
+                    Instructions
+                  </a>                  
                 </div>
               </li>
               <li>
-                <div className={styles.btn}><a href="#chapter2">Chapter 2</a></div>
-                <div className={[styles.moreinfo, styles.inactive].join(' ')}>
-                  <a href="#" onClick={(e) => {e.preventDefault() }} target="_blank" rel="noopener noreferrer">
+                <div className={styles.btn}><a href="#chapter2">Chapter 2: Genesis Adventurer</a></div>
+                <div className={[styles.moreinfo].join(' ')}>
+                  <a href="https://opensea.io/collection/genesisadventurer" onClick={(e) => {e.preventDefault() }} target="_blank" rel="noopener noreferrer">
                     OpenSea
                   </a>
-                  <a href="#" onClick={(e) => {e.preventDefault() }} target="_blank" rel="noopener noreferrer">
+                  <a href="https://etherscan.io/token/0x8db687aceb92c66f013e1d614137238cc698fedb#writeProxyContract" onClick={(e) => {e.preventDefault() }} target="_blank" rel="noopener noreferrer">
                     Etherscan
                   </a>
+                  <a href="https://genesisproject.notion.site/Genesis-Adventurer-cc41f0c184ab481aafb0e1056a48727e" onClick={(e) => {e.preventDefault() }} target="_blank" rel="noopener noreferrer">
+                    Instructions
+                  </a>                  
                 </div>
               </li>
               <li>
-                <div className={styles.btn}><a href="#chapter3">Chapter 3</a></div>
+                <div className={styles.btn}><a href="#chapter3">Chapter 3: $TIME</a></div>
                 <div className={[styles.moreinfo, styles.inactive].join(' ')}>
                   <a href="#" onClick={(e) => {e.preventDefault() }}  target="_blank" rel="noopener noreferrer">
                     OpenSea
@@ -81,6 +87,9 @@ export default function Home(): ReactElement {
                   <a href="#" onClick={(e) => {e.preventDefault() }} target="_blank" rel="noopener noreferrer">
                     Etherscan
                   </a>
+                  <a href="#" onClick={(e) => {e.preventDefault() }} target="_blank" rel="noopener noreferrer">
+                    Instructions
+                  </a>                           
                 </div>
               </li>
             </ul>
@@ -147,7 +156,9 @@ export default function Home(): ReactElement {
           Upon collecting 8 Genesis Mana from a single Order, corresponding to all 8 item types (i.e. weapon, head armor, chest armor, etc), a Genesis Adventurer can be resurrected.
           </p>
           <br/><br/>
+          <div className={[styles.btn, styles.cta].join(' ')}><Link href="https://twitter.com/genesisloot/status/1436084847827570689?s=21">Instructions</Link></div>
           <div className={[styles.btn, styles.cta].join(' ')}><Link href="https://etherscan.io/address/0xf4b6040a4b1b30f1d1691699a8f3bf957b03e463#writeContract">Distill Genesis Mana</Link></div>
+          <div className={[styles.btn, styles.cta].join(' ')}><Link href="https://opensea.io/collection/genesis-mana">Buy Genesis Mana on OpenSea</Link></div>
         </div>
         <div className={styles.home__feature}>
           <span>Example Genesis Mana:</span>
@@ -184,7 +195,9 @@ export default function Home(): ReactElement {
           The more Genesis Adventurers you resurrect, the stronger you and/or your team will be in the games ahead. Furthermore, for every Genesis Adventurer you resurrect, you have the right to claim a bag of Adventure Mana ($AMANA).
           </p>
           <br/><br/>
-          <div className={[styles.btn, styles.disabled, styles.cta].join(" ")}><a>Resurrect Genesis Adventurer</a></div>
+          <div className={[styles.btn, styles.cta].join(' ')}><Link href="https://genesisproject.notion.site/Genesis-Adventurer-cc41f0c184ab481aafb0e1056a48727e">Instructions</Link></div>
+          <div className={[styles.btn, styles.cta].join(' ')}><Link href="https://etherscan.io/token/0x8db687aceb92c66f013e1d614137238cc698fedb#writeProxyContract">Resurrect a Gensis Adenturer</Link></div>
+          <div className={[styles.btn, styles.cta].join(' ')}><Link href="https://opensea.io/collection/genesisadventurer">View Genesis Adventurers on OpenSea</Link></div>
         </div>
         <div className={styles.home__feature}>
           <span>Example Genesis Adventurer:</span>
@@ -195,18 +208,18 @@ export default function Home(): ReactElement {
 
         <div className={styles.home__chapters}>
           <hr id="chapter3"/>
-          <h2>Chapter 3 : $AMANA</h2>
+          <h2>Chapter 3 : $TIME</h2>
           <blockquote>
             <p>
             As the flames die down, you notice something in the ash.
             <br/><br/>
             Your bag of Genesis Mana is intact, but transformed.
             <br/><br/>
-            You remove it from the ash and discover a bag of Adventure Mana ($AMANA).
+            You remove it from the ash and discover a bag of $TIME.
             <br/><br/>
             It tingles with energy and magic.
             <br/><br/>
-            You put the $AMANA in your wallet for safekeeping.
+            You put the $TIME in your wallet for safekeeping.
             <br/><br/>
             What will you do with this newfound resource?
             <br/><br/>
@@ -214,13 +227,8 @@ export default function Home(): ReactElement {
             </p>
             <span className={styles.author}><i>The Ancestral Mana Returns</i></span>
           </blockquote>
-          <p>
-          For Genesis Adventurer holders (individuals or teams), retrieve your $AMANA (an ERC20 token).
           <br/><br/>
-          While Adventure Gold ($AGLD) is used to BUY things in the game, Adventure Mana ($AMANA) is used to DO things in the adventures ahead.
-          </p>
-          <br/><br/>
-          <div className={[styles.btn, styles.disabled, styles.cta].join(" ")}><a>Retrieve Adventure Mana</a></div>
+          <div className={[styles.btn, styles.disabled, styles.cta].join(" ")}><a>Retrieve $TIME</a></div>
         </div>
       </div>
     </Layout>
