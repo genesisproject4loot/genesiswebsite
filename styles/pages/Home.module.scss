@@ -22,6 +22,9 @@
 
     &.btns {
       margin: 35px auto 0;
+      p {
+        color: white;
+      }
     }
 
     li {
@@ -34,6 +37,9 @@
 
         &:hover {
           text-decoration: underline;
+        }
+        .label {
+          font-size: 14px;
         }
       }
       .moreinfo {
@@ -53,8 +59,8 @@
       }
     }
   }
-  div {
-    padding: 20px 0;
+  .btn {
+    padding: 15px 0;
     a:hover {
       text-decoration: none;
     }
@@ -152,6 +158,19 @@
       text-decoration: underline;
     }
   }
+  .moreinfo {
+    padding: 10px 0;
+      a {
+        font-size: 15px;
+        padding: 0 10px;
+      }
+  }
+  .cta {
+    margin: 0 auto;
+    .btn {
+      width: 220px;
+    }
+  }
   ul {
     color: #8e8e8e;
     font-size: 22px;
@@ -208,35 +227,30 @@
 }
 
 .btn {
-  a {
-    border: 3px solid #fff;
-    background: hsl(0deg 0% 10%);
-    font-size: 22px;
-    color: #fff;
-    padding: 20px 40px;
-    margin: auto 10px;
+  border: 3px solid #fff;
+  background: hsl(0deg 0% 10%);
+  font-size: 22px;
+  color: #fff;
+  padding: 20px 40px;
+  margin: auto 10px;
 
-    &:hover {
-      border: 5px solid #fff;
-      padding: 18px 38px;
-      cursor: pointer;
-      text-decoration: none;
-    }
+  &:hover {
+    box-shadow: 0 0 0 2px #fff;
+    cursor: pointer;
+    text-decoration: none;
   }
 }
 .disabled {
-  a {
       color: #888 !important;
       border-color: #888;
       background-color: #333;
 
       &:hover {
-        border: 3px solid #888;
+        box-shadow: 0 0 0 0px #fff;
         padding: 20px 40px;;
         cursor: default;
         text-decoration: none;
       }
-    }
 }
 .center {
   text-align: center;
@@ -266,9 +280,7 @@
       margin: 20px 10px;
     }
     .btn {
-      a {
         padding: 15px 25px;
-      }
     }
   }
   .home__feature {
