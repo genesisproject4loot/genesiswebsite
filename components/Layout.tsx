@@ -141,9 +141,16 @@ function Footer(): ReactElement {
           target="_blank"
           rel="noopener noreferrer"
         >
-          Chapter 1&apos;s contract
-        </a>
-        .
+          Chapter 1&apos;s
+        </a>{" "}&{" "}
+        <a
+          href="https://github.com/genesisproject4loot/genesisadventurer"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          Chapter 2&apos;s
+        </a>{" "}
+        contract.
       </p>
     </div>
   );
