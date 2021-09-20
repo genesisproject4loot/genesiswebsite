@@ -67,13 +67,13 @@ export default function Home(): ReactElement {
               <li>
                 <div className={styles.btn}><a href="#chapter2"><p className={styles.label}>Chapter 2</p><p>Genesis Adventurer</p></a></div>
                 <div className={[styles.moreinfo].join(' ')}>
-                  <a href="https://opensea.io/collection/genesisadventurer" onClick={(e) => {e.preventDefault() }} target="_blank" rel="noopener noreferrer">
+                  <a href="https://opensea.io/collection/genesisadventurer" target="_blank" rel="noopener noreferrer">
                     OpenSea
                   </a>
-                  <a href="https://etherscan.io/token/0x8db687aceb92c66f013e1d614137238cc698fedb#writeProxyContract" onClick={(e) => {e.preventDefault() }} target="_blank" rel="noopener noreferrer">
+                  <a href="https://etherscan.io/token/0x8db687aceb92c66f013e1d614137238cc698fedb#writeProxyContract" target="_blank" rel="noopener noreferrer">
                     Etherscan
                   </a>
-                  <a href="https://genesisproject.notion.site/Genesis-Adventurer-cc41f0c184ab481aafb0e1056a48727e" onClick={(e) => {e.preventDefault() }} target="_blank" rel="noopener noreferrer">
+                  <a href="https://genesisproject.notion.site/Genesis-Adventurer-cc41f0c184ab481aafb0e1056a48727e" target="_blank" rel="noopener noreferrer">
                     Instructions
                   </a>
                 </div>
