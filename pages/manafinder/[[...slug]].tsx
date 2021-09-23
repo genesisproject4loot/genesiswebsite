@@ -1,10 +1,11 @@
 // Imports
 import Layout from "@components/Layout"; // Layout wrapper
-import styles from "@styles/pages/Home.module.scss"; // Styles
+import styles from "@styles/pages/Manafinder.module.scss"; // Styles
 import Link from "next/link"
 import { gql,useQuery } from '@apollo/client';
 import { useCallback, useRef, useState } from 'react';
 import { useRouter } from "next/router";
+import Select from 'react-select'
 
 // Types
 import type { ReactElement } from "react";
@@ -53,6 +54,40 @@ const inventoryIds = [
   "neck",
   "ring"
   ]
+
+  const suffices = [
+    { value: '1', label: 'Power' },
+    { value: '2', label: 'Giants' },
+    { value: '3', label: 'Titans' },
+    { value: '4', label: 'Skill' },
+    { value: '5', label: 'Perfection' },
+    { value: '6', label: 'Brilliance' },
+    { value: '7', label: 'Enlightenment' },
+    { value: '8', label: 'Protection' },
+    { value: '9', label: 'Anger' },
+    { value: '10', label: 'Rage' },
+    { value: '11', label: 'Fury' },
+    { value: '12', label: 'Vitriol' },
+    { value: '13', label: 'the Fox' },
+    { value: '14', label: 'Detection' },
+    { value: '15', label: 'Reflection' },
+    { value: '16', label: 'the Twins' }
+  ]
+
+  const inventory = [
+    { value: '1', label: 'Weapon' },
+    { value: '2', label: 'Chest' },
+    { value: '3', label: 'Head' },
+    { value: '4', label: 'Waist' },
+    { value: '5', label: 'Foot' },
+    { value: '6', label: 'Hand' },
+    { value: '7', label: 'Neck' },
+    { value: '8', label: 'Ring' }
+  ]
+
+function shortenAddress(address: string) {
+  return address.slice(0, 6) + '…' + address.slice(-4)
+}
 
 export default function Home(): ReactElement {
   const router = useRouter();
@@ -121,7 +156,7 @@ export default function Home(): ReactElement {
   return (
     <Layout>
       <div>
-        <div className={styles.home__cta}>
+        <div className={styles.manafinder__intro}>
           {/* CTA title */}
           <h1>Mana Finder</h1>
           {/* CTA Description */}
@@ -134,8 +169,12 @@ export default function Home(): ReactElement {
             Join us on our quest to restore the original Orders of Loot and resurrect the Genesis Adventurers.
           </p>
         </div>
-        <div className={styles.home__chapters}>
-
+        <div className={styles.manafinder__app}>
+        <div className={styles.controls}>
+          <Select placeholder="Select an Order..." className={styles.suffixDropdown} options={suffices} />
+          <Select placeholder="Select an Item..." className={styles.inventoryDropdown} options={inventory} />
+          <button className={styles.btn}>Find Mana</button>
+        </div>
           <h2>Claimed Mana</h2>
           {cLoading ? (
           <p>Loading ...</p>
@@ -143,17 +182,17 @@ export default function Home(): ReactElement {
             <table>
             <thead>
               <tr>
-                <th>Token ID</th>
+                <th className={styles.header_id}>Mana Token ID</th>
                 <th>Item Name</th>
-                <th>Addresss</th>
+                <th className={styles.header_address}>Addresss</th>
               </tr>
             </thead>
             <tbody>
               {cData && cData.manas.map(mana => (
                 <tr key={mana.id}>
-                  <td>{mana.id}</td>
+                  <td><a href={"//opensea.io/assets/0xf4b6040a4b1b30f1d1691699a8f3bf957b03e463/" + mana.id}  target="_blank" rel="noopener noreferrer">{mana.id}</a></td>
                   <td>{mana.itemName}</td>
-                  <td>{mana.currentOwner.id}</td>
+                  <td><a href={"//opensea.io/" + mana.currentOwner.id}  target="_blank" rel="noopener noreferrer">{shortenAddress(mana.currentOwner.id)}</a></td>
                 </tr>
               ))}
             </tbody>
@@ -166,17 +205,17 @@ export default function Home(): ReactElement {
             <table>
             <thead>
               <tr>
-                <th>Token ID</th>
+                <th className={styles.header_id}>Loot Token ID</th>
                 <th>Item Name</th>
-                <th>Addresss</th>
+                <th className={styles.header_address}>Addresss</th>
               </tr>
             </thead>
             <tbody>
-              {ucData && ucData.bags.map(mana => (
-                <tr key={mana.id}>
-                  <td>{mana.id}</td>
-                  <td>{mana.itemName}</td>
-                  <td>{mana.currentOwner.id}</td>
+              {ucData && ucData.bags.map(bag => (
+                <tr key={bag.id}>
+                  <td><a href={"//opensea.io/assets/0xf4b6040a4b1b30f1d1691699a8f3bf957b03e463/" + bag.id}  target="_blank" rel="noopener noreferrer">{bag.id}</a></td>
+                  <td>{bag.itemName}</td>
+                  <td><a href={"//opensea.io/" + bag.currentOwner.id}  target="_blank" rel="noopener noreferrer">{shortenAddress(bag.currentOwner.id)}</a></td>
                 </tr>
               ))}
             </tbody>
@@ -187,17 +226,3 @@ export default function Home(): ReactElement {
     </Layout>
   );
 }
-
-// <div>
-//   <input
-//     placeholder="Suffix ID"
-//     type = "text"
-//
-//   />
-//   <input
-//     placeholder="Inventory ID"
-//     type = "text"
-//
-//   />
-//   <button onClick={onClick}>Search</button>
-// </div>
