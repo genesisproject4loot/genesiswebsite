@@ -24,24 +24,20 @@
   font-size: 22px;
   .controls {
     width: 100%;
-    vertical-align: middle;
+    text-align: center;
     .suffixDropdown {
       width: 350px;
       color: #000;
       display: inline-block;
-      margin-right:10px;
+      margin:10px 20px;
+      text-align: left;
     }
     .inventoryDropdown {
       width: 250px;
       color: #000;
       display: inline-block;
-      margin-right:10px;
-    }
-    .btn {
-      display: inline-block;
-      padding: 8px 20px;
-      font-size: 18px;
-      margin:10px;
+      margin:10px 20px;
+      text-align: left;
     }
   }
   table {

@@ -3,7 +3,6 @@ import Layout from "@components/Layout"; // Layout wrapper
 import styles from "@styles/pages/Manafinder.module.scss"; // Styles
 import Link from "next/link"
 import { gql,useQuery } from '@apollo/client';
-import { useState, useEffect, ChangeEvent } from 'react';
 import { useRouter } from "next/router";
 import Select from 'react-select'
 
@@ -50,10 +49,10 @@ export default function Home(): ReactElement {
   const router = useRouter();
   const slug = router.query.slug;
   const [suffixId, inventoryId] = (
-    (router.query.slug as string[]) || ["0", "0"]
+    (router.query.slug as string[]) || ["-1", "-1"]
   ).map((val) => (val ? parseInt(val) : 0));
 
-  const inventoryName = inventory[inventoryId].label.toLowerCase();
+  const inventoryName = (inventoryId >= 0) ? inventory[inventoryId].label.toLowerCase() : 'weapon';
   const inventoryNameSuffix = inventoryName + "SuffixId";
 
   const GET_CLAIMED_MANA = gql`
@@ -105,12 +104,12 @@ export default function Home(): ReactElement {
     router.push(`/manafinder/${suffixId}/${item.value || 0}`);
   };
 
-  const { loading:cLoading, data:cData } = useQuery<ManaData, ManaVars>(
+  const { loading:cLoading, data:cData, error: cError } = useQuery<ManaData, ManaVars>(
     GET_CLAIMED_MANA,
     { variables: { suffixId: suffixId, inventoryId: inventoryId } }
   );
 
-  const { loading:ucLoading, data:ucData } = useQuery<BagData, BagVars>(
+  const { loading:ucLoading, data:ucData, error: ucError } = useQuery<BagData, BagVars>(
     GET_UNCLAIMED_MANA,
     { variables: { suffixId: suffixId } }
   );
@@ -133,8 +132,24 @@ export default function Home(): ReactElement {
         </div>
         <div className={styles.manafinder__app}>
           <div className={styles.controls}>
-            <Select placeholder="Select an Order..." onChange={onChangeSuffixId} className={styles.suffixDropdown} options={suffices} />
-            <Select placeholder="Select an Item..." onChange={onChangeInventoryId} className={styles.inventoryDropdown} options={inventory} />
+            <Select
+              placeholder="Select an Order..."
+              value={suffices.find(
+                (item) => parseInt(item.value) == suffixId
+              )}
+              onChange={onChangeSuffixId}
+              className={styles.suffixDropdown}
+              options={suffices}
+            />
+            <Select
+              placeholder="Select an Item..."
+              value={inventory.find(
+                (item) => parseInt(item.value) == inventoryId
+              )}
+              onChange={onChangeInventoryId}
+              className={styles.inventoryDropdown}
+              options={inventory}
+            />
           </div>
           <h2>Claimed Mana</h2>
           {cLoading ? <p>Loading ...</p> : <TokenList name ="Mana" data={cData?.manas} address="0xf4b6040a4b1b30f1d1691699a8f3bf957b03e463"/>}
