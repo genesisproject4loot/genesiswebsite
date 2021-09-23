@@ -9,8 +9,6 @@ import Select from 'react-select'
 // Types
 import type { ReactElement } from "react";
 import type {Mana, ManaVars, ManaData, Bag, BagData, BagVars, Wallet, TokenListProps} from '../../utils/manaFinderTypes'
-import type { OpenseaResponse, Asset } from '../../../utils/openseaTypes'
-const apiKey = process.env.OPENSEA_API_KEY
 
 const suffices = [
   { value: '1', label: 'Power' },
