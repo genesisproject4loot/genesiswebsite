@@ -9,7 +9,8 @@ import Select from 'react-select'
 // Types
 import type { ReactElement } from "react";
 import type {Mana, ManaVars, ManaData, Bag, BagData, BagVars, Wallet, TokenListProps} from '../../utils/manaFinderTypes'
-
+import type { OpenseaResponse, Asset } from '../../../utils/openseaTypes'
+const apiKey = process.env.OPENSEA_API_KEY
 
 const suffices = [
   { value: '1', label: 'Power' },
@@ -154,7 +155,7 @@ export default function Home(): ReactElement {
           <h2>Claimed Mana</h2>
           {cLoading ? <p>Loading ...</p> : <TokenList name ="Mana" data={cData?.manas} address="0xf4b6040a4b1b30f1d1691699a8f3bf957b03e463"/>}
           <h2>Unclaimed Mana</h2>
-          {ucLoading ? <p>Loading ...</p> : <TokenList name="Loot" data={ucData?.bags} address="0xf4b6040a4b1b30f1d1691699a8f3bf957b03e463"/>}
+          {ucLoading ? <p>Loading ...</p> : <TokenList name="Loot" data={ucData?.bags} address="0xff9c1b15b16263c61d017ee9f65c50e4ae0113d7"/>}
         </div>
       </div>
     </Layout>
