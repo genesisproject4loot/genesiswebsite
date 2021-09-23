@@ -109,7 +109,7 @@ function Header() {
       {/* Main logo */}
       <div className={styles.header__logo}>
         <Link href="/">
-          <a><img src="genesis-icon.png" height="35px"></img> Genesis Project (for Loot)</a>
+          <a><img src="/genesis-icon.png" height="35px"></img> Genesis Project (for Loot)</a>
         </Link>
       </div>
 
