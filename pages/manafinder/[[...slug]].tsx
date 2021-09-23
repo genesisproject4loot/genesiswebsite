@@ -3,13 +3,14 @@ import Layout from "@components/Layout"; // Layout wrapper
 import styles from "@styles/pages/Manafinder.module.scss"; // Styles
 import Link from "next/link"
 import { gql,useQuery } from '@apollo/client';
-import { useState, useEffect, FocusEventHandler } from 'react';
+import { useState, useEffect, ChangeEvent } from 'react';
 import { useRouter } from "next/router";
 import Select from 'react-select'
 
 // Types
 import type { ReactElement } from "react";
 import type {Mana, ManaVars, ManaData, Bag, BagData, BagVars, Wallet, TokenListProps} from '../../utils/manaFinderTypes'
+
 
 const suffices = [
   { value: '1', label: 'Power' },
@@ -48,16 +49,9 @@ function shortenAddress(address: string) {
 export default function Home(): ReactElement {
   const router = useRouter();
   const slug = router.query.slug;
-  let [suffixId, setSuffixId] = useState(0);
-  let [inventoryId, setInventoryId] = useState(0);
-
-  // if (slug) {
-  //   suffixId = Number(slug[0])
-  //   inventoryId = Number(slug[0])
-  // } else {
-  //   suffixId = 1
-  //   inventoryId = 1
-  // }
+  const [suffixId, inventoryId] = (
+    (router.query.slug as string[]) || ["0", "0"]
+  ).map((val) => (val ? parseInt(val) : 0));
 
   const inventoryName = inventory[inventoryId].label.toLowerCase();
   const inventoryNameSuffix = inventoryName + "SuffixId";
@@ -103,15 +97,12 @@ export default function Home(): ReactElement {
   }
   `;
 
-
-  const onChangeSuffixId: FocusEventHandler<HTMLInputElement> = (evt) => {
-    setSuffixId(parseInt(evt.value));
-    //router.push('/manafinder/[[...slug]]', '/manafinder/'+suffixId+'/'+inventoryId, { shallow: true })
+  const onChangeSuffixId = (item: any) => {
+    router.push(`/manafinder/${item.value || 0}/${inventoryId}`);
   };
 
-  const onChangeInventoryId: FocusEventHandler<HTMLInputElement> = (evt) => {
-    setInventoryId(parseInt(evt.value));
-    //router.push('/manafinder/[[...slug]]', '/manafinder/'+suffixId+'/'+inventoryId, { shallow: true })
+  const onChangeInventoryId = (item: any) => {
+    router.push(`/manafinder/${suffixId}/${item.value || 0}`);
   };
 
   const { loading:cLoading, data:cData } = useQuery<ManaData, ManaVars>(

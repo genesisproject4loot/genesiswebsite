@@ -32,8 +32,8 @@ export interface Wallet {
   id: string;
 }
 
-export interface TokenListProps = {
+export interface TokenListProps {
   data?: Mana[] | Bag[];
   name: string;
   address: string;
-};
+}
