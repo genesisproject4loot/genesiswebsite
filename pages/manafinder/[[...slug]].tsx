@@ -5,40 +5,42 @@ import Link from "next/link"
 import { gql,useQuery } from '@apollo/client';
 import { useRouter } from "next/router";
 import Select from 'react-select'
+import suffices from '../../data/suffices.json'
+import inventory from '../../data/inventory.json'
 
 // Types
 import type { ReactElement } from "react";
 import type {Mana, ManaVars, ManaData, Bag, BagData, BagVars, Wallet, TokenListProps} from '../../utils/manaFinderTypes'
 
-const suffices = [
-  { value: '1', label: 'Power' },
-  { value: '2', label: 'Giants' },
-  { value: '3', label: 'Titans' },
-  { value: '4', label: 'Skill' },
-  { value: '5', label: 'Perfection' },
-  { value: '6', label: 'Brilliance' },
-  { value: '7', label: 'Enlightenment' },
-  { value: '8', label: 'Protection' },
-  { value: '9', label: 'Anger' },
-  { value: '10', label: 'Rage' },
-  { value: '11', label: 'Fury' },
-  { value: '12', label: 'Vitriol' },
-  { value: '13', label: 'the Fox' },
-  { value: '14', label: 'Detection' },
-  { value: '15', label: 'Reflection' },
-  { value: '16', label: 'the Twins' }
-]
-
-const inventory = [
-  { value: '0', label: 'Weapon' },
-  { value: '1', label: 'Chest' },
-  { value: '2', label: 'Head' },
-  { value: '3', label: 'Waist' },
-  { value: '4', label: 'Foot' },
-  { value: '5', label: 'Hand' },
-  { value: '6', label: 'Neck' },
-  { value: '7', label: 'Ring' }
-]
+// const suffices = [
+//   { value: '1', label: 'Power' },
+//   { value: '2', label: 'Giants' },
+//   { value: '3', label: 'Titans' },
+//   { value: '4', label: 'Skill' },
+//   { value: '5', label: 'Perfection' },
+//   { value: '6', label: 'Brilliance' },
+//   { value: '7', label: 'Enlightenment' },
+//   { value: '8', label: 'Protection' },
+//   { value: '9', label: 'Anger' },
+//   { value: '10', label: 'Rage' },
+//   { value: '11', label: 'Fury' },
+//   { value: '12', label: 'Vitriol' },
+//   { value: '13', label: 'the Fox' },
+//   { value: '14', label: 'Detection' },
+//   { value: '15', label: 'Reflection' },
+//   { value: '16', label: 'the Twins' }
+// ]
+//
+// const inventory = [
+//   { value: '0', label: 'Weapon' },
+//   { value: '1', label: 'Chest' },
+//   { value: '2', label: 'Head' },
+//   { value: '3', label: 'Waist' },
+//   { value: '4', label: 'Foot' },
+//   { value: '5', label: 'Hand' },
+//   { value: '6', label: 'Neck' },
+//   { value: '7', label: 'Ring' }
+// ]
 
 function shortenAddress(address: string) {
   return address.slice(0, 6) + '…' + address.slice(-4)

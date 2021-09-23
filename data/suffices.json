@@ -1,0 +1,18 @@
+[
+  { "value": "1", "label": "Power" },
+  { "value": "2", "label": "Giants" },
+  { "value": "3", "label": "Titans" },
+  { "value": "4", "label": "Skill" },
+  { "value": "5", "label": "Perfection" },
+  { "value": "6", "label": "Brilliance" },
+  { "value": "7", "label": "Enlightenment" },
+  { "value": "8", "label": "Protection" },
+  { "value": "9", "label": "Anger" },
+  { "value": "10", "label": "Rage" },
+  { "value": "11", "label": "Fury" },
+  { "value": "12", "label": "Vitriol" },
+  { "value": "13", "label": "the Fox" },
+  { "value": "14", "label": "Detection" },
+  { "value": "15", "label": "Reflection" },
+  { "value": "16", "label": "the Twins" }
+]

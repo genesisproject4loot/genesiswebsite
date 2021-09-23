@@ -1,0 +1,10 @@
+[
+  { "value": "0", "label": "Weapon" },
+  { "value": "1", "label": "Chest" },
+  { "value": "2", "label": "Head" },
+  { "value": "3", "label": "Waist" },
+  { "value": "4", "label": "Foot" },
+  { "value": "5", "label": "Hand" },
+  { "value": "6", "label": "Neck" },
+  { "value": "7", "label": "Ring" }
+]
