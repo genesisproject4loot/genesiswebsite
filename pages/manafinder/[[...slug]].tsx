@@ -3,87 +3,43 @@ import Layout from "@components/Layout"; // Layout wrapper
 import styles from "@styles/pages/Manafinder.module.scss"; // Styles
 import Link from "next/link"
 import { gql,useQuery } from '@apollo/client';
-import { useCallback, useRef, useState } from 'react';
+import { useState, useEffect, FocusEventHandler } from 'react';
 import { useRouter } from "next/router";
 import Select from 'react-select'
 
 // Types
 import type { ReactElement } from "react";
+import type {Mana, ManaVars, ManaData, Bag, BagData, BagVars, Wallet, TokenListProps} from '../../utils/manaFinderTypes'
 
-interface Mana {
-  id: number;
-  itemName: string;
-  currentOwner: Wallet;
-}
+const suffices = [
+  { value: '1', label: 'Power' },
+  { value: '2', label: 'Giants' },
+  { value: '3', label: 'Titans' },
+  { value: '4', label: 'Skill' },
+  { value: '5', label: 'Perfection' },
+  { value: '6', label: 'Brilliance' },
+  { value: '7', label: 'Enlightenment' },
+  { value: '8', label: 'Protection' },
+  { value: '9', label: 'Anger' },
+  { value: '10', label: 'Rage' },
+  { value: '11', label: 'Fury' },
+  { value: '12', label: 'Vitriol' },
+  { value: '13', label: 'the Fox' },
+  { value: '14', label: 'Detection' },
+  { value: '15', label: 'Reflection' },
+  { value: '16', label: 'the Twins' }
+]
 
-interface ManaData {
-  manas: Mana[];
-}
-
-interface ManaVars {
-  suffixId: number;
-  inventoryId: number;
-}
-
-interface UnclaimedVars {
-  suffixId: number;
-}
-
-interface Bag {
-  id: number;
-  manasClaimed: number;
-  itemName: string;
-  currentOwner: Wallet;
-}
-
-interface Wallet {
-  id: string;
-}
-
-interface BagData {
-  bags: Bag[];
-}
-
-const inventoryIds = [
-  "weapon",
-  "chest",
-  "head",
-  "waist",
-  "foot",
-  "hand",
-  "neck",
-  "ring"
-  ]
-
-  const suffices = [
-    { value: '1', label: 'Power' },
-    { value: '2', label: 'Giants' },
-    { value: '3', label: 'Titans' },
-    { value: '4', label: 'Skill' },
-    { value: '5', label: 'Perfection' },
-    { value: '6', label: 'Brilliance' },
-    { value: '7', label: 'Enlightenment' },
-    { value: '8', label: 'Protection' },
-    { value: '9', label: 'Anger' },
-    { value: '10', label: 'Rage' },
-    { value: '11', label: 'Fury' },
-    { value: '12', label: 'Vitriol' },
-    { value: '13', label: 'the Fox' },
-    { value: '14', label: 'Detection' },
-    { value: '15', label: 'Reflection' },
-    { value: '16', label: 'the Twins' }
-  ]
-
-  const inventory = [
-    { value: '1', label: 'Weapon' },
-    { value: '2', label: 'Chest' },
-    { value: '3', label: 'Head' },
-    { value: '4', label: 'Waist' },
-    { value: '5', label: 'Foot' },
-    { value: '6', label: 'Hand' },
-    { value: '7', label: 'Neck' },
-    { value: '8', label: 'Ring' }
-  ]
+const inventory = [
+  { value: '0', label: 'Weapon' },
+  { value: '1', label: 'Chest' },
+  { value: '2', label: 'Head' },
+  { value: '3', label: 'Waist' },
+  { value: '4', label: 'Foot' },
+  { value: '5', label: 'Hand' },
+  { value: '6', label: 'Neck' },
+  { value: '7', label: 'Ring' }
+]
 
 function shortenAddress(address: string) {
   return address.slice(0, 6) + '…' + address.slice(-4)
@@ -92,16 +48,20 @@ function shortenAddress(address: string) {
 export default function Home(): ReactElement {
   const router = useRouter();
   const slug = router.query.slug;
-  //const [newId, setNewId] = useState(initialId);
+  let [suffixId, setSuffixId] = useState(0);
+  let [inventoryId, setInventoryId] = useState(0);
 
-  let suffixId = 0;
-  let inventoryId = 0;
-  if (slug) {
-    suffixId = Number(slug[0]);
-    inventoryId = Number(slug[1]);
-  }
+  // if (slug) {
+  //   suffixId = Number(slug[0])
+  //   inventoryId = Number(slug[0])
+  // } else {
+  //   suffixId = 1
+  //   inventoryId = 1
+  // }
 
-  console.log('Claimed: ' + suffixId + ' '+ inventoryId);
+  const inventoryName = inventory[inventoryId].label.toLowerCase();
+  const inventoryNameSuffix = inventoryName + "SuffixId";
+
   const GET_CLAIMED_MANA = gql`
   query GetClaimedMana($suffixId: Int!, $inventoryId: Int!) {
     manas(where: {suffixId: $suffixId, inventoryId: $inventoryId, currentOwner_not_in:
@@ -129,14 +89,7 @@ export default function Home(): ReactElement {
     }
   }
   `;
-  const { loading:cLoading, data:cData } = useQuery<ManaData, ManaVars>(
-    GET_CLAIMED_MANA,
-    { variables: { suffixId: suffixId, inventoryId: inventoryId } }
-  );
 
-  let inventoryName = inventoryIds[inventoryId];
-  let inventoryNameSuffix = inventoryIds[inventoryId] + "SuffixId";
-  console.log('Unclaimed: ' + suffixId + ' '+ inventoryName+ ' '+ inventoryNameSuffix);
   const GET_UNCLAIMED_MANA = gql`
   query GetUnclaimedMana($suffixId: Int!) {
     bags(where: {manasClaimed: 0, ${inventoryNameSuffix}: $suffixId}) {
@@ -149,10 +102,28 @@ export default function Home(): ReactElement {
     }
   }
   `;
-  const { loading:ucLoading, data:ucData } = useQuery<BagData, UnclaimedVars>(
+
+
+  const onChangeSuffixId: FocusEventHandler<HTMLInputElement> = (evt) => {
+    setSuffixId(parseInt(evt.value));
+    //router.push('/manafinder/[[...slug]]', '/manafinder/'+suffixId+'/'+inventoryId, { shallow: true })
+  };
+
+  const onChangeInventoryId: FocusEventHandler<HTMLInputElement> = (evt) => {
+    setInventoryId(parseInt(evt.value));
+    //router.push('/manafinder/[[...slug]]', '/manafinder/'+suffixId+'/'+inventoryId, { shallow: true })
+  };
+
+  const { loading:cLoading, data:cData } = useQuery<ManaData, ManaVars>(
+    GET_CLAIMED_MANA,
+    { variables: { suffixId: suffixId, inventoryId: inventoryId } }
+  );
+
+  const { loading:ucLoading, data:ucData } = useQuery<BagData, BagVars>(
     GET_UNCLAIMED_MANA,
     { variables: { suffixId: suffixId } }
   );
+
   return (
     <Layout>
       <div>
@@ -170,59 +141,40 @@ export default function Home(): ReactElement {
           </p>
         </div>
         <div className={styles.manafinder__app}>
-        <div className={styles.controls}>
-          <Select placeholder="Select an Order..." className={styles.suffixDropdown} options={suffices} />
-          <Select placeholder="Select an Item..." className={styles.inventoryDropdown} options={inventory} />
-          <button className={styles.btn}>Find Mana</button>
-        </div>
+          <div className={styles.controls}>
+            <Select placeholder="Select an Order..." onChange={onChangeSuffixId} className={styles.suffixDropdown} options={suffices} />
+            <Select placeholder="Select an Item..." onChange={onChangeInventoryId} className={styles.inventoryDropdown} options={inventory} />
+          </div>
           <h2>Claimed Mana</h2>
-          {cLoading ? (
-          <p>Loading ...</p>
-          ) : (
-            <table>
-            <thead>
-              <tr>
-                <th className={styles.header_id}>Mana Token ID</th>
-                <th>Item Name</th>
-                <th className={styles.header_address}>Addresss</th>
-              </tr>
-            </thead>
-            <tbody>
-              {cData && cData.manas.map(mana => (
-                <tr key={mana.id}>
-                  <td><a href={"//opensea.io/assets/0xf4b6040a4b1b30f1d1691699a8f3bf957b03e463/" + mana.id}  target="_blank" rel="noopener noreferrer">{mana.id}</a></td>
-                  <td>{mana.itemName}</td>
-                  <td><a href={"//opensea.io/" + mana.currentOwner.id}  target="_blank" rel="noopener noreferrer">{shortenAddress(mana.currentOwner.id)}</a></td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-          )}
+          {cLoading ? <p>Loading ...</p> : <TokenList name ="Mana" data={cData?.manas} address="0xf4b6040a4b1b30f1d1691699a8f3bf957b03e463"/>}
           <h2>Unclaimed Mana</h2>
-          {ucLoading ? (
-          <p>Loading ...</p>
-          ) : (
-            <table>
-            <thead>
-              <tr>
-                <th className={styles.header_id}>Loot Token ID</th>
-                <th>Item Name</th>
-                <th className={styles.header_address}>Addresss</th>
-              </tr>
-            </thead>
-            <tbody>
-              {ucData && ucData.bags.map(bag => (
-                <tr key={bag.id}>
-                  <td><a href={"//opensea.io/assets/0xf4b6040a4b1b30f1d1691699a8f3bf957b03e463/" + bag.id}  target="_blank" rel="noopener noreferrer">{bag.id}</a></td>
-                  <td>{bag.itemName}</td>
-                  <td><a href={"//opensea.io/" + bag.currentOwner.id}  target="_blank" rel="noopener noreferrer">{shortenAddress(bag.currentOwner.id)}</a></td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-          )}
+          {ucLoading ? <p>Loading ...</p> : <TokenList name="Loot" data={ucData?.bags} address="0xf4b6040a4b1b30f1d1691699a8f3bf957b03e463"/>}
         </div>
       </div>
     </Layout>
+  );
+}
+
+function TokenList(props: TokenListProps): ReactElement {
+  return (
+    <table>
+      <thead>
+        <tr>
+          <th className={styles.header_id}>{props.name} Token ID</th>
+          <th>Item Name</th>
+          <th className={styles.header_address}>Addresss</th>
+        </tr>
+      </thead>
+      <tbody>
+        {props.data &&
+          props.data.map((item) => (
+            <tr key={item.id}>
+              <td><a href={"//opensea.io/assets/"+ props.address + "/" + item.id}  target="_blank" rel="noopener noreferrer">{item.id}</a></td>
+              <td>{item.itemName}</td>
+              <td><a href={"//opensea.io/" + item.currentOwner.id}  target="_blank" rel="noopener noreferrer">{shortenAddress(item.currentOwner.id)}</a></td>
+            </tr>
+          ))}
+      </tbody>
+    </table>
   );
 }
