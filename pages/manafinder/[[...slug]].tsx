@@ -150,7 +150,7 @@ export default function Home(): ReactElement {
             </thead>
             <tbody>
               {cData && cData.manas.map(mana => (
-                <tr>
+                <tr key={mana.id}>
                   <td>{mana.id}</td>
                   <td>{mana.itemName}</td>
                   <td>{mana.currentOwner.id}</td>
@@ -173,7 +173,7 @@ export default function Home(): ReactElement {
             </thead>
             <tbody>
               {ucData && ucData.bags.map(mana => (
-                <tr>
+                <tr key={mana.id}>
                   <td>{mana.id}</td>
                   <td>{mana.itemName}</td>
                   <td>{mana.currentOwner.id}</td>
