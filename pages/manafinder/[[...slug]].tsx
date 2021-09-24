@@ -4,6 +4,7 @@ import styles from "@styles/pages/Manafinder.module.scss"; // Styles
 import Link from "next/link"
 import { gql,useQuery } from '@apollo/client';
 import { useRouter } from "next/router";
+import { useState, useMemo } from "react";
 import Select from 'react-select'
 import suffices from '@data/suffices.json'
 import inventory from '@data/inventory.json'
@@ -58,7 +59,6 @@ export default function Home(): ReactElement {
   query GetUnclaimedMana($suffixId: Int!) {
     bags(where: {manasClaimed: 0, ${inventoryNameSuffix}: $suffixId}) {
       id
-      manasClaimed
       itemName: ${inventoryName}
       currentOwner {
         id
@@ -84,7 +84,6 @@ export default function Home(): ReactElement {
     GET_UNCLAIMED_MANA,
     { variables: { suffixId: suffixId } }
   );
-
   return (
     <Layout>
       <div>
@@ -132,23 +131,68 @@ export default function Home(): ReactElement {
   );
 }
 
+const useSortableData = (items, config = null) => {
+  const [sortConfig, setSortConfig] = useState(config);
+  const sortedItems = useMemo(() => {
+    let sortableItems = [...items];
+    if (sortConfig !== null) {
+      sortableItems.sort((a, b) => {
+        if (a[sortConfig.key] < b[sortConfig.key]) {
+          return sortConfig.direction === 'ascending' ? -1 : 1;
+        }
+        if (a[sortConfig.key] > b[sortConfig.key]) {
+          return sortConfig.direction === 'ascending' ? 1 : -1;
+        }
+        return 0;
+      });
+    }
+    return sortableItems;
+  }, [items, sortConfig]);
+
+  const requestSort = key => {
+    let direction = 'ascending';
+    if (sortConfig && sortConfig.key === key && sortConfig.direction === 'ascending') {
+      direction = 'descending';
+    }
+    setSortConfig({ key, direction });
+  }
+  return { items: sortedItems, requestSort, sortConfig };
+}
+
+
 function TokenList(props: TokenListProps): ReactElement {
+  let collapsedData = props.data.map((i)=> {
+    return {
+      id: Number(i.id),
+      name: i.itemName,
+      address: i.currentOwner.id
+    }
+  });
+
+  const { items: sortedData, requestSort, sortConfig } = useSortableData(collapsedData, {key: 'id', direction: 'ascending'})
+  const getClassNamesFor = (name) => {
+     if (!sortConfig) {
+       return;
+     }
+     return sortConfig.key === name ? sortConfig.direction : undefined;
+   };
+
   return (
     <table>
       <thead>
         <tr>
-          <th className={styles.header_id}>{props.name} Token ID</th>
-          <th>Item Name</th>
-          <th className={styles.header_address}>Addresss</th>
+          <th className={styles.header_id}><a href="#" onClick={(e) => {e.preventDefault(); requestSort('id');}} className={styles?.[getClassNamesFor('id')]}>{props.name} Token ID</a></th>
+          <th><a href="#" onClick={(e) => {e.preventDefault(); requestSort('name');}} className={styles?.[getClassNamesFor('name')]}>Item Name</a></th>
+          <th className={styles.header_address}><a href="#" onClick={(e) => {e.preventDefault(); requestSort('address');}} className={styles?.[getClassNamesFor('address')]}>Addresss</a></th>
         </tr>
       </thead>
       <tbody>
-        {props.data &&
-          props.data.map((item) => (
+        {sortedData &&
+          sortedData.map((item) => (
             <tr key={item.id}>
               <td><a href={"//opensea.io/assets/"+ props.address + "/" + item.id}  target="_blank" rel="noopener noreferrer">{item.id}</a></td>
-              <td>{item.itemName}</td>
-              <td><a href={"//opensea.io/" + item.currentOwner.id}  target="_blank" rel="noopener noreferrer">{shortenAddress(item.currentOwner.id)}</a></td>
+              <td>{item.name}</td>
+              <td><a href={"//opensea.io/" + item.address}  target="_blank" rel="noopener noreferrer">{shortenAddress(item.address)}</a></td>
             </tr>
           ))}
       </tbody>
