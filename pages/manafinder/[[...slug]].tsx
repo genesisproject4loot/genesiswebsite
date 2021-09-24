@@ -29,22 +29,22 @@ export default function Home(): ReactElement {
   const GET_CLAIMED_MANA = gql`
   query GetClaimedMana($suffixId: Int!, $inventoryId: Int!) {
     manas(where: {suffixId: $suffixId, inventoryId: $inventoryId, currentOwner_not_in:
-        ["0x1884d71487bFD7f595061221801e783EFcD0BF6A",
-         "0x9BbDA2777C8623D8894b21120bEd1fFf72B024f8",
-         "0xb6b3EB3Ec30bD8979DF60D7F47b173a389310dd9",
-         "0xc3e33B881AeA922BCE6df56bC2C6f0686A3A421A",
-         "0xdcab536Df6Dd9Ad5D332180edF1ba1ec71669Ae2",
-         "0x4cF7E239F5BC882e007D9790A7B49B4abDFeB510",
-         "0x338AEf050Ac689246490AA75B691AC03FE0a81C8",
-         "0xeA0a3aae1DdA17D0a17A488196801F59cA96854C",
-         "0x1f5FE23574D5aEc1660A8c6B209135DA5723042f",
-         "0xd431a116A7d0eca9371614D5652CDfFfb7c5B6Eb",
-         "0x0780529F0EcfAc1048d2fAAe5007Fe62Ce318c79",
-         "0xf935C944A8E03181ae3229774D4B93D7BBa816D4",
-         "0xAba619A78032abCfE0346c1592835Df563BA3BFa",
-         "0xe1E5072FC1fF1A419D17bF9B5C5b6Ddd12c19F08",
-         "0x17498d27433849a510165Cc1Fc618582AC54229B",
-         "0xb1deA25cB8B997913f86076B372AA75F06C53c99"]}) {
+        ["0x1884d71487bfd7f595061221801e783efcd0bf6a",
+         "0x9bbda2777c8623d8894b21120bed1fff72b024f8",
+         "0xb6b3eb3ec30bd8979df60d7f47b173a389310dd9",
+         "0xc3e33b881aea922bce6df56bc2c6f0686a3a421a",
+         "0xdcab536df6dd9ad5d332180edf1ba1ec71669ae2",
+         "0x4cf7e239f5bc882e007d9790a7b49b4abdfeb510",
+         "0x338aef050ac689246490aa75b691ac03fe0a81c8",
+         "0xea0a3aae1dda17d0a17a488196801f59ca96854c",
+         "0x1f5fe23574d5aec1660a8c6b209135da5723042f",
+         "0xd431a116a7d0eca9371614d5652cdfffb7c5b6eb",
+         "0x0780529f0ecfac1048d2faae5007fe62ce318c79",
+         "0xf935c944a8e03181ae3229774d4b93d7bba816d4",
+         "0xaba619a78032abcfe0346c1592835df563ba3bfa",
+         "0xe1e5072fc1ff1a419d17bf9b5c5b6ddd12c19f08",
+         "0x17498d27433849a510165cc1fc618582ac54229b",
+         "0xb1dea25cb8b997913f86076b372aa75f06c53c99"]}) {
       id
       itemName
       currentOwner {
