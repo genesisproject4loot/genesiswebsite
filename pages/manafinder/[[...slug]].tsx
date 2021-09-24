@@ -4,20 +4,36 @@ import styles from "@styles/pages/Manafinder.module.scss"; // Styles
 import Link from "next/link"
 import { gql,useQuery } from '@apollo/client';
 import { useRouter } from "next/router";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import Select from 'react-select'
 import suffices from '@data/suffices.json'
 import inventory from '@data/inventory.json'
+import { ManaInfo, fetchMana } from '@api/mana'
+import { GetStaticProps, GetStaticPaths } from 'next'
+// import { format as ts } from 'timeago.js'
 
 // Types
 import type { ReactElement } from "react";
 import type {Mana, ManaVars, ManaData, Bag, BagData, BagVars, Wallet, TokenListProps} from '@utils/manaFinderTypes'
 
-function shortenAddress(address: string) {
-  return address.slice(0, 6) + '…' + address.slice(-4)
+export const getStaticProps: GetStaticProps = async (context) => {
+  let openseaGMData = await fetchMana()
+  return {
+    props: {
+      openseaGMData: openseaGMData.mana,
+      lastUpdate: openseaGMData.lastUpdate,
+    }, // pass the data as props to your component
+  }
 }
 
-export default function Home(): ReactElement {
+export const getStaticPaths: GetStaticPaths = async () => {
+  return {
+    paths: [],
+    fallback: true
+  }
+}
+
+export default function Home(props): ReactElement {
   const router = useRouter();
   const slug = router.query.slug;
   const [suffixId, inventoryId] = (
@@ -84,6 +100,35 @@ export default function Home(): ReactElement {
     GET_UNCLAIMED_MANA,
     { variables: { suffixId: suffixId } }
   );
+
+  let claimedTableData = null;
+  let unclaimedTableData = null;
+  if(!cLoading && cData) {
+    claimedTableData = cData.manas.map((i)=> {
+      return {
+        id: Number(i.id),
+        name: i.itemName,
+        address: i.currentOwner.id
+        // price: {
+        //   if (openseaGMData.mana
+        // }
+      }
+    });
+  }
+
+
+  if(!ucLoading && ucData) {
+    unclaimedTableData = ucData.bags.map((i)=> {
+      return {
+        id: Number(i.id),
+        name: i.itemName,
+        address: i.currentOwner.id
+        // price: {
+        //   if (openseaGMData.mana
+        // }
+      }
+    });
+  }
   return (
     <Layout>
       <div>
@@ -122,13 +167,18 @@ export default function Home(): ReactElement {
             />
           </div>
           <h2>Claimed Mana</h2>
-          {cLoading ? <p>Loading ...</p> : <TokenList name ="Mana" data={cData?.manas} address="0xf4b6040a4b1b30f1d1691699a8f3bf957b03e463"/>}
+          {cLoading ? <p>Loading ...</p> : <TokenList name ="Mana" data={claimedTableData} address="0xf4b6040a4b1b30f1d1691699a8f3bf957b03e463"/>}
           <h2>Unclaimed Mana</h2>
-          {ucLoading ? <p>Loading ...</p> : <TokenList name="Loot" data={ucData?.bags} address="0xff9c1b15b16263c61d017ee9f65c50e4ae0113d7"/>}
+          {ucLoading ? <p>Loading ...</p> : <TokenList name="Loot" data={unclaimedTableData} address="0xff9c1b15b16263c61d017ee9f65c50e4ae0113d7"/>}
         </div>
       </div>
     </Layout>
   );
+}
+
+
+function shortenAddress(address: string) {
+  return address.slice(0, 6) + '…' + address.slice(-4)
 }
 
 const useSortableData = (items, config = null) => {
@@ -161,15 +211,9 @@ const useSortableData = (items, config = null) => {
 
 
 function TokenList(props: TokenListProps): ReactElement {
-  let collapsedData = props.data.map((i)=> {
-    return {
-      id: Number(i.id),
-      name: i.itemName,
-      address: i.currentOwner.id
-    }
-  });
+  const data = props.data;
 
-  const { items: sortedData, requestSort, sortConfig } = useSortableData(collapsedData, {key: 'id', direction: 'ascending'})
+  const { items: sortedData, requestSort, sortConfig } = useSortableData(data, {key: 'id', direction: 'ascending'})
   const getClassNamesFor = (name) => {
      if (!sortConfig) {
        return;

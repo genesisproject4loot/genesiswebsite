@@ -12,14 +12,15 @@ const contract = new Contract(process.env.CONTRACT_ADDRESS as string, abi, rpc)
 
 
 const fetchManaPage = async (ids: string[]) => {
-  let url = 'https://api.opensea.io/api/v1/assets?collection=genesis-mana'
+  let url = 'https://api.opensea.io/api/v1/assets?collection=genesis-mana&'
   url += ids.map((id) => `token_ids=${id}`).join('&')
+  // const res = await fetch(url, {
+  //   headers: {
+  //     'X-API-KEY': apiKey,
+  //   },
+  // })
+  const res = await fetch(url)
 
-  const res = await fetch(url, {
-    // headers: {
-    //   'X-API-KEY': apiKey,
-    // },
-  })
   const json: OpenseaResponse = await res.json()
 
   return Promise.all(
