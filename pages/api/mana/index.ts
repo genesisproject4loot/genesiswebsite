@@ -2,20 +2,23 @@ import { NextApiRequest, NextApiResponse } from 'next'
 import pMap from 'p-map'
 import { chunk, flatten, orderBy } from 'lodash'
 import { utils as etherUtils, BigNumber } from 'ethers'
-import type { OpenseaResponse, Asset } from '../../../utils/openseaTypes'
-import RobeIDs from '../../../data/robes-ids.json'
+import { Contract, Event, providers } from 'ethers'
+import type { OpenseaResponse, Asset } from '@utils/openseaTypes'
+import abi from '@data/genesismana-abi.json'
 
-const chunked = chunk(RobeIDs, 20)
 const apiKey = process.env.OPENSEA_API_KEY
+const rpc = new providers.JsonRpcProvider(process.env.PROVIDER_URL)
+const contract = new Contract(process.env.CONTRACT_ADDRESS as string, abi, rpc)
 
-const fetchRobePage = async (ids: string[]) => {
-  let url = 'https://api.opensea.io/api/v1/assets?collection=genesis-mana&'
+
+const fetchManaPage = async (ids: string[]) => {
+  let url = 'https://api.opensea.io/api/v1/assets?collection=genesis-mana'
   url += ids.map((id) => `token_ids=${id}`).join('&')
 
   const res = await fetch(url, {
-    headers: {
-      'X-API-KEY': apiKey,
-    },
+    // headers: {
+    //   'X-API-KEY': apiKey,
+    // },
   })
   const json: OpenseaResponse = await res.json()
 
@@ -28,41 +31,48 @@ const fetchRobePage = async (ids: string[]) => {
   )
 }
 
-export interface RobeInfo {
+export interface ManaInfo {
   id: string
   price: Number
   url: string
 }
 
-export const fetchRobes = async () => {
-  const data = await pMap(chunked, fetchRobePage, { concurrency: 2 })
+export const fetchMana = async () => {
+  const manaSupply = await contract.totalSupply();
+  const maxTokenID = manaSupply.toNumber();
+  let ManaIDs = new Array();
+  for(let i=0; i < maxTokenID; i++) {
+    ManaIDs.push(i+1);
+  }
+  const chunked = chunk(ManaIDs, 20)
+  const data = await pMap(chunked, fetchManaPage, { concurrency: 2 })
+
   const mapped = flatten(data)
     .filter(
       (a: Asset) =>
         a?.sell_orders?.[0]?.payment_token_contract.symbol === 'ETH',
     )
-    .map((a: Asset): RobeInfo => {
+    .map((a: Asset): ManaInfo => {
       return {
         id: a.token_id,
         price: Number(
           etherUtils.formatUnits(
-            BigNumber.from(a.sell_orders[0]?.current_price.split('.')[0]),
+            BigNumber.from(a.sell_orders[0]?.current_price.split('.')[0])
           ),
         ),
-        url: a.permalink + '?ref=0xfb843f8c4992efdb6b42349c35f025ca55742d33',
-        svg: a.image_url,
+        url: a.permalink
       }
     })
 
   return {
-    robes: orderBy(mapped, ['price', 'id'], ['asc', 'asc']),
+    mana: orderBy(mapped, ['price', 'id'], ['asc', 'asc']),
     lastUpdate: new Date().toISOString(),
   }
 }
 
 const handler = async (_req: NextApiRequest, res: NextApiResponse) => {
   try {
-    const data = await fetchRobes()
+    const data = await fetchMana()
     res.status(200).json(data)
   } catch (err) {
     res.status(500).json({ statusCode: 500, message: err.message })
