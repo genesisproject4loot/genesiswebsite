@@ -75,6 +75,20 @@
 
       }
     }
+    td {
+      &.tokenId {
+        text-align:left;
+      }
+      &.price {
+        text-align: center;
+      }
+      &.eth::before {
+        font-size:12px;
+        content: "♦";
+        position:relative;
+        top:-2px;
+      }
+    }
   }
   hr {
     margin: 40px 80px;
@@ -130,6 +144,9 @@
       }
       td {
         font-size:18px;
+      }
+      td.eth::before {
+        font-size:10px;
       }
     }
     .controls {

@@ -9,6 +9,7 @@ import Select from 'react-select'
 import suffices from '@data/suffices.json'
 import inventory from '@data/inventory.json'
 import { ManaInfo, fetchMana } from '@api/mana'
+import { BagInfo, fetchBags } from '@api/bags'
 import { GetStaticProps, GetStaticPaths } from 'next'
 // import { format as ts } from 'timeago.js'
 
@@ -18,11 +19,18 @@ import type {Mana, ManaVars, ManaData, Bag, BagData, BagVars, Wallet, TokenListP
 
 export const getStaticProps: GetStaticProps = async (context) => {
   let openseaGMData = await fetchMana()
+  // let openseaLootData = await fetchBags()
   return {
     props: {
-      openseaGMData: openseaGMData.mana,
-      lastUpdate: openseaGMData.lastUpdate,
-    }, // pass the data as props to your component
+      openseaGMData: openseaGMData.mana.reduce((ctx, manaInfo: ManaInfo) => {
+        ctx[manaInfo.id] = manaInfo;
+        return ctx;
+      }, {} as Map<string, ManaInfo>),
+      // openseaLootData: openseaLootData.bags.reduce((ctx, bagInfo: BagInfo) => {
+      //   ctx[bagInfo.id] = bagInfo;
+      //   return ctx;
+      // }, {} as Map<string, BagInfo>)
+    },
   }
 }
 
@@ -108,10 +116,8 @@ export default function Home(props): ReactElement {
       return {
         id: Number(i.id),
         name: i.itemName,
-        address: i.currentOwner.id
-        // price: {
-        //   if (openseaGMData.mana
-        // }
+        address: i.currentOwner.id,
+        price: props.openseaGMData[i.id]?.price
       }
     });
   }
@@ -122,13 +128,12 @@ export default function Home(props): ReactElement {
       return {
         id: Number(i.id),
         name: i.itemName,
-        address: i.currentOwner.id
-        // price: {
-        //   if (openseaGMData.mana
-        // }
+        address: i.currentOwner.id,
+        price: 0 //props.openseaLootData[i.id]?.price
       }
     });
   }
+
   return (
     <Layout>
       <div>
@@ -227,16 +232,18 @@ function TokenList(props: TokenListProps): ReactElement {
         <tr>
           <th className={styles.header_id}><a href="#" onClick={(e) => {e.preventDefault(); requestSort('id');}} className={styles?.[getClassNamesFor('id')]}>{props.name} Token ID</a></th>
           <th><a href="#" onClick={(e) => {e.preventDefault(); requestSort('name');}} className={styles?.[getClassNamesFor('name')]}>Item Name</a></th>
-          <th className={styles.header_address}><a href="#" onClick={(e) => {e.preventDefault(); requestSort('address');}} className={styles?.[getClassNamesFor('address')]}>Addresss</a></th>
+          <th className={styles.header_address}><a href="#" onClick={(e) => {e.preventDefault(); requestSort('address');}} className={styles?.[getClassNamesFor('address')]}>Address</a></th>
+          <th><a href="#" onClick={(e) => {e.preventDefault(); requestSort('price');}} className={styles?.[getClassNamesFor('price')]}>Price</a></th>
         </tr>
       </thead>
       <tbody>
         {sortedData &&
           sortedData.map((item) => (
             <tr key={item.id}>
-              <td><a href={"//opensea.io/assets/"+ props.address + "/" + item.id}  target="_blank" rel="noopener noreferrer">{item.id}</a></td>
+              <td className={styles.tokenId}><a href={"//opensea.io/assets/"+ props.address + "/" + item.id}  target="_blank" rel="noopener noreferrer">{item.id}</a></td>
               <td>{item.name}</td>
               <td><a href={"//opensea.io/" + item.address}  target="_blank" rel="noopener noreferrer">{shortenAddress(item.address)}</a></td>
+              <td className={[styles.price,(item.price ? styles.eth : '')].join(" ")}>{(item.price ? item.price : "--")}</td>
             </tr>
           ))}
       </tbody>
