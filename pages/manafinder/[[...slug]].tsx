@@ -103,6 +103,8 @@ export default function Home(): ReactElement {
         <div className={styles.manafinder__app}>
           <div className={styles.controls}>
             <Select
+              id="order-dropdown"
+              instanceId="order-dropdown"
               placeholder="Select an Order..."
               value={suffices.find(
                 (item) => parseInt(item.value) == suffixId
@@ -112,6 +114,8 @@ export default function Home(): ReactElement {
               options={suffices}
             />
             <Select
+              id="item-dropdown"
+              instanceId="item-dropdown"
               placeholder="Select an Item..."
               value={inventory.find(
                 (item) => parseInt(item.value) == inventoryId
