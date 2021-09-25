@@ -40,8 +40,8 @@ export const fetchBags = async () => {
   for(let i=0; i < 8000; i++) {
     BagIDs.push(i+1);
   }
-  const chunked = chunk(BagIDs, 20)
-  const data = await pMap(chunked, fetchBagPage, { concurrency: 2 })
+  const chunked = chunk(BagIDs, 30)
+  const data = await pMap(chunked, fetchBagPage, { concurrency: 5 })
 
   const mapped = flatten(data)
     .filter(
