@@ -261,7 +261,7 @@ const useSortableData = (items, config = null) => {
 
 function TokenList(props: TokenListProps): ReactElement {
   const data = props.data;
-  const { items: sortedData, requestSort, sortConfig } = useSortableData(data, {key: 'id', direction: 'ascending'})
+  const { items: sortedData, requestSort, sortConfig } = useSortableData(data, {key: 'price', direction: 'ascending'})
   const getClassNamesFor = (name) => {
      if (!sortConfig) {
        return;
