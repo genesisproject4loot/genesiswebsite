@@ -1,15 +1,12 @@
 // Imports
 import Layout from "@components/Layout"; // Layout wrapper
 import styles from "@styles/pages/Manafinder.module.scss"; // Styles
-import Link from "next/link"
 import { gql,useQuery } from '@apollo/client';
 import { useRouter } from "next/router";
 import { useState, useMemo, useEffect } from "react";
 import Select from 'react-select'
 import suffices from '@data/suffices.json'
 import inventory from '@data/inventory.json'
-import { ManaInfo, fetchMana } from '@api/mana'
-import { BagInfo, fetchBags } from '@api/bags'
 // import { format as ts } from 'timeago.js'
 
 // Types
@@ -90,7 +87,7 @@ function ClaimedMana(props: {suffixId:number, inventoryId:number}) {
     id: Number(item.id),
     name: item.itemName,
     address: item.currentOwner?.id,
-    price: openseaData?.queryManas?.manas?.find(mana => mana.id == item.id)?.price ?? -1
+    price: openseaData?.queryManas?.manas?.find(mana => mana.id == item.id)?.price
   }));
 
   return (
@@ -109,7 +106,7 @@ function UnClaimedMana(props: {suffixId:number, inventoryId:number}) {
     id: Number(item.id),
     name: item.itemName,
     address: item.currentOwner?.id,
-    price: openseaData?.queryBags?.bags?.find(bag => bag.id == item.id)?.price ?? -1
+    price: openseaData?.queryBags?.bags?.find(bag => bag.id == item.id)?.price
   }));
 
   return (
@@ -233,6 +230,12 @@ const useSortableData = (items, config = null) => {
     let sortableItems = [...items];
     if (sortConfig !== null) {
       sortableItems.sort((a, b) => {
+        if (typeof a[sortConfig.key] === 'undefined' && typeof b[sortConfig.key] !== 'undefined') {
+          return 1;
+        }
+        if (typeof a[sortConfig.key] !== 'undefined' && typeof b[sortConfig.key] === 'undefined') {
+          return -1;
+        }
         if (a[sortConfig.key] < b[sortConfig.key]) {
           return sortConfig.direction === 'ascending' ? -1 : 1;
         }
@@ -283,7 +286,7 @@ function TokenList(props: TokenListProps): ReactElement {
               <td className={styles.tokenId}><a href={"//opensea.io/assets/"+ props.address + "/" + item.id}  target="_blank" rel="noopener noreferrer">{item.id}</a></td>
               <td>{item.name}</td>
               <td><a href={"//opensea.io/" + item.address}  target="_blank" rel="noopener noreferrer">{shortenAddress(item.address)}</a></td>
-              <td className={[styles.price,(item.price && item.price > 0 ? styles.eth : '')].join(" ")}>{(item.price && item.price > 0 ? item.price : "--")}</td>
+              <td className={[styles.price,(item.price ? styles.eth : '')].join(" ")}>{(item.price && item.price > 0 ? item.price : "--")}</td>
             </tr>
           ))}
       </tbody>
