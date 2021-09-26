@@ -1,6 +1,6 @@
 import { NextApiRequest, NextApiResponse } from 'next'
 import pMap from 'p-map'
-import { chunk, flatten, orderBy } from 'lodash'
+import { chunk, flatten, orderBy, range } from 'lodash'
 import { utils as etherUtils, BigNumber } from 'ethers'
 import { Contract, Event, providers } from 'ethers'
 import type { OpenseaResponse, Asset } from '@utils/openseaTypes'
@@ -38,14 +38,15 @@ export interface ManaInfo {
   url: string
 }
 
-export const fetchMana = async () => {
-  const manaSupply = await contract.totalSupply();
-  const maxTokenID = manaSupply.toNumber();
-  let ManaIDs = new Array();
-  for(let i=0; i < maxTokenID; i++) {
-    ManaIDs.push(i+1);
+export const fetchMana = async (manaIds: string[]) => {
+  if (!manaIds) {
+    const manaSupply = await contract.totalSupply();
+    const maxTokenID = manaSupply.toNumber();
+    let ManaIDs = new Array();
+    manaIds = range(1, maxTokenID).map(id => id.toString());
   }
-  const chunked = chunk(ManaIDs, 20)
+  
+  const chunked = chunk(manaIds, 20)
   const data = await pMap(chunked, fetchManaPage, { concurrency: 2 })
 
   const mapped = flatten(data)
@@ -66,14 +67,24 @@ export const fetchMana = async () => {
     })
 
   return {
-    mana: orderBy(mapped, ['price', 'id'], ['asc', 'asc']),
+    manas: orderBy(mapped, ['price', 'id'], ['asc', 'asc']),
     lastUpdate: new Date().toISOString(),
   }
 }
 
 const handler = async (_req: NextApiRequest, res: NextApiResponse) => {
   try {
-    const data = await fetchMana()
+    const { tokenIds } = _req.query;
+    if (!tokenIds) { // restrict pulling all bags
+      res.status(200).json({
+        manas: [],
+        lastUpdate: new Date().toISOString()
+      });
+      return ;
+    }
+
+    const data = await fetchMana((tokenIds as string).split(','))
+
     res.status(200).json(data)
   } catch (err) {
     res.status(500).json({ statusCode: 500, message: err.message })

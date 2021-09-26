@@ -33,7 +33,7 @@ export interface Wallet {
 }
 
 export interface TokenListProps {
-  data?: Mana[] | Bag[];
+  data?: any[];
   name: string;
   address: string;
 }
