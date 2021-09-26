@@ -1,6 +1,6 @@
 import { NextApiRequest, NextApiResponse } from 'next'
 import pMap from 'p-map'
-import { chunk, flatten, orderBy } from 'lodash'
+import { chunk, flatten, orderBy, range } from 'lodash'
 import { utils as etherUtils, BigNumber } from 'ethers'
 import type { OpenseaResponse, Asset } from '@utils/openseaTypes'
 
@@ -35,12 +35,9 @@ export interface BagInfo {
   url: string
 }
 
-export const fetchBags = async () => {
-  let BagIDs = new Array();
-  for(let i=0; i < 8000; i++) {
-    BagIDs.push(i+1);
-  }
-  const chunked = chunk(BagIDs, 30)
+export const fetchBags = async (bagIds: string[]) => {
+  bagIds = bagIds ?? range(1,8000).map(id => id.toString());
+  const chunked = chunk(bagIds, 30)
   const data = await pMap(chunked, fetchBagPage, { concurrency: 5 })
 
   const mapped = flatten(data)
@@ -68,7 +65,16 @@ export const fetchBags = async () => {
 
 const handler = async (_req: NextApiRequest, res: NextApiResponse) => {
   try {
-    const data = await fetchBags()
+    const { tokenIds } = _req.query;
+    if (!tokenIds) { // restrict pulling all bags
+      res.status(200).json({
+        bags: [],
+        lastUpdate: new Date().toISOString()
+      });
+      return ;
+    }
+
+    const data = await fetchBags((tokenIds as string).split(','))
     res.status(200).json(data)
   } catch (err) {
     res.status(500).json({ statusCode: 500, message: err.message })
