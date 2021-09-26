@@ -279,7 +279,7 @@ function TokenList(props: TokenListProps): ReactElement {
               <td className={styles.tokenId}><a href={"//opensea.io/assets/"+ props.address + "/" + item.id}  target="_blank" rel="noopener noreferrer">{item.id}</a></td>
               <td>{item.name}</td>
               <td><a href={"//opensea.io/" + item.address}  target="_blank" rel="noopener noreferrer">{shortenAddress(item.address)}</a></td>
-              <td className={[styles.price,(item.price ? styles.eth : '')].join(" ")}>{(item.price && item.price > 0 ? item.price : "--")}</td>
+              <td className={[styles.price,(item.price && item.price > 0 ? styles.eth : '')].join(" ")}>{(item.price && item.price > 0 ? item.price : "--")}</td>
             </tr>
           ))}
       </tbody>
