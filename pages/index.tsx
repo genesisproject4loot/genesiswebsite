@@ -2,10 +2,14 @@
 import Layout from "@components/Layout"; // Layout wrapper
 import styles from "@styles/pages/Home.module.scss"; // Styles
 import Link from "next/link"
+import { useState, useEffect } from "react";
+import Numeral from "numeral"
 // Types
 import type { ReactElement } from "react";
 
 export default function Home(): ReactElement {
+  const [gmProgress, setGmProgress] = useState({percentage: 0, msg: ""})
+
   // Quicklinks to render
   const quicklinks: Record<string, string>[] = [
     {
@@ -22,7 +26,19 @@ export default function Home(): ReactElement {
     },
   ];
 
+  useEffect(() => {
+    const url = "/api/mana/total"
 
+    const fetchData = async() => {
+      const maxGM = 20320;
+      const response = await fetch(url);
+      const json = await response.json();
+      const progress = Math.ceil(json.manaSupply/maxGM);
+
+      setGmProgress({ percentage: progress, msg: Numeral(json.manaSupply).format('0,0') + " of "+Numeral(maxGM).format('0,0')+" Genesis Mana Left"})
+    }
+    fetchData();
+  })
   return (
     <Layout>
       <div>
@@ -155,7 +171,8 @@ export default function Home(): ReactElement {
           Genesis Mana is essentially a Mint Pass for a Genesis Adventurer.
           Upon collecting 8 Genesis Mana from a single Order, corresponding to all 8 item types (i.e. weapon, head armor, chest armor, etc), a Genesis Adventurer can be resurrected.
           </p>
-          <br/><br/>
+          <br/>
+          <ProgressBar data={gmProgress} />
           <div className={[styles.cta].join(' ')}>
             <div className={[styles.btn, styles.cta].join(' ')}><Link href="https://etherscan.io/address/0xf4b6040a4b1b30f1d1691699a8f3bf957b03e463#writeContract">Distill Genesis Mana</Link></div>
             <div className={[styles.moreinfo].join(' ')}>
@@ -243,4 +260,20 @@ export default function Home(): ReactElement {
       </div>
     </Layout>
   );
+}
+
+
+const ProgressBar = (props) => {
+  const percentage = props.data.percentage
+  const msg = props.data.msg
+  return (
+    <div className={styles.progressbar}>
+      <div className={styles.message}>{msg}</div>
+      <Filler percentage={percentage} />
+    </div>
+  )
+}
+
+const Filler = (props) => {
+  return <div className={styles.filler} style={{ width: `${props.percentage}%` }} />
 }

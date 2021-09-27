@@ -7,7 +7,6 @@ import { useState, useMemo, useEffect } from "react";
 import Select from 'react-select'
 import suffices from '@data/suffices.json'
 import inventory from '@data/inventory.json'
-// import { format as ts } from 'timeago.js'
 
 // Types
 import type { ReactElement } from "react";

@@ -208,6 +208,33 @@
     }
   }
 
+  .progressbar {
+    margin: 10px auto;
+    position: relative;
+    height: 2rem;
+    width: 450px;
+    border-radius: 0.25rem;
+    border: 1px solid #333;
+    overflow: hidden;
+    .message {
+      position: absolute;
+      z-index:5;
+      font-size:1rem;
+      line-height: 2rem;
+      vertical-align: middle;
+      text-align: center;
+      white-space: nowrap;
+      width: 100%;
+    }
+
+    .filler {
+      background: #8e8e8e;
+      height: 100%;
+      transition: width .6s ease-in;
+    }
+  }
+
+
 }
 
 .home__feature {

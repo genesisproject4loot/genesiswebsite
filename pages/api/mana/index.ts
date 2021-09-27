@@ -2,13 +2,9 @@ import { NextApiRequest, NextApiResponse } from 'next'
 import pMap from 'p-map'
 import { chunk, flatten, orderBy, range } from 'lodash'
 import { utils as etherUtils, BigNumber } from 'ethers'
-import { Contract, Event, providers } from 'ethers'
 import type { OpenseaResponse, Asset } from '@utils/openseaTypes'
-import abi from '@data/genesismana-abi.json'
 
 const apiKey = process.env.OPENSEA_API_KEY
-const rpc = new providers.JsonRpcProvider(process.env.PROVIDER_URL)
-const contract = new Contract(process.env.CONTRACT_ADDRESS as string, abi, rpc)
 
 
 const fetchManaPage = async (ids: string[]) => {
@@ -39,13 +35,7 @@ export interface ManaInfo {
 }
 
 export const fetchMana = async (manaIds: string[]) => {
-  if (!manaIds) {
-    const manaSupply = await contract.totalSupply();
-    const maxTokenID = manaSupply.toNumber();
-    let ManaIDs = new Array();
-    manaIds = range(1, maxTokenID).map(id => id.toString());
-  }
-  
+ 
   const chunked = chunk(manaIds, 20)
   const data = await pMap(chunked, fetchManaPage, { concurrency: 2 })
 
