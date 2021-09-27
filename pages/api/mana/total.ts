@@ -6,12 +6,6 @@ import abi from '@data/genesismana-abi.json'
 const rpc = new providers.JsonRpcProvider(process.env.PROVIDER_URL)
 const contract = new Contract(process.env.CONTRACT_ADDRESS as string, abi, rpc)
 
-export interface ManaInfo {
-  id: string
-  price: Number
-  url: string
-}
-
 export const fetchManaSupply = async () => {
 
     const manaSupply = await contract.totalSupply();
