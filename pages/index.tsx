@@ -35,7 +35,7 @@ export default function Home(): ReactElement {
       const json = await response.json();
       const progress = Math.ceil(json.manaSupply/maxGM);
 
-      setGmProgress({ percentage: progress, msg: Numeral(json.manaSupply).format('0,0') + " of "+Numeral(maxGM).format('0,0')+" Genesis Mana Left"})
+      setGmProgress({ percentage: progress, msg: Numeral(json.manaSupply).format('0,0') + " of "+Numeral(maxGM).format('0,0')+" Genesis Mana Distilled"})
     }
     fetchData();
   })
