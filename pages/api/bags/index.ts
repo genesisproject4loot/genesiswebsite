@@ -15,7 +15,6 @@ const fetchBagPage = async (ids: string[]) => {
   //   },
   // })
 
-  console.log(url);
   const res = await fetch(url)
 
   const json: OpenseaResponse = await res.json()
