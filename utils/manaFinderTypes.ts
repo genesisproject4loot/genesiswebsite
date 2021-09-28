@@ -9,7 +9,7 @@ export interface ManaData {
 }
 
 export interface ManaVars {
-  suffixId: number;
+  suffixId: string;
   inventoryId: number;
 }
 
