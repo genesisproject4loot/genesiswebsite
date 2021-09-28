@@ -121,7 +121,7 @@ function useClaimedMana(suffixId, inventoryId) {
   const [claimedMana, setClaimedMana] = useState();
 
   const GET_CLAIMED_MANA = gql`
-  query GetClaimedMana($suffixId: Int!, $inventoryId: Int!) {
+  query GetClaimedMana($suffixId: String!, $inventoryId: Int!) {
     manas(where: {suffixId: $suffixId, inventoryId: $inventoryId, currentOwner_not_in:
         ["0x1884d71487bfd7f595061221801e783efcd0bf6a",
          "0x9bbda2777c8623d8894b21120bed1fff72b024f8",
@@ -149,7 +149,7 @@ function useClaimedMana(suffixId, inventoryId) {
   `;
   return useQuery<ManaData, ManaVars>(
     GET_CLAIMED_MANA,
-    { variables: { suffixId: suffixId, inventoryId: inventoryId } }
+    { variables: { suffixId: String(suffixId), inventoryId: inventoryId } }
   );
 }
 
