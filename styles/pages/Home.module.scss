@@ -8,7 +8,6 @@
     font-size: 5rem;
     margin: 15px 0px 0px 0px;
   }
-
   p {
     color: #8e8e8e;
     font-size: 22px;
@@ -72,7 +71,15 @@
   margin: 0px auto;
   padding: 15px 20px;
   text-align: left;
-
+  
+  h3 {
+    color: #8e8e8e;
+    font-size: 22px;
+    text-align: center;
+    margin: 15px 0 0 0;
+    padding: 0;
+    font-weight: bold;
+  }
   hr {
     margin: 40px 80px;
     border: 1px solid #aaa;
@@ -212,7 +219,8 @@
     margin: 10px auto;
     position: relative;
     height: 2rem;
-    width: 450px;
+    width: 100%;
+    max-width: 450px;
     border-radius: 0.25rem;
     border: 1px solid #333;
     overflow: hidden;

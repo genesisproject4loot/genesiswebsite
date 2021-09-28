@@ -4,6 +4,8 @@ import styles from "@styles/pages/Home.module.scss"; // Styles
 import Link from "next/link"
 import { gql,useQuery } from '@apollo/client';
 import Numeral from "numeral"
+import { Chart } from "react-google-charts";
+
 // Types
 import type { ReactElement } from "react";
 import type {ManaByOrdersData} from '@utils/manaFinderTypes'
@@ -160,6 +162,9 @@ export default function Home(): ReactElement {
           Upon collecting 8 Genesis Mana from a single Order, corresponding to all 8 item types (i.e. weapon, head armor, chest armor, etc), a Genesis Adventurer can be resurrected.
           </p>
           <br/>
+          <h3>Distribution of Genesis Mana</h3>
+          <Chapter1ProgressBars type="chart"/>
+          <br/>
           <Chapter1ProgressBars type="progress"/>
           <div className={[styles.cta].join(' ')}>
             <div className={[styles.btn, styles.cta].join(' ')}><Link href="https://etherscan.io/address/0xf4b6040a4b1b30f1d1691699a8f3bf957b03e463#writeContract">Distill Genesis Mana</Link></div>
@@ -196,11 +201,13 @@ export default function Home(): ReactElement {
           This means one Weapon, one Head Armor, one Chest Armor, etc all from the same Order (item with suffix &ldquo;of ____&rdquo;).
           <br/><br/>
           There is no wrong way to complete your collection but here are some suggestions:
+          </p>
           <ul>
             <li>Buy GMs on OpenSea and resurrect a GA yourself.</li>
             <li>Trade GMs with others to resurrect a GA yourself.</li>
             <li>Team up with others to pool your GMs and collectively resurrect one or many GAs and share them fractionally.</li>
           </ul>
+          <p>
           The more Genesis Adventurers you resurrect, the stronger you and/or your team will be in the games ahead. Furthermore, for every Genesis Adventurer you resurrect, you have the right to claim a bag of Adventure Mana ($AMANA).
           </p>
           <br/><br/>
@@ -286,11 +293,91 @@ const Chapter1ProgressBars = (props) => {
     progressByOrder["total"] = totalMana
     progressByOrder["spread"] = manaByOrders
   }
-  if (props.type == "spread")
-    return <OrdersSpreadBar data={progressByOrder} /> 
-  else
-    return <ProgressBar data={progress} />
+  switch(props.type) {
+    case "spread":
+      return <OrdersSpreadBar data={progressByOrder} /> 
+      break
+    case "progress":
+      return <ProgressBar data={progress} />
+      break
+    case "chart":
+      return <GenesisManaChart data={progressByOrder} />
+      break
+    default:
+      break
+  }
+    
 }
+
+const GenesisManaChart = (props) => {
+  const spread = props.data.spread
+  const data = [
+    ['Genesis Mana', 'Distilled',  {role: "style"}, 'Unclaimed', {role: "style"}],
+    ['Power', spread[1],"191D7E", 1328, "silver"],
+    ['Giants', spread[2],"DAC931", 1384, "silver"],
+    ['Titans', spread[3],"B45FBB", 1304, "silver"],
+    ['Skill', spread[4],"1FAD94", 1256, "silver"],
+    ['Perfection', spread[5],"2C1A72", 1280, "silver"],
+    ['Brilliance', spread[6],"36662A", 1216, "silver"],
+    ['Enlightenment', spread[7],"78365E", 1208, "silver"],
+    ['Protection', spread[8],"4F4B4B", 1296, "silver"],
+    ['Anger', spread[9],"9B1414", 1280, "silver"],
+    ['Rage', spread[10],"77CE58", 1192, "silver"],
+    ['Fury', spread[11],"C07A28", 1320, "silver"],
+    ['Vitriol', spread[12],"511D71", 1296, "silver"],
+    ['the Fox', spread[13],"949494", 1280, "silver"],
+    ['Detection', spread[14],"DB8F8B", 1248, "silver"],
+    ['Reflection', spread[15],"318C9F", 1232, "silver"],
+    ['the Twins', spread[16],"00AE3B", 1200, "silver"],
+  ];
+
+  return (
+    <Chart
+      chartType="ColumnChart"
+      width="100%"
+      height="400px"
+      data={data}
+      options={{
+        titlePosition: 'none',
+        chartArea: { width: '85%',height:'80%' },
+        isStacked: true,
+        legend: "none",
+        backgroundColor: '#1a1a1a',
+        vAxis: {
+          title: 'Count (log scale)',
+          scaleType: 'log',
+          gridlines: {
+            count: 4,
+            color: '#8e8e8e'
+          },
+          titleTextStyle: {
+            color: '#8e8e8e',
+            fontSize: 12,
+            fontName: 'EB Garamond'
+          }
+        },
+        hAxis: {
+          textStyle: {
+            color: '#fff',
+            fontSize: 12,
+            fontName: 'EB Garamond'
+          }
+        },
+        animation: {
+          duration: 1000,
+          easing: 'out',
+          startup: true,
+        },
+        tooltip: {
+          textStyle: {
+            fontName: 'EB Garamond',
+            fontSize: 16
+          }
+        }
+      }}
+    />
+  );
+};
 
 const OrdersSpreadBar = (props) => {
   const total = props.data.total
@@ -300,7 +387,7 @@ const OrdersSpreadBar = (props) => {
   let filler = []
   for (let i=1; i<orderCount; i++) {
     let data = orderSpread[i]/total*100
-    filler.push(<OrderFiller percentage={data} suffixid={i}/>)
+    filler.push(<OrderFiller key={i} percentage={data} suffixid={i}/>)
   }
   return (
     <div className={styles.progressbar_spread}>
@@ -310,7 +397,7 @@ const OrdersSpreadBar = (props) => {
 }
 
 const OrderFiller = (props) => {
-  return <div className={styles.orderFiller} style={{ width: `${props.percentage}%` }} data-suffixId={props.suffixid} />
+  return <div className={styles.orderFiller} style={{ width: `${props.percentage}%` }} data-suffixid={props.suffixid} />
 }
 
 const ProgressBar = (props) => {
