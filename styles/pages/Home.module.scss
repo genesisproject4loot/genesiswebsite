@@ -216,6 +216,7 @@
     border-radius: 0.25rem;
     border: 1px solid #333;
     overflow: hidden;
+    
     .message {
       position: absolute;
       z-index:5;
@@ -231,10 +232,72 @@
       background: #8e8e8e;
       height: 100%;
       transition: width .6s ease-in;
+    }    
+  }
+  .progressbar_spread {
+    width: 100%;
+    margin: 10px auto;
+    position: relative;
+    height: 1rem;
+    border-radius: 0;
+    border: 1px solid transparent;
+    overflow: hidden;  
+
+    .orderFiller {
+      background: #8e8e8e;
+      height: 100%;
+      transition: width .6s ease-in;
+      display:inline-block;
+      &[data-suffixid="1"] {
+        background: #191D7E
+      }
+      &[data-suffixid="2"] {
+        background: #DAC931
+      }
+      &[data-suffixid="3"] {
+        background: #B45FBB
+      }
+      &[data-suffixid="4"] {
+        background: #1FAD94
+      }
+      &[data-suffixid="5"] {
+        background: #2C1A72
+      }
+      &[data-suffixid="6"] {
+        background: #36662A
+      }
+      &[data-suffixid="7"] {
+        background: #78365E
+      }
+      &[data-suffixid="8"] {
+        background: #4F4B4B
+      }
+      &[data-suffixid="9"] {
+        background: #9B1414
+      }
+      &[data-suffixid="10"] {
+        background: #77CE58
+      }
+      &[data-suffixid="11"] {
+        background: #C07A28
+      }
+      &[data-suffixid="12"] {
+        background: #511D71
+      }
+      &[data-suffixid="13"] {
+        background: #949494
+      }
+      &[data-suffixid="14"] {
+        background: #DB8F8B
+      }
+      &[data-suffixid="15"] {
+        background: #318C9F
+      }
+      &[data-suffixid="16"] {
+        background: #00AE3B
+      }
     }
   }
-
-
 }
 
 .home__feature {

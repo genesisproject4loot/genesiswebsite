@@ -37,3 +37,12 @@ export interface TokenListProps {
   name: string;
   address: string;
 }
+
+export interface Order {
+  id: number;
+  manasHeld: number;
+}
+
+export interface ManaByOrdersData {
+  orders: Order[];
+}

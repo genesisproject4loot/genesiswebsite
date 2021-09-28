@@ -10,7 +10,7 @@ import inventory from '@data/inventory.json'
 
 // Types
 import type { ReactElement } from "react";
-import type {Mana, ManaVars, ManaData, Bag, BagData, BagVars, Wallet, TokenListProps} from '@utils/manaFinderTypes'
+import type {ManaVars, ManaData, BagData, BagVars, TokenListProps} from '@utils/manaFinderTypes'
 
 export default function Home(props): ReactElement {
   const router = useRouter();
@@ -118,7 +118,6 @@ function UnClaimedMana(props: {suffixId:number, inventoryId:number}) {
 
 
 function useClaimedMana(suffixId, inventoryId) {
-  const [claimedMana, setClaimedMana] = useState();
 
   const GET_CLAIMED_MANA = gql`
   query GetClaimedMana($suffixId: String!, $inventoryId: Int!) {

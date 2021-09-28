@@ -2,13 +2,13 @@
 import Layout from "@components/Layout"; // Layout wrapper
 import styles from "@styles/pages/Home.module.scss"; // Styles
 import Link from "next/link"
-import { useState, useEffect } from "react";
+import { gql,useQuery } from '@apollo/client';
 import Numeral from "numeral"
 // Types
 import type { ReactElement } from "react";
+import type {ManaByOrdersData} from '@utils/manaFinderTypes'
 
 export default function Home(): ReactElement {
-  const [gmProgress, setGmProgress] = useState({percentage: 0, msg: ""})
 
   // Quicklinks to render
   const quicklinks: Record<string, string>[] = [
@@ -26,19 +26,6 @@ export default function Home(): ReactElement {
     },
   ];
 
-  useEffect(() => {
-    const url = "/api/mana/total"
-
-    const fetchData = async() => {
-      const maxGM = 20320;
-      const response = await fetch(url);
-      const json = await response.json();
-      const progress = Math.ceil(json.manaSupply/maxGM);
-
-      setGmProgress({ percentage: progress, msg: Numeral(json.manaSupply).format('0,0') + " of "+Numeral(maxGM).format('0,0')+" Genesis Mana Distilled"})
-    }
-    fetchData();
-  })
   return (
     <Layout>
       <div>
@@ -142,6 +129,7 @@ export default function Home(): ReactElement {
         <div className={styles.home__chapters}>
           <hr id="chapter1"/>
           <h2>Chapter 1 : Genesis Mana</h2>
+          <Chapter1ProgressBars type="spread"/>
           <blockquote>
           <p>
           You walk to the edge, and take the Holy Chestplate of Brilliance from your Loot bag.
@@ -172,7 +160,7 @@ export default function Home(): ReactElement {
           Upon collecting 8 Genesis Mana from a single Order, corresponding to all 8 item types (i.e. weapon, head armor, chest armor, etc), a Genesis Adventurer can be resurrected.
           </p>
           <br/>
-          <ProgressBar data={gmProgress} />
+          <Chapter1ProgressBars type="progress"/>
           <div className={[styles.cta].join(' ')}>
             <div className={[styles.btn, styles.cta].join(' ')}><Link href="https://etherscan.io/address/0xf4b6040a4b1b30f1d1691699a8f3bf957b03e463#writeContract">Distill Genesis Mana</Link></div>
             <div className={[styles.moreinfo].join(' ')}>
@@ -262,6 +250,69 @@ export default function Home(): ReactElement {
   );
 }
 
+function useManaCountByOrders() {
+
+  const GET_MANA_COUNT_BY_ORDERS = gql`
+    query GetManaCountByOrders {
+      orders (orderBy: id) {
+        id
+        manasHeld
+      }
+    }
+  `;
+  return useQuery<ManaByOrdersData>(
+    GET_MANA_COUNT_BY_ORDERS
+  );
+}
+
+const Chapter1ProgressBars = (props) => {
+  const maxGM = 20320;
+  const { loading, data, error } = useManaCountByOrders();
+  let progress = { percentage: 0, message: "" }
+  let progressByOrder = { total: 0, spread: new Array}
+  if (loading) {
+    progress["percentage"] = 0;
+    progress["msg"] = "Loading..."
+  } else {
+    let totalMana = 0;
+    let manaByOrders = new Array;
+
+    for(let i=0; i < data.orders.length; i++) {
+      totalMana = totalMana + Number(data.orders[i].manasHeld)
+      manaByOrders[data.orders[i].id] = Number(data.orders[i].manasHeld)
+    } 
+    progress["percentage"] = Math.ceil(totalMana/maxGM*100);
+    progress["msg"] = Numeral(totalMana).format('0,0') + " of "+Numeral(maxGM).format('0,0')+" Genesis Mana Distilled"
+    progressByOrder["total"] = totalMana
+    progressByOrder["spread"] = manaByOrders
+  }
+  if (props.type == "spread")
+    return <OrdersSpreadBar data={progressByOrder} /> 
+  else
+    return <ProgressBar data={progress} />
+}
+
+const OrdersSpreadBar = (props) => {
+  const total = props.data.total
+  const orderCount = props.data.spread.length
+  const orderSpread = props.data.spread
+
+  let filler = []
+  for (let i=1; i<orderCount; i++) {
+    let data = orderSpread[i]/total*100
+    console.log(orderSpread[i], total, data)
+    filler.push(<OrderFiller percentage={data} suffixid={i}/>)
+  }
+  return (
+    <div className={styles.progressbar_spread}>
+      {filler}
+    </div>
+  )
+}
+
+const OrderFiller = (props) => {
+  return <div className={styles.orderFiller} style={{ width: `${props.percentage}%` }} data-suffixId={props.suffixid} />
+}
 
 const ProgressBar = (props) => {
   const percentage = props.data.percentage
