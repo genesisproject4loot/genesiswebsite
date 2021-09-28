@@ -300,7 +300,6 @@ const OrdersSpreadBar = (props) => {
   let filler = []
   for (let i=1; i<orderCount; i++) {
     let data = orderSpread[i]/total*100
-    console.log(orderSpread[i], total, data)
     filler.push(<OrderFiller percentage={data} suffixid={i}/>)
   }
   return (
