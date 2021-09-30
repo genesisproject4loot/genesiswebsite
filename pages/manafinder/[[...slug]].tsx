@@ -193,7 +193,7 @@ function useOpenseaManaData(tokenIds:string[]) {
       tokenIds: (tokenIds ?? []).join(','),
       restful: true,
     },
-    fetchPolicy: 'network-only'
+    fetchPolicy: 'no-cache'
   });
 }
 
@@ -216,7 +216,7 @@ function useOpenseaBagsData(tokenIds:string[]) {
       tokenIds: (tokenIds ?? []).join(','),
       restful: true,
     },
-    fetchPolicy: 'network-only'
+    fetchPolicy: 'no-cache'
   });
 }
 
