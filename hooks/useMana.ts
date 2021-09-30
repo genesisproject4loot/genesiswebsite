@@ -1,5 +1,10 @@
 import { gql, useQuery } from "@apollo/client";
-import type { BagData, BagVars, ManaData, ManaVars } from "@utils/manaFinderTypes";
+import type {
+  BagData,
+  BagVars,
+  ManaData,
+  ManaVars
+} from "@utils/manaFinderTypes";
 import inventory from "@data/inventory.json";
 
 export function useUnclaimedMana(suffixId, inventoryId) {
@@ -86,7 +91,10 @@ export function useUnclaimedManaByOwner(currentOwner: String) {
     }
   `;
 
-  return useQuery<BagData, { currentOwner: String }>(GET_UNCLAIMED_MANA_BY_OWNER, {
-    variables: { currentOwner }
-  });
+  return useQuery<BagData, { currentOwner: String }>(
+    GET_UNCLAIMED_MANA_BY_OWNER,
+    {
+      variables: { currentOwner: currentOwner?.toLowerCase() }
+    }
+  );
 }
