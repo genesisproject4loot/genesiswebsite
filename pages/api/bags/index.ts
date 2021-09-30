@@ -7,25 +7,16 @@ import type { OpenseaResponse, Asset } from '@utils/openseaTypes'
 const apiKey = process.env.OPENSEA_API_KEY
 
 const fetchBagPage = async (ids: string[]) => {
-  let url = 'https://api.opensea.io/api/v1/assets?collection=lootproject&'
+  let url = `https://api.opensea.io/api/v1/assets?collection=lootproject&limit=${ids.length}&`
   url += ids.map((id) => `token_ids=${id}`).join('&')
   // const res = await fetch(url, {
   //   headers: {
   //     'X-API-KEY': apiKey,
   //   },
   // })
-
   const res = await fetch(url)
-
-  const json: OpenseaResponse = await res.json()
-
-  return Promise.all(
-    json.assets.map(async (asset) => {
-      return {
-        ...asset
-      }
-    }),
-  )
+  const json: OpenseaResponse = await res.json();
+  return json.assets ?? [];
 }
 
 export interface BagInfo {
