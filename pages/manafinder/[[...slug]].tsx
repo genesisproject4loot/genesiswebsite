@@ -192,8 +192,7 @@ function useOpenseaManaData(tokenIds:string[]) {
     variables: {
       tokenIds: (tokenIds ?? []).join(','),
       restful: true,
-    },
-    fetchPolicy: 'no-cache'
+    }
   });
 }
 
@@ -215,8 +214,7 @@ function useOpenseaBagsData(tokenIds:string[]) {
     variables: {
       tokenIds: (tokenIds ?? []).join(','),
       restful: true,
-    },
-    fetchPolicy: 'no-cache'
+    }
   });
 }
 
