@@ -75,7 +75,8 @@ export function useUnclaimedManaByOwner(currentOwner: String) {
       bags(where: { currentOwner: $currentOwner }) {
         id
         manasClaimed
-        chest
+        ${inventory.map((item) => item.label.toLowerCase()).join("\n")}
+        ${inventory.map((item) => `${item.label.toLowerCase()}SuffixId`).join("\n")}
         manas {
           id
           suffixId {

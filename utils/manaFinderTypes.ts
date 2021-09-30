@@ -1,6 +1,8 @@
 export interface Mana {
   id: number;
   itemName: string;
+  suffixId: Order;
+  inventoryId: number;
   currentOwner: Wallet;
 }
 
@@ -15,9 +17,26 @@ export interface ManaVars {
 
 export interface Bag {
   id: number;
+  chest: string;
+  foot: string;
+  hand: string;
+  head: string;
+  neck: string;
+  ring: string;
+  waist: string;
+  weapon: string;
+  chestSuffixId: number;
+  footSuffixId: number;
+  handSuffixId: number;
+  headSuffixId: number;
+  neckSuffixId: number;
+  ringSuffixId: number;
+  waistSuffixId: number;
+  weaponSuffixId: number;
   manasClaimed: number;
   itemName: string;
   currentOwner: Wallet;
+  manas: Mana[];
 }
 
 export interface BagVars {
@@ -39,7 +58,7 @@ export interface TokenListProps {
 }
 
 export interface Order {
-  id: number;
+  id: string;
   manasHeld: number;
 }
 
