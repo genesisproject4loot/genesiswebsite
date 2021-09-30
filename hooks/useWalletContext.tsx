@@ -25,7 +25,8 @@ const defaultWalletContext = {
   provider: null,
   connectWallet: () => {},
   disconnectWallet: () => {},
-  account: ""
+  account: "",
+  displayName: ""
 };
 
 const WalletContext = createContext<{
@@ -35,6 +36,7 @@ const WalletContext = createContext<{
   connectWallet: () => void;
   disconnectWallet: () => void;
   account: String;
+  displayName: String;
 }>(defaultWalletContext);
 
 interface WalletProviderProps {
@@ -50,12 +52,17 @@ export const WalletProvider = (props: WalletProviderProps) => {
   );
 };
 
+function shortenAddress(address) {
+  return address.slice(0, 3) + "..." + address.slice(-3);
+}
+
 function useWallet() {
   const [modal, setModal] = useState<Web3Modal>();
   const [signer, setSigner] = useState<ethers.providers.JsonRpcSigner>();
   const [provider, setProvider] = useState<ethers.providers.Provider>();
   const [isConnected, setIsConnected] = useState(false);
   const [account, setAccount] = useState<string>("");
+  const [displayName, setDisplayName] = useState("");
 
   async function connectWallet() {
     const web3Modal = new Web3Modal(WEB3_MODAL_CONFIG);
@@ -76,6 +83,8 @@ function useWallet() {
       const address = await signer.getAddress();
       if (address) {
         setAccount(address);
+        const ensName = await provider.lookupAddress(address);
+        setDisplayName(ensName || shortenAddress(address));
       }
 
       if (rawProvider) {
@@ -101,6 +110,7 @@ function useWallet() {
     setProvider(null);
     setAccount("");
     setIsConnected(false);
+    setDisplayName("");
   }
 
   return {
@@ -109,7 +119,8 @@ function useWallet() {
     provider,
     disconnectWallet,
     isConnected,
-    account
+    account,
+    displayName
   };
 }
 

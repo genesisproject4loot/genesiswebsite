@@ -7,7 +7,7 @@ import { useWalletContext } from "hooks/useWalletContext";
 export default function Header() {
   // Collect current path for active links
   const { pathname } = useRouter();
-  const { connectWallet, isConnected, disconnectWallet, account } =
+  const { connectWallet, isConnected, disconnectWallet, displayName } =
     useWalletContext();
 
   return (
@@ -23,7 +23,7 @@ export default function Header() {
       </div>
       {isConnected && (
         <div>
-          {account} <button onClick={disconnectWallet}>disconnect</button>
+          {displayName} <button onClick={disconnectWallet}>disconnect</button>
         </div>
       )}
       {!isConnected && <button onClick={connectWallet}>connect</button>}
