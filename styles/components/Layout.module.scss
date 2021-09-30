@@ -19,6 +19,8 @@
 }
 
 .header__logo {
+  flex: 1 1 0%;
+
   a {
     font-size: 24px;
     color: white;
@@ -63,6 +65,7 @@
 
 .header__links_active {
   color: white !important;
+  cursor: pointer;
 }
 
 .footer {
@@ -78,4 +81,18 @@
       color: #838383;
     }
   }
+}
+
+.header__account {
+  display: flex;
+  justify-content: end;
+}
+
+.header__button {
+  padding: 8px 16px;
+  border-color: #fff;
+  background: transparent;
+  color: white;
+  border-style: solid;
+  cursor: pointer;
 }

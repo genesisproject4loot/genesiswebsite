@@ -14,7 +14,6 @@ export default function Layout({
   children: ReactElement | ReactElement[];
 }) {
   return (
-
     <div>
       {/* Meta */}
       <Head />

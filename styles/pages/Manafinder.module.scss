@@ -82,13 +82,17 @@
       &.price {
         text-align: center;
       }
+      &.action {
+        text-align: center;
+        cursor: pointer;
+      }
       &.eth::before {
         font-size:12px;
         content: "♦";
         position:relative;
         top:0px;
       }
-      &.eth {
+      &.eth, &.action {
         border: 1px solid #FFF;
         font-size: 12px;
         overflow: hidden;
