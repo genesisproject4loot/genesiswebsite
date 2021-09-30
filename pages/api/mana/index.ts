@@ -8,7 +8,7 @@ const apiKey = process.env.OPENSEA_API_KEY
 
 
 const fetchManaPage = async (ids: string[]) => {
-  let url = 'https://api.opensea.io/api/v1/assets?collection=genesis-mana&'
+  let url = `https://api.opensea.io/api/v1/assets?collection=genesis-mana&limit=${ids.length}&`
   url += ids.map((id) => `token_ids=${id}`).join('&')
   // const res = await fetch(url, {
   //   headers: {
@@ -16,16 +16,8 @@ const fetchManaPage = async (ids: string[]) => {
   //   },
   // })
   const res = await fetch(url)
-
-  const json: OpenseaResponse = await res.json()
-
-  return Promise.all(
-    json.assets.map(async (asset) => {
-      return {
-        ...asset
-      }
-    }),
-  )
+  const json: OpenseaResponse = await res.json();
+  return json.assets ?? [];
 }
 
 export interface ManaInfo {
