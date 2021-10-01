@@ -192,7 +192,11 @@ function useNFTx() {
   }
   `;
 
-  return useQuery(GET_NFTX_DATA);
+  return useQuery(GET_NFTX_DATA, {
+    context: {
+      nftx: true
+    }
+  });
 }
 
 function useSushiSwap() {
@@ -204,7 +208,11 @@ function useSushiSwap() {
   }
   `;
 
-  return useQuery(GET_SUSHI_SWAP_DATA);
+  return useQuery(GET_SUSHI_SWAP_DATA, {
+    context: {
+      sushiswap: true
+    }
+  });
 }
 
 function useOpenseaManaData(tokenIds:string[]) {
@@ -224,6 +232,8 @@ function useOpenseaManaData(tokenIds:string[]) {
   return useQuery(GET_OPENSEA_MANA_DATA, {
     variables: {
       tokenIds: (tokenIds ?? []).join(','),
+    }, 
+    context: {
       restful: true,
     }
   });
