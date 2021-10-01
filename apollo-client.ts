@@ -15,7 +15,7 @@ const dispatcherLink = new RetryLink().split(
   (operation) =>  operation.getContext()?.restful,
   apiLink,
   new RetryLink().split(
-    (operation) =>  operation.getContext()?.ntfx,
+    (operation) =>  operation.getContext()?.nftx,
     theNFTxLink,
     new RetryLink().split(
       (operation) =>  operation.getContext()?.sushiswap,
