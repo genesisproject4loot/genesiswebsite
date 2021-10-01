@@ -9,13 +9,13 @@ const apiLink = new RestLink({
 });
 
 const theNFTxLink = new HttpLink({uri:"https://api.thegraph.com/subgraphs/name/nftx-project/nftx-v2"});
-const theSushiSwapLink = new HttpLink({uri:"https://thegraph.com/legacy-explorer/subgraph/zippoxer/sushiswap-subgraph-fork"});
+const theSushiSwapLink = new HttpLink({uri:"https://api.thegraph.com/subgraphs/name/zippoxer/sushiswap-subgraph-fork"});
 
 const dispatcherLink = new RetryLink().split(
   (operation) =>  operation.getContext()?.restful,
   apiLink,
   new RetryLink().split(
-    (operation) =>  operation.getContext()?.ntfx,
+    (operation) =>  operation.getContext()?.nftx,
     theNFTxLink,
     new RetryLink().split(
       (operation) =>  operation.getContext()?.sushiswap,
