@@ -331,7 +331,7 @@ function TokenList(props: TokenListProps): ReactElement {
               <td className={styles.tokenId}><OpenseaLink address={props.address} tokenid={item.id} text={item.id} /></td>
               <td>{item.name}</td>
               <td><OpenseaLink address={item.address} tokenid={undefined} text={shortenAddress(item.address)} /></td>
-              <td className={[styles.price,(item.price ? styles.eth : '')].join(" ")}><BuyItNowLink price={item.price} address={props.address} tokenid={item.id} text={item.id} /></td>
+              <td className={[styles.price,(item.price ? styles.eth : '')].join(" ")}><BuyItNowLink price={item.price} ownerAddress={item.address} itemAddress={props.address} tokenid={item.id} text={item.id} /></td>
             </tr>
           ))}
       </tbody>
@@ -340,14 +340,14 @@ function TokenList(props: TokenListProps): ReactElement {
 
 }
 
-function BuyItNowLink(props: {price:number, address:string, tokenid:number, text:string}): ReactElement {
+function BuyItNowLink(props: {price:number, ownerAddress:string, itemAddress:string, tokenid:number, text:string}): ReactElement {
   
   if (props.price && props.price > 0) {
     const price = props.price.toFixed(2).replace(/[.,]00$/, "").toString()
-    if (props.address == "0x2d77f5b3efa51821ad6483adaf38ea4cb1824cc5") {
-      return (<NFTxLink address={props.address} tokenid={props.tokenid} text={price} />)
+    if (props.ownerAddress == "0x2d77f5b3efa51821ad6483adaf38ea4cb1824cc5") {
+      return (<NFTxLink address={props.ownerAddress} tokenid={props.tokenid} text={price} />)
     } else {
-      return (<OpenseaLink address={props.address} tokenid={props.tokenid} text={price} />)  
+      return (<OpenseaLink address={props.itemAddress} tokenid={props.tokenid} text={price} />)  
     }
   } else {
     return (<span>--</span>)
@@ -369,7 +369,7 @@ function NFTxLink(props: {address:string, tokenid:number, text:string}): ReactEl
 function OpenseaLink(props: {address:string, tokenid:number, text:string}): ReactElement {
   return (
     <a 
-      href={"//opensea.io/assets/"+ props.address + (props.tokenid ? "/" + props.tokenid : "")}
+      href={"//opensea.io" + (props.tokenid ? "/assets" : "") + "/"+ props.address + (props.tokenid ? "/" + props.tokenid : "")}
       target="_blank" 
       rel="noopener noreferrer">
         {props.text}
