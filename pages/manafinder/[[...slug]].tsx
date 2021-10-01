@@ -86,9 +86,7 @@ function ClaimedMana(props: {suffixId:number, inventoryId:number}) {
 
   let NFTxFloorPrice;
   if (!loadingNFTx && !loadingSS) {
-    console.log("SS - Data:", dataSS?.token.derivedETH, "Error:", errorSS) 
-    console.log("NFTX - Data:", dataNFTx?.vaults[0].fees.targetRedeemFee, "Error:", errorNFTx)
-    NFTxFloorPrice = ((dataNFTx?.vaults[0].fees.targetRedeemFee/1000000000000000000+1)*dataSS?.token.derivedETH).toFixed(4)
+    NFTxFloorPrice = (dataNFTx?.vaults[0].fees.targetRedeemFee/1000000000000000000+1)*dataSS?.token.derivedETH
   } else {
     NFTxFloorPrice = 0
   }
@@ -259,8 +257,10 @@ function useOpenseaBagsData(tokenIds:string[]) {
 
   return useQuery(GET_OPENSEA_BAGS_DATA, {
     variables: {
-      tokenIds: (tokenIds ?? []).join(','),
-      restful: true,
+      tokenIds: (tokenIds ?? []).join(',')
+    },
+    context: {
+      restful: true
     }
   });
 }
@@ -343,10 +343,11 @@ function TokenList(props: TokenListProps): ReactElement {
 function BuyItNowLink(props: {price:number, address:string, tokenid:number, text:string}): ReactElement {
   
   if (props.price && props.price > 0) {
+    const price = props.price.toFixed(2).replace(/[.,]00$/, "").toString()
     if (props.address == "0x2d77f5b3efa51821ad6483adaf38ea4cb1824cc5") {
-      return (<NFTxLink address={props.address} tokenid={props.tokenid} text={props.price.toString()} />)
+      return (<NFTxLink address={props.address} tokenid={props.tokenid} text={price} />)
     } else {
-      return (<OpenseaLink address={props.address} tokenid={props.tokenid} text={props.price.toString()} />)  
+      return (<OpenseaLink address={props.address} tokenid={props.tokenid} text={price} />)  
     }
   } else {
     return (<span>--</span>)
@@ -356,7 +357,7 @@ function BuyItNowLink(props: {price:number, address:string, tokenid:number, text
 function NFTxLink(props: {address:string, tokenid:number, text:string}): ReactElement {
   
   return (
-    <a 
+    <a
       href={"//nftx.io/vault/0x2d77f5b3efa51821ad6483adaf38ea4cb1824cc5/buy/"}
       target="_blank" 
       rel="noopener noreferrer">
