@@ -14,7 +14,15 @@ const theSushiSwapLink = new HttpLink({uri:"https://thegraph.com/legacy-explorer
 const dispatcherLink = new RetryLink().split(
   (operation) =>  operation.variables?.restful,
   apiLink,
-  theGraphLink
+  new RetryLink().split(
+    (operation) =>  operation.variables?.restful,
+    theNFTxLink,
+    new RetryLink().split(
+      (operation) =>  operation.variables?.restful,
+      theSushiSwapLink,
+      theGraphLink,
+    )
+  )
 );
 
 const client = new ApolloClient({

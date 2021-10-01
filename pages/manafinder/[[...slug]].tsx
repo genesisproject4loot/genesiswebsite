@@ -81,6 +81,13 @@ export default function Home(props): ReactElement {
 function ClaimedMana(props: {suffixId:number, inventoryId:number}) {
   const { loading, data, error } = useClaimedMana(props.suffixId, props.inventoryId);
   const { data: openseaData } = useOpenseaManaData((data?.manas ?? []).map(mana => mana.id.toString()));
+  const { loading:loadingNFTx, data:dataNFTx, error:errorNFTx } = useNFTx();
+  const { loading:loadingSS, data:dataSS, error:errorSS } = useSushiSwap();
+
+  // if (!loadingNFTx)
+  //   console.log("NFTX - Data:", dataNFTx, "Error:", errorNFTx)
+  // if (!loadingSS)
+  //   console.log("SS - Data:", dataSS, "Error:", errorSS) 
 
   const tableData = (data?.manas??[]).map((item) => ({
     id: Number(item.id),
@@ -172,6 +179,36 @@ function useUnclaimedMana(suffixId, inventoryId) {
     GET_UNCLAIMED_MANA,
     { variables: { suffixId: suffixId } }
   );
+}
+
+function useNFTx() {
+  const GET_NFTX_DATA = gql`
+  query GetNFTxData {
+    vaults(where: {vaultId:209}) {
+      fees {
+        targetRedeemFee
+      }
+    }
+  }
+  `;
+
+  return useQuery(GET_NFTX_DATA);
+}
+
+function useSushiSwap() {
+  const GET_SUSHI_SWAP_DATA = gql`
+  query GetSushiSwapData {
+    token (id: "0x2d77f5b3efa51821ad6483adaf38ea4cb1824cc5") {
+      id
+      symbol
+      name
+      decimals
+      derivedETH
+    }
+  }
+  `;
+
+  return useQuery(GET_SUSHI_SWAP_DATA);
 }
 
 function useOpenseaManaData(tokenIds:string[]) {
@@ -294,6 +331,7 @@ function TokenList(props: TokenListProps): ReactElement {
 }
 
 function BuyItNowLink(props: {price:number, address:string, tokenid:number, text:string}): ReactElement {
+  
   if (props.price && props.price > 0) {
     if (props.address == "0x2d77f5b3efa51821ad6483adaf38ea4cb1824cc5") {
       return (<NFTxLink address={props.address} tokenid={props.tokenid} text={props.price.toString()} />)
