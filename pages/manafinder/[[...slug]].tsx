@@ -84,16 +84,20 @@ function ClaimedMana(props: {suffixId:number, inventoryId:number}) {
   const { loading:loadingNFTx, data:dataNFTx, error:errorNFTx } = useNFTx();
   const { loading:loadingSS, data:dataSS, error:errorSS } = useSushiSwap();
 
-  // if (!loadingNFTx)
-  //   console.log("NFTX - Data:", dataNFTx, "Error:", errorNFTx)
-  // if (!loadingSS)
-  //   console.log("SS - Data:", dataSS, "Error:", errorSS) 
-
+  let NFTxFloorPrice;
+  if (!loadingNFTx && !loadingSS) {
+    console.log("SS - Data:", dataSS?.token.derivedETH, "Error:", errorSS) 
+    console.log("NFTX - Data:", dataNFTx?.vaults[0].fees.targetRedeemFee, "Error:", errorNFTx)
+    NFTxFloorPrice = ((dataNFTx?.vaults[0].fees.targetRedeemFee/1000000000000000000+1)*dataSS?.token.derivedETH).toFixed(4)
+  } else {
+    NFTxFloorPrice = 0
+  }
+  
   const tableData = (data?.manas??[]).map((item) => ({
     id: Number(item.id),
     name: item.itemName,
     address: item.currentOwner?.id,
-    price: (item.currentOwner?.id == "0x2d77f5b3efa51821ad6483adaf38ea4cb1824cc5" ? "0.2493" : openseaData?.queryManas?.manas?.find(mana => mana.id == item.id)?.price)
+    price: ((item.currentOwner?.id == "0x2d77f5b3efa51821ad6483adaf38ea4cb1824cc5") && !loadingNFTx && !loadingSS? NFTxFloorPrice : openseaData?.queryManas?.manas?.find(mana => mana.id == item.id)?.price)
   }));
 
   return (
