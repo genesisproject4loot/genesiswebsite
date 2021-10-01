@@ -331,7 +331,7 @@ function TokenList(props: TokenListProps): ReactElement {
               <td className={styles.tokenId}><OpenseaLink address={props.address} tokenid={item.id} text={item.id} /></td>
               <td>{item.name}</td>
               <td><OpenseaLink address={item.address} tokenid={undefined} text={shortenAddress(item.address)} /></td>
-              <td className={[styles.price,(item.price ? styles.eth : '')].join(" ")}><BuyItNowLink price={item.price} address={item.address} tokenid={item.id} text={item.id} /></td>
+              <td className={[styles.price,(item.price ? styles.eth : '')].join(" ")}><BuyItNowLink price={item.price} address={props.address} tokenid={item.id} text={item.id} /></td>
             </tr>
           ))}
       </tbody>
