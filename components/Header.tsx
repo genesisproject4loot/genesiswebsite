@@ -1,13 +1,10 @@
 import Link from "next/link"; // Routing
-import type { ReactElement } from "react";
 import { useRouter } from "next/router"; // Routing
 import styles from "@styles/components/Layout.module.scss"; // Styles
 import { useWalletContext } from "hooks/useWalletContext";
 
 export default function Header() {
-  // Collect current path for active links
-  const { pathname } = useRouter();
-  const { connectWallet, isConnected, disconnectWallet, displayName } =
+  const { connectWallet, isConnected, disconnectWallet, displayName, balance } =
     useWalletContext();
 
   return (
@@ -22,13 +19,23 @@ export default function Header() {
         </Link>
       </div>
       <div className={styles.header__account}>
-
-      {isConnected && (
-          <span>{displayName} <a className={styles.header__links_active} onClick={disconnectWallet}>[ disconnect ]</a></span>
-      )}
-      {!isConnected && <button className={styles.header__button} onClick={connectWallet}>Connect Wallet</button>}
+        {isConnected && (
+          <span>
+            {displayName} {" "}
+            <a
+              className={styles.header__links_active}
+              onClick={disconnectWallet}
+            >
+              [ disconnect ]
+            </a>
+          </span>
+        )}
+        {!isConnected && (
+          <button className={styles.header__button} onClick={connectWallet}>
+            Connect Wallet
+          </button>
+        )}
       </div>
-
     </div>
   );
 }

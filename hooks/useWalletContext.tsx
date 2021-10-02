@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState } from "react";
+import React, { createContext, useContext, useEffect, useState } from "react";
 import { ethers } from "ethers";
 import WalletConnectProvider from "@walletconnect/web3-provider";
 import Web3Modal from "web3modal";
@@ -19,6 +19,8 @@ const WEB3_MODAL_CONFIG = {
   }
 };
 
+const isServer = typeof window === "undefined";
+
 const defaultWalletContext = {
   isConnected: false,
   signer: null,
@@ -26,7 +28,8 @@ const defaultWalletContext = {
   connectWallet: () => {},
   disconnectWallet: () => {},
   account: "",
-  displayName: ""
+  displayName: "",
+  balance: 0
 };
 
 const WalletContext = createContext<{
@@ -37,6 +40,7 @@ const WalletContext = createContext<{
   disconnectWallet: () => void;
   account: String;
   displayName: String;
+  balance: Number;
 }>(defaultWalletContext);
 
 interface WalletProviderProps {
@@ -63,6 +67,7 @@ function useWallet() {
   const [isConnected, setIsConnected] = useState(false);
   const [account, setAccount] = useState<string>("");
   const [displayName, setDisplayName] = useState("");
+  const [balance, setBalance] = useState(0);
 
   async function connectWallet() {
     const web3Modal = new Web3Modal(WEB3_MODAL_CONFIG);
@@ -71,14 +76,23 @@ function useWallet() {
   }
 
   async function updateAccount(provider, address) {
+    let ensName, balance;
     setAccount(address);
-    const ensName = await provider.lookupAddress(address);
-    setDisplayName(ensName || shortenAddress(address));
+
+    try {
+      ensName = await provider.lookupAddress(address);
+      balance = await provider.getBalance(address);
+      setDisplayName(ensName ?? shortenAddress(address));
+      setBalance(
+        parseFloat(parseFloat(ethers.utils.formatUnits(balance)).toFixed(4))
+      );
+    } catch (e) {
+      setDisplayName(address);
+    }
   }
+
   async function login(newModal: Web3Modal) {
     try {
-      newModal.clearCachedProvider();
-      await newModal.connect();
       const rawProvider = await newModal.connect();
       const provider = new ethers.providers.Web3Provider(rawProvider);
       const signer = provider.getSigner();
@@ -116,6 +130,16 @@ function useWallet() {
     setDisplayName("");
   }
 
+  useEffect(() => {
+    if (!isServer) {
+      const web3Modal = new Web3Modal(WEB3_MODAL_CONFIG);
+      if (web3Modal.cachedProvider) {
+        setModal(web3Modal);
+        login(web3Modal);
+      }
+    }
+  }, [isServer]);
+
   return {
     connectWallet,
     signer,
@@ -123,7 +147,8 @@ function useWallet() {
     disconnectWallet,
     isConnected,
     account,
-    displayName
+    displayName,
+    balance
   };
 }
 
