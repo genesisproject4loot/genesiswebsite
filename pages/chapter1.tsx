@@ -1,10 +1,17 @@
 // Imports
+import { useState } from 'react';
 import Layout from "@components/Layout"; // Layout wrapper
 import styles from "@styles/pages/Home.module.scss"; // Styles
 import Link from "next/link"
+import { useUnclaimedMana, useUnclaimedManaByOwner } from 'hooks/useMana';
+import { useManaContract } from 'hooks/useManaContract';
+
+import inventory from 'data/inventory.json';
 
 // Types
 import type { ReactElement } from "react";
+import { useWalletContext } from "hooks/useWalletContext";
+import { id } from "@ethersproject/hash";
 
 export default function Home(): ReactElement {
   // Quicklinks to render
@@ -74,8 +81,79 @@ Can you resurrect a Genesis Adventurer of Brilliance before it’s too late?
             <li><b>Why:</b> If you collect all 8 Genesis Mana from a single order, the original items that equipped a &ldquo;Genesis Adventurer&rdquo; of your order, then you can mint a Genesis Adventurer.</li>
           </ul>
           <div className="btn"><Link href="#">Mint the NFT</Link></div>
+
+          <UnclaimedMana />
+
         </div>
       </div>
     </Layout>
   );
+}
+
+function UnclaimedMana() {
+  const { account } = useWalletContext();
+  const { data, refetch: refetchUnclaimedMana } = useUnclaimedManaByOwner(account);
+  const inventoryNames = inventory.map(item => item.label.toLowerCase());
+  const { mintMana } = useManaContract();
+  const [mintsInProgress, setMintsInProgress] = useState<any[]>([]);
+
+  const isMintInProgress = (id) => mintsInProgress.includes(id);
+  const mintKey = (bag) => [bag.lootId, bag.inventoryId].join('-');
+
+  async function onMintMana(bag) {
+    if (isMintInProgress(mintKey(bag))) {
+      return;
+    }
+    setMintsInProgress([...mintsInProgress, mintKey(bag)]);
+    try {
+      const transaction = await mintMana(bag.lootId, bag.inventoryId + 1);
+      const done = await transaction.wait();
+      console.log(done);
+      setTimeout(async () => {
+        await refetchUnclaimedMana();
+        setMintsInProgress(mintsInProgress.filter((id) => id !== mintKey(bag)));
+      }, 1000);
+    } catch (e) {
+      setMintsInProgress(mintsInProgress.filter((id) => id !== mintKey(bag)));
+      alert(e?.data?.message ?? e?.message ?? "Error");
+    }
+  }
+
+  const mana = (data?.bags??[]).map(bag => {
+    return inventoryNames.filter(name => bag[`${name}SuffixId`]>0).map(name=> {
+      return {
+        lootId: bag.id,
+        name: bag[name],
+        suffixId: bag[`${name}SuffixId`],
+        inventoryId: inventoryNames.findIndex(item => item == name)
+      }
+    })
+  }).flat();
+
+  if (!mana || mana.length === 0) {
+    return null;
+  }
+
+  return (<table>
+          <thead>
+            <tr>
+              <th>Loot Id</th>
+              <th></th>
+              <th>Item Name</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+        <tbody>
+          { mana.map((item) => (
+              <tr key={item.lootId + item.suffixId}>
+                <td >{item.lootId}</td>
+                <td>{item.name}</td>
+                <td>
+                  {!isMintInProgress(mintKey(item)) && <button onClick={() => onMintMana(item)}>Mint</button> }
+                  {isMintInProgress(mintKey(item)) && <div>Minting...</div> }
+                </td>
+              </tr>
+            ))}
+        </tbody>
+      </table>);
 }

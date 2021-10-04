@@ -72,7 +72,7 @@ export function useClaimedMana(suffixId, inventoryId) {
 export function useUnclaimedManaByOwner(currentOwner: String) {
   const GET_UNCLAIMED_MANA_BY_OWNER = gql`
     query GetUnclaimedMana($currentOwner: String!) {
-      bags(where: { currentOwner: $currentOwner }) {
+      bags(where: { manasClaimed: 0, currentOwner: $currentOwner }) {
         id
         manasClaimed
         ${inventory.map((item) => item.label.toLowerCase()).join("\n")}
