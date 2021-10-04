@@ -8,10 +8,12 @@ import Select from 'react-select'
 import suffices from '@data/suffices.json'
 import inventory from '@data/inventory.json'
 import { useClaimedMana, useUnclaimedMana } from 'hooks/useMana';
+import { useWalletContext } from "hooks/useWalletContext";
+import { useManaContract } from "hooks/useManaContract";
 
 // Types
 import type { ReactElement } from "react";
-import type {ManaVars, ManaData, BagData, BagVars, TokenListProps} from '@utils/manaFinderTypes'
+import type { Bag, TokenListProps} from '@utils/manaFinderTypes'
 
 export default function Home(props): ReactElement {
   const router = useRouter();
@@ -82,12 +84,17 @@ export default function Home(props): ReactElement {
 function ClaimedMana(props: {suffixId:number, inventoryId:number}) {
   const { loading, data, error } = useClaimedMana(props.suffixId, props.inventoryId);
   const { data: openseaData } = useOpenseaManaData((data?.manas ?? []).map(mana => mana.id.toString()));
+  const { account } = useWalletContext();
+
+  const isOwnedByWallet = (item) =>
+    item.currentOwner?.id?.toLowerCase() === account?.toLowerCase();
 
   const tableData = (data?.manas??[]).map((item) => ({
     id: Number(item.id),
     name: item.itemName,
     address: item.currentOwner?.id,
-    price: (item.currentOwner?.id == "0x2d77f5b3efa51821ad6483adaf38ea4cb1824cc5" ? "0.2493" : openseaData?.queryManas?.manas?.find(mana => mana.id == item.id)?.price)
+    price: (item.currentOwner?.id == "0x2d77f5b3efa51821ad6483adaf38ea4cb1824cc5" ? "0.2493" : openseaData?.queryManas?.manas?.find(mana => mana.id == item.id)?.price),
+    action: isOwnedByWallet(item) ? (<span>Owned</span>) : null
   }));
 
   return (
@@ -99,14 +106,49 @@ function ClaimedMana(props: {suffixId:number, inventoryId:number}) {
 }
 
 function UnClaimedMana(props: {suffixId:number, inventoryId:number}) {
-  const { loading, data, error } = useUnclaimedMana(props.suffixId, props.inventoryId);  
-  const { data: openseaData } = useOpenseaBagsData((data?.bags ?? []).map(bag => bag.id.toString()));
+  const { loading, data, refetch: refetchUnclaimedMana } = useUnclaimedMana(props.suffixId, props.inventoryId);  
+  const { data: openseaData, refetch: refetchOpenseaBagsData } = useOpenseaBagsData((data?.bags ?? []).map(bag => bag.id.toString()));
+  const { account } = useWalletContext();
+  const { mintMana } = useManaContract();
+  const [mintsInProgress, setMintsInProgress] = useState<any[]>([]);
+
+  const isMintInProgress = (id) => mintsInProgress.includes(id);
+  
+  const isOwnedByWallet = (item) =>
+    item.currentOwner?.id?.toLowerCase() === account?.toLowerCase();
+  
+  async function onMintMana(bag: Bag) {
+    if (isMintInProgress(bag.id)) {
+      return;
+    }
+    setMintsInProgress([...mintsInProgress, bag.id]);
+    try {
+      const transaction = await mintMana(bag.id, props.inventoryId + 1);
+      const done = await transaction.wait();
+      console.log(done);
+      setTimeout(async () => {
+        await refetchUnclaimedMana();
+        await refetchOpenseaBagsData();
+        setMintsInProgress(mintsInProgress.filter((id) => id !== bag.id));
+      }, 1000);
+    } catch (e) {
+      setMintsInProgress(mintsInProgress.filter((id) => id !== bag.id));
+      alert(e?.data?.message ?? e?.message ?? "Error");
+    }
+  }
 
   const tableData = (data?.bags??[]).map((item) => ({
     id: Number(item.id),
     name: item.itemName,
     address: item.currentOwner?.id,
-    price: openseaData?.queryBags?.bags?.find(bag => bag.id == item.id)?.price
+    price: openseaData?.queryBags?.bags?.find(bag => bag.id == item.id)?.price,
+    action: isOwnedByWallet(item) ? (
+      isMintInProgress(item.id) ? (
+        "In progress"
+      ) : (
+        <a onClick={() => onMintMana(item)}>mint</a>
+      )
+    ) : null
   }));
 
   return (
@@ -201,7 +243,9 @@ const useSortableData = (items, config = null) => {
 
 
 function TokenList(props: TokenListProps): ReactElement {
-  const data = props.data;
+  const data = props.data.filter((item) => !item.action);
+  const actions = props.data.filter((item) => item.action);
+
   const { items: sortedData, requestSort, sortConfig } = useSortableData(data, {key: 'price', direction: 'ascending'})
   const getClassNamesFor = (name) => {
      if (!sortConfig) {
@@ -221,6 +265,15 @@ function TokenList(props: TokenListProps): ReactElement {
         </tr>
       </thead>
       <tbody>
+      {actions &&
+          actions.map((item) => (
+            <tr key={item.id}>
+              <td className={styles.tokenId}><OpenseaLink address={props.address} tokenid={item.id} text={item.id} /></td>
+              <td>{item.name}</td>
+              <td><OpenseaLink address={item.address} tokenid={undefined} text={shortenAddress(item.address)} /></td>
+              <td className={styles.action}>{item.action}</td>
+            </tr>
+          ))}
         {sortedData &&
           sortedData.map((item) => (
             <tr key={item.id}>
