@@ -3,6 +3,7 @@ import Link from "next/link"; // Routing
 import { useRouter } from "next/router"; // Routing
 import { default as HTMLHead } from "next/head"; // Meta
 import styles from "@styles/components/Layout.module.scss"; // Styles
+import Header from '@components/Header';
 
 // Types
 import type { ReactElement } from "react";
@@ -93,27 +94,6 @@ function Head(): ReactElement {
         }}
       />
     </HTMLHead>
-  );
-}
-
-/**
- * Header
- * @returns {ReactElement} Header
- */
-function Header() {
-  // Collect current path for active links
-  const { pathname } = useRouter();
-
-  return (
-    <div className={styles.header}>
-      {/* Main logo */}
-      <div className={styles.header__logo}>
-        <Link href="/">
-          <a><img src="/genesis-icon.png" height="35px"></img> Genesis Project (for Loot)</a>
-        </Link>
-      </div>
-
-    </div>
   );
 }
 
