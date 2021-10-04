@@ -87,8 +87,16 @@ function useWallet() {
         parseFloat(parseFloat(ethers.utils.formatUnits(balance)).toFixed(4))
       );
     } catch (e) {
-      setDisplayName(address);
+      setDisplayName(shortenAddress(address));
     }
+  }
+
+  async function isMetaMaskAndUnlocked(modal) {
+    if (modal?.cachedProvider !== "injected" || !window?.ethereum?.isMetaMask) {
+      return false;
+    }
+    // Experimental function
+    return window?.ethereum?._metamask?.isUnlocked();
   }
 
   async function login(newModal: Web3Modal) {
@@ -131,13 +139,17 @@ function useWallet() {
   }
 
   useEffect(() => {
-    if (!isServer) {
+    async function tryAutoLogin() {
       const web3Modal = new Web3Modal(WEB3_MODAL_CONFIG);
       if (web3Modal.cachedProvider) {
-        setModal(web3Modal);
-        login(web3Modal);
+        const isMetaMaskUnlocked = await isMetaMaskAndUnlocked(web3Modal);
+        if (isMetaMaskUnlocked) {
+          setModal(web3Modal);
+          login(web3Modal);
+        }
       }
     }
+    if (!isServer) tryAutoLogin();
   }, [isServer]);
 
   return {
