@@ -86,7 +86,24 @@
         font-size:12px;
         content: "♦";
         position:relative;
-        top:-2px;
+        top:0px;
+      }
+      &.eth {
+        border: 1px solid #FFF;
+        font-size: 12px;
+        overflow: hidden;
+        line-height: 18px;
+        display: block;
+        background: #8e8e8e;
+        a {
+          font-size: 14px;
+          &:hover {
+            text-decoration: none;
+          }
+        }
+        &:hover {
+          box-shadow: 0 0 0 2px #fff;
+        }
       }
     }
   }

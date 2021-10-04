@@ -8,14 +8,27 @@ const apiLink = new RestLink({
   responseTransformer: response => response.json()
 });
 
+const theNFTxLink = new HttpLink({uri:"https://api.thegraph.com/subgraphs/name/nftx-project/nftx-v2"});
+const theSushiSwapLink = new HttpLink({uri:"https://api.thegraph.com/subgraphs/name/zippoxer/sushiswap-subgraph-fork"});
+
 const dispatcherLink = new RetryLink().split(
-  (operation) =>  operation.variables?.restful,
+  (operation) =>  operation.getContext()?.restful,
   apiLink,
-  theGraphLink
+  new RetryLink().split(
+    (operation) =>  operation.getContext()?.nftx,
+    theNFTxLink,
+    new RetryLink().split(
+      (operation) =>  operation.getContext()?.sushiswap,
+      theSushiSwapLink,
+      theGraphLink,
+    )
+  )
 );
 
 const client = new ApolloClient({
   cache: new InMemoryCache(),
   link: dispatcherLink
 });
+
 export default client;
+

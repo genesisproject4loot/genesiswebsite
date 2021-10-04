@@ -82,12 +82,21 @@ export default function Home(props): ReactElement {
 function ClaimedMana(props: {suffixId:number, inventoryId:number}) {
   const { loading, data, error } = useClaimedMana(props.suffixId, props.inventoryId);
   const { data: openseaData } = useOpenseaManaData((data?.manas ?? []).map(mana => mana.id.toString()));
+  const { loading:loadingNFTx, data:dataNFTx, error:errorNFTx } = useNFTx();
+  const { loading:loadingSS, data:dataSS, error:errorSS } = useSushiSwap();
 
+  let NFTxFloorPrice;
+  if (!loadingNFTx && !loadingSS) {
+    NFTxFloorPrice = (dataNFTx?.vaults[0].fees.targetRedeemFee/1000000000000000000+1)*dataSS?.token.derivedETH
+  } else {
+    NFTxFloorPrice = 0
+  }
+  
   const tableData = (data?.manas??[]).map((item) => ({
     id: Number(item.id),
     name: item.itemName,
     address: item.currentOwner?.id,
-    price: openseaData?.queryManas?.manas?.find(mana => mana.id == item.id)?.price
+    price: ((item.currentOwner?.id == "0x2d77f5b3efa51821ad6483adaf38ea4cb1824cc5") && !loadingNFTx && !loadingSS? NFTxFloorPrice : openseaData?.queryManas?.manas?.find(mana => mana.id == item.id)?.price)
   }));
 
   return (
@@ -119,6 +128,40 @@ function UnClaimedMana(props: {suffixId:number, inventoryId:number}) {
 
 
 
+function useNFTx() {
+  const GET_NFTX_DATA = gql`
+  query GetNFTxData {
+    vaults(where: {vaultId:209}) {
+      fees {
+        targetRedeemFee
+      }
+    }
+  }
+  `;
+
+  return useQuery(GET_NFTX_DATA, {
+    context: {
+      nftx: true
+    }
+  });
+}
+
+function useSushiSwap() {
+  const GET_SUSHI_SWAP_DATA = gql`
+  query GetSushiSwapData {
+    token (id: "0x2d77f5b3efa51821ad6483adaf38ea4cb1824cc5") {
+      derivedETH
+    }
+  }
+  `;
+
+  return useQuery(GET_SUSHI_SWAP_DATA, {
+    context: {
+      sushiswap: true
+    }
+  });
+}
+
 function useOpenseaManaData(tokenIds:string[]) {
   const GET_OPENSEA_MANA_DATA = gql`
   query GetOpenSeaManaData ($tokenIds: String) {
@@ -136,9 +179,10 @@ function useOpenseaManaData(tokenIds:string[]) {
   return useQuery(GET_OPENSEA_MANA_DATA, {
     variables: {
       tokenIds: (tokenIds ?? []).join(','),
+    }, 
+    context: {
       restful: true,
-    },
-    fetchPolicy: 'no-cache'
+    }
   });
 }
 
@@ -158,10 +202,11 @@ function useOpenseaBagsData(tokenIds:string[]) {
 
   return useQuery(GET_OPENSEA_BAGS_DATA, {
     variables: {
-      tokenIds: (tokenIds ?? []).join(','),
-      restful: true,
+      tokenIds: (tokenIds ?? []).join(',')
     },
-    fetchPolicy: 'no-cache'
+    context: {
+      restful: true
+    }
   });
 }
 
@@ -220,21 +265,59 @@ function TokenList(props: TokenListProps): ReactElement {
         <tr>
           <th className={styles.header_id}><a href="#" onClick={(e) => {e.preventDefault(); requestSort('id');}} className={styles?.[getClassNamesFor('id')]}>{props.name} Token ID</a></th>
           <th><a href="#" onClick={(e) => {e.preventDefault(); requestSort('name');}} className={styles?.[getClassNamesFor('name')]}>Item Name</a></th>
-          <th className={styles.header_address}><a href="#" onClick={(e) => {e.preventDefault(); requestSort('address');}} className={styles?.[getClassNamesFor('address')]}>Address</a></th>
-          <th><a href="#" onClick={(e) => {e.preventDefault(); requestSort('price');}} className={styles?.[getClassNamesFor('price')]}>Price</a></th>
+          <th className={styles.header_address}><a href="#" onClick={(e) => {e.preventDefault(); requestSort('address');}} className={styles?.[getClassNamesFor('address')]}>Owner</a></th>
+          <th><a href="#" onClick={(e) => {e.preventDefault(); requestSort('price');}} className={styles?.[getClassNamesFor('price')]}>Buy</a></th>
         </tr>
       </thead>
       <tbody>
         {sortedData &&
           sortedData.map((item) => (
             <tr key={item.id}>
-              <td className={styles.tokenId}><a href={"//opensea.io/assets/"+ props.address + "/" + item.id}  target="_blank" rel="noopener noreferrer">{item.id}</a></td>
+              <td className={styles.tokenId}><OpenseaLink address={props.address} tokenid={item.id} text={item.id} /></td>
               <td>{item.name}</td>
-              <td><a href={"//opensea.io/" + item.address}  target="_blank" rel="noopener noreferrer">{shortenAddress(item.address)}</a></td>
-              <td className={[styles.price,(item.price ? styles.eth : '')].join(" ")}>{(item.price && item.price > 0 ? item.price : "--")}</td>
+              <td><OpenseaLink address={item.address} tokenid={undefined} text={shortenAddress(item.address)} /></td>
+              <td className={[styles.price,(item.price ? styles.eth : '')].join(" ")}><BuyItNowLink price={item.price} ownerAddress={item.address} itemAddress={props.address} tokenid={item.id} text={item.id} /></td>
             </tr>
           ))}
       </tbody>
     </table>
   );
+
+}
+
+function BuyItNowLink(props: {price:number, ownerAddress:string, itemAddress:string, tokenid:number, text:string}): ReactElement {
+  
+  if (props.price && props.price > 0) {
+    const price = props.price.toFixed(2).replace(/[.,]00$/, "").toString()
+    if (props.ownerAddress == "0x2d77f5b3efa51821ad6483adaf38ea4cb1824cc5") {
+      return (<NFTxLink address={props.ownerAddress} tokenid={props.tokenid} text={price} />)
+    } else {
+      return (<OpenseaLink address={props.itemAddress} tokenid={props.tokenid} text={price} />)  
+    }
+  } else {
+    return (<span>--</span>)
+  }
+}
+
+function NFTxLink(props: {address:string, tokenid:number, text:string}): ReactElement {
+  
+  return (
+    <a
+      href={"//nftx.io/vault/0x2d77f5b3efa51821ad6483adaf38ea4cb1824cc5/buy/"}
+      target="_blank" 
+      rel="noopener noreferrer">
+        {props.text}
+    </a>
+  )
+}
+
+function OpenseaLink(props: {address:string, tokenid:number, text:string}): ReactElement {
+  return (
+    <a 
+      href={"//opensea.io" + (props.tokenid ? "/assets" : "") + "/"+ props.address + (props.tokenid ? "/" + props.tokenid : "")}
+      target="_blank" 
+      rel="noopener noreferrer">
+        {props.text}
+    </a>
+  )
 }
