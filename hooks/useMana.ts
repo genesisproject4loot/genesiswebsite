@@ -3,7 +3,8 @@ import type {
   BagData,
   BagVars,
   ManaData,
-  ManaVars
+  ManaVars,
+  ManaByOrdersData
 } from "@utils/manaFinderTypes";
 import inventory from "@data/inventory.json";
 
@@ -97,5 +98,19 @@ export function useUnclaimedManaByOwner(currentOwner: String) {
     {
       variables: { currentOwner: currentOwner?.toLowerCase() }
     }
+  );
+}
+
+export function useManaCountByOrders() {
+  const GET_MANA_COUNT_BY_ORDERS = gql`
+    query GetManaCountByOrders {
+      orders (orderBy: id) {
+        id
+        manasHeld
+      }
+    }
+  `;
+  return useQuery<ManaByOrdersData>(
+    GET_MANA_COUNT_BY_ORDERS
   );
 }

@@ -2,13 +2,14 @@
 import Layout from "@components/Layout"; // Layout wrapper
 import styles from "@styles/pages/Home.module.scss"; // Styles
 import Link from "next/link"
-import { gql,useQuery } from '@apollo/client';
 import Numeral from "numeral"
-import { Chart } from "react-google-charts";
+import { useManaCountByOrders } from "hooks/useMana";
 
 // Types
 import type { ReactElement } from "react";
-import type {ManaByOrdersData} from '@utils/manaFinderTypes'
+
+//Components 
+import GenesisManaChart from "@components/charts/GenesisManaChart";
 
 export default function Home(): ReactElement {
 
@@ -163,7 +164,7 @@ export default function Home(): ReactElement {
           </p>
           <br/>
           <h3>Distribution of Genesis Mana</h3>
-          <Chapter1ProgressBars type="chart"/>
+          <GenesisManaChart />
           <br/>
           <Chapter1ProgressBars type="progress"/>
           <div className={[styles.cta].join(' ')}>
@@ -257,51 +258,27 @@ export default function Home(): ReactElement {
   );
 }
 
-function useManaCountByOrders() {
-
-  const GET_MANA_COUNT_BY_ORDERS = gql`
-    query GetManaCountByOrders {
-      orders (orderBy: id) {
-        id
-        manasHeld
-      }
-    }
-  `;
-  return useQuery<ManaByOrdersData>(
-    GET_MANA_COUNT_BY_ORDERS
-  );
-}
-
 const Chapter1ProgressBars = (props) => {
   const maxGM = 20320;
-  const { loading, data, error } = useManaCountByOrders();
-  let progress = { percentage: 0, message: "" }
-  let progressByOrder = { total: 0, spread: new Array}
+  const { loading, data } = useManaCountByOrders();
+  let progress = { percentage: 0, msg: "" }
+  let totalMana = 0;
+  let progressByOrder = [];
   if (loading) {
     progress["percentage"] = 0;
     progress["msg"] = "Loading..."
   } else {
-    let totalMana = 0;
-    let manaByOrders = new Array;
-
-    for(let i=0; i < data.orders.length; i++) {
-      totalMana = totalMana + Number(data.orders[i].manasHeld)
-      manaByOrders[data.orders[i].id] = Number(data.orders[i].manasHeld)
-    } 
+    progressByOrder = Array.from(data.orders).sort((a,b) => Number(a.id) - Number(b.id));
+    totalMana = progressByOrder.reduce((total,order) => total + Number(order.manasHeld), 0);
     progress["percentage"] = Math.ceil(totalMana/maxGM*100);
     progress["msg"] = Numeral(totalMana).format('0,0') + " of "+Numeral(maxGM).format('0,0')+" Genesis Mana Distilled"
-    progressByOrder["total"] = totalMana
-    progressByOrder["spread"] = manaByOrders
   }
   switch(props.type) {
     case "spread":
-      return <OrdersSpreadBar data={progressByOrder} /> 
+      return <OrdersSpreadBar data={progressByOrder} total={totalMana} /> 
       break
     case "progress":
       return <ProgressBar data={progress} />
-      break
-    case "chart":
-      return <GenesisManaChart data={progressByOrder} />
       break
     default:
       break
@@ -309,80 +286,10 @@ const Chapter1ProgressBars = (props) => {
     
 }
 
-const GenesisManaChart = (props) => {
-  const spread = props.data.spread
-  const data = [
-    ['Genesis Mana', 'Distilled',  {role: "style"}, 'Unclaimed', {role: "style"}],
-    ['Power', spread[1],"191D7E", 1328, "silver"],
-    ['Giants', spread[2],"DAC931", 1384, "silver"],
-    ['Titans', spread[3],"B45FBB", 1304, "silver"],
-    ['Skill', spread[4],"1FAD94", 1256, "silver"],
-    ['Perfection', spread[5],"2C1A72", 1280, "silver"],
-    ['Brilliance', spread[6],"36662A", 1216, "silver"],
-    ['Enlightenment', spread[7],"78365E", 1208, "silver"],
-    ['Protection', spread[8],"4F4B4B", 1296, "silver"],
-    ['Anger', spread[9],"9B1414", 1280, "silver"],
-    ['Rage', spread[10],"77CE58", 1192, "silver"],
-    ['Fury', spread[11],"C07A28", 1320, "silver"],
-    ['Vitriol', spread[12],"511D71", 1296, "silver"],
-    ['the Fox', spread[13],"949494", 1280, "silver"],
-    ['Detection', spread[14],"DB8F8B", 1248, "silver"],
-    ['Reflection', spread[15],"318C9F", 1232, "silver"],
-    ['the Twins', spread[16],"00AE3B", 1200, "silver"],
-  ];
 
-  return (
-    <Chart
-      chartType="ColumnChart"
-      width="100%"
-      height="400px"
-      data={data}
-      options={{
-        titlePosition: 'none',
-        chartArea: { width: '85%',height:'80%' },
-        isStacked: true,
-        legend: "none",
-        backgroundColor: '#1a1a1a',
-        vAxis: {
-          title: 'Count (log scale)',
-          scaleType: 'log',
-          gridlines: {
-            count: 4,
-            color: '#8e8e8e'
-          },
-          titleTextStyle: {
-            color: '#8e8e8e',
-            fontSize: 12,
-            fontName: 'EB Garamond'
-          }
-        },
-        hAxis: {
-          textStyle: {
-            color: '#fff',
-            fontSize: 12,
-            fontName: 'EB Garamond'
-          }
-        },
-        animation: {
-          duration: 1000,
-          easing: 'out',
-          startup: true,
-        },
-        tooltip: {
-          textStyle: {
-            fontName: 'EB Garamond',
-            fontSize: 16
-          }
-        }
-      }}
-    />
-  );
-};
-
-const OrdersSpreadBar = (props) => {
-  const total = props.data.total
-  const orderCount = props.data.spread.length
-  const orderSpread = props.data.spread
+const OrdersSpreadBar = ({ data, total }) => {
+  const orderCount = data.length;
+  const orderSpread = data;
 
   let filler = []
   for (let i=1; i<orderCount; i++) {
@@ -400,9 +307,7 @@ const OrderFiller = (props) => {
   return <div className={styles.orderFiller} style={{ width: `${props.percentage}%` }} data-suffixid={props.suffixid} />
 }
 
-const ProgressBar = (props) => {
-  const percentage = props.data.percentage
-  const msg = props.data.msg
+const ProgressBar = ({ data: { percentage, msg }}) => {
   return (
     <div className={styles.progressbar}>
       <div className={styles.message}>{msg}</div>
