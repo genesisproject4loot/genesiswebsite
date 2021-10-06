@@ -4,7 +4,7 @@ import manaABI from "data/genesismana-abi.json";
 import { useWalletContext } from "./useWalletContext";
 import { Bag } from "@utils/manaFinderTypes";
 
-const GM_CONTRACT_ADDRESS = process.env.NEXT_PUBLIC_GM_CONTRACT_ADDRESS ?? "0xf4B6040A4b1B30f1d1691699a8F3BF957b03e463";
+export const GM_CONTRACT_ADDRESS = process.env.NEXT_PUBLIC_GM_CONTRACT_ADDRESS ?? "0xf4B6040A4b1B30f1d1691699a8F3BF957b03e463";
 export function useManaContract() {
   const wallet = useWalletContext();
   const [manaContract, setManaContract] = useState<ethers.Contract>();

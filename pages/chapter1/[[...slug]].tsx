@@ -4,7 +4,7 @@ import { useState } from "react";
 import Layout from "@components/Layout"; // Layout wrapper
 import styles from "@styles/pages/Chapter1.module.scss"; // Styles
 import { useManaBagsByOwner, useManaFromWallet } from "hooks/useMana";
-import { useManaContract } from "hooks/useManaContract";
+import { useManaContract, GM_CONTRACT_ADDRESS } from "hooks/useManaContract";
 import { lookupLootById } from "hooks/useLoot";
 import inventory from "data/inventory.json";
 import { useRouter } from "next/router";
@@ -76,28 +76,10 @@ function ManaBagsList(): ReactElement {
 
   function accessoryItem(item) {
     if (item.ownedByOther) {
-      return (
-        <span>
-          {item.hasMinted ? "Minted" : "UnMinted"}{" "}
-          <OpenseaLink
-            address={item.ownedByOther}
-            tokenid={undefined}
-            text={shortenAddress(item.ownedByOther)}
-          />
-        </span>
-      );
+      return <span>{item.hasMinted ? "Minted" : "UnMinted"} </span>;
     }
     if (item.hasMinted) {
-      return (
-        <span>
-          Minted!{" "}
-          <OpenseaLink
-            address={account as string}
-            tokenid={undefined}
-            text={shortenAddress(account)}
-          />
-        </span>
-      );
+      return <span>Minted!</span>;
     }
     if (isMintInProgress(mintKey(item))) {
       return <span>Minting...</span>;
@@ -142,7 +124,7 @@ function ManaBagsList(): ReactElement {
   return (
     <div>
       {bags.map((bag, idx) => (
-        <ManaBag key={bag.id} bag={bag} />
+        <ManaBag key={idx} bag={bag} />
       ))}
     </div>
   );
@@ -155,8 +137,24 @@ function ManaBag({ bag }) {
       <div className={styles.mana_list}>
         {bag.manas.map((item) => (
           <>
-            <span>{item.id}</span>
-            <span>{item.name}</span>
+            <span>
+              {item.hasMinted && (
+                <OpenseaLink
+                  address={GM_CONTRACT_ADDRESS}
+                  tokenid={item.id}
+                  text={item.id}
+                />
+              )}
+              {!item.hasMinted && item.id}
+            </span>
+            <span>{item.hasMinted && (
+                <OpenseaLink
+                  address={GM_CONTRACT_ADDRESS}
+                  tokenid={item.id}
+                  text={item.name}
+                />
+              )}
+              {!item.hasMinted && item.name}</span>
             <span>{item.accessoryItem}</span>
           </>
         ))}
