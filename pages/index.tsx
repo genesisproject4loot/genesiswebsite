@@ -9,7 +9,7 @@ import { useManaCountByOrders } from "hooks/useMana";
 import type { ReactElement } from "react";
 
 //Components 
-import GenesisManaChart from "@components/charts/GenesisManaChart";
+import GenesisManaChart from "components/charts/GenesisManaChart";
 
 export default function Home(): ReactElement {
 
@@ -290,11 +290,10 @@ const Chapter1ProgressBars = (props) => {
 const OrdersSpreadBar = ({ data, total }) => {
   const orderCount = data.length;
   const orderSpread = data;
-
   let filler = []
-  for (let i=1; i<orderCount; i++) {
-    let data = orderSpread[i]/total*100
-    filler.push(<OrderFiller key={i} percentage={data} suffixid={i}/>)
+  for (let i=0; i<orderCount; i++) {
+    let percentage = Number(orderSpread[i].manasHeld)/total*100
+    filler.push(<OrderFiller key={i} percentage={percentage} suffixid={orderSpread[i].id}/>)
   }
   return (
     <div className={styles.progressbar_spread}>
