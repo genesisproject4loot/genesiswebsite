@@ -3,7 +3,7 @@ import type { ReactElement } from "react";
 import { useState } from "react";
 import Layout from "@components/Layout"; // Layout wrapper
 import styles from "@styles/pages/Chapter1.module.scss"; // Styles
-import { useManaBagsByOwner } from "hooks/useMana";
+import { useManaBagsByOwner, useManaFromWallet } from "hooks/useMana";
 import { useManaContract } from "hooks/useManaContract";
 import { useLootById } from "hooks/useLoot";
 import inventory from "data/inventory.json";
@@ -35,10 +35,10 @@ function ManaBagsList(): ReactElement {
   const { data, refetch: refetchManaBags } = useManaBagsByOwner(
     address || account
   );
+  // const { data, refetch: refetchManaBags } = useManaFromWallet();
   const inventoryNames = inventory.map((item) => item.label.toLowerCase());
   const { mintMana } = useManaContract();
   const [mintsInProgress, setMintsInProgress] = useState<any[]>([]);
-
   function isMintInProgress(id) {
     return mintsInProgress.includes(id);
   }
@@ -117,7 +117,7 @@ function ManaBagsList(): ReactElement {
   return (
     <div>
       {bags.map((bag) => (
-        <ManaBag key={bag.id}  bag={bag} />
+        <ManaBag key={bag.id + bag.lootId}  bag={bag} />
       ))}
     </div>
   );
