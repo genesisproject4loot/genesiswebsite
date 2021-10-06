@@ -117,7 +117,7 @@ function ManaBagsList(): ReactElement {
   return (
     <div>
       {bags.map((bag, idx) => (
-        <ManaBag key={idx} bag={bag} />
+        <ManaBag key={bag.id} bag={bag} />
       ))}
     </div>
   );
@@ -125,7 +125,7 @@ function ManaBagsList(): ReactElement {
 
 function ManaBag({ bag }) {
   return (
-    <div key={bag.id} className={styles.bag_list}>
+    <div className={styles.bag_list}>
       <img src={bag.data?.image} width={300} height={300} />
       <div className={styles.mana_list}>
         {bag.manas.map((item) => (
