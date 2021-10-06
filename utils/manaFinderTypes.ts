@@ -1,6 +1,7 @@
 export interface Mana {
   id: number;
   itemName: string;
+  inventoryId: number;
   currentOwner: Wallet;
 }
 
@@ -18,6 +19,7 @@ export interface Bag {
   manasClaimed: number;
   itemName: string;
   currentOwner: Wallet;
+  manas: Mana[];
 }
 
 export interface BagVars {

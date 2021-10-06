@@ -1,0 +1,65 @@
+.chapter1__cta {
+  max-width: 800px;
+  margin: 0px auto;
+  padding: 15px 20px 0;
+  text-align: center;
+  gap: 20px;
+  display: flex;
+  flex-direction: column;
+
+  h1 {
+    font-size: 5rem;
+    margin: 15px 0px 0px 0px;
+  }
+  p {
+    color: #8e8e8e;
+    font-size: 22px;
+    margin: 0px;
+  }
+
+  div.bag_list {
+    display: flex;
+    padding: 20px;
+    margin-top: 20px;
+  }
+
+  div.bag_list > img {
+    margin-right: 40px;
+  }
+
+  div.mana_list {
+    display: grid;
+    grid-template-columns: 50px 1fr 1fr;
+    width: 100%;
+    align-content: start;
+  }
+
+  div.mana_list > span {
+    white-space: nowrap;
+    text-align: left;
+    padding: 0 0 20px 0;
+  }
+
+  button {
+    border: 1px solid #FFF;
+    font-size: 12px;
+    overflow: hidden;
+    line-height: 18px;
+    display: block;
+    background: #8e8e8e;
+    a {
+      font-size: 14px;
+      &:hover {
+        text-decoration: none;
+      }
+    }
+    &:hover {
+      box-shadow: 0 0 0 2px #fff;
+    }
+  }
+}
+
+
+@media screen and (max-width: 600px) {
+ 
+}
