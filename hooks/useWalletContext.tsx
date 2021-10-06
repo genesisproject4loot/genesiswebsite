@@ -2,6 +2,7 @@ import React, { createContext, useContext, useEffect, useState } from "react";
 import { ethers } from "ethers";
 import WalletConnectProvider from "@walletconnect/web3-provider";
 import Web3Modal from "web3modal";
+import { shortenAddress } from "@utils/formatters";
 
 const WEB3_MODAL_CONFIG = {
   network: "mainnet",
@@ -55,10 +56,6 @@ export const WalletProvider = (props: WalletProviderProps) => {
     </WalletContext.Provider>
   );
 };
-
-function shortenAddress(address) {
-  return address.slice(0, 3) + "..." + address.slice(-3);
-}
 
 function useWallet() {
   const [modal, setModal] = useState<Web3Modal>();

@@ -8,10 +8,13 @@ import Select from 'react-select'
 import suffices from '@data/suffices.json'
 import inventory from '@data/inventory.json'
 import { useUnclaimedMana, useClaimedMana } from 'hooks/useMana'
+import { shortenAddress } from "@utils/formatters";
+import { OpenseaLink } from "@components/common/OpenseaLink";
 
 // Types
 import type { ReactElement } from "react";
 import type { TokenListProps } from '@utils/manaFinderTypes'
+
 
 export default function Home(props): ReactElement {
   const router = useRouter();
@@ -209,9 +212,6 @@ function useOpenseaBagsData(tokenIds:string[]) {
   });
 }
 
-function shortenAddress(address: string) {
-  return address.slice(0, 6) + '…' + address.slice(-4)
-}
 
 const useSortableData = (items, config = null) => {
   const [sortConfig, setSortConfig] = useState(config);
@@ -303,17 +303,6 @@ function NFTxLink(props: {address:string, tokenid:number, text:string}): ReactEl
   return (
     <a
       href={"//nftx.io/vault/0x2d77f5b3efa51821ad6483adaf38ea4cb1824cc5/buy/"}
-      target="_blank" 
-      rel="noopener noreferrer">
-        {props.text}
-    </a>
-  )
-}
-
-function OpenseaLink(props: {address:string, tokenid:number, text:string}): ReactElement {
-  return (
-    <a 
-      href={"//opensea.io" + (props.tokenid ? "/assets" : "") + "/"+ props.address + (props.tokenid ? "/" + props.tokenid : "")}
       target="_blank" 
       rel="noopener noreferrer">
         {props.text}

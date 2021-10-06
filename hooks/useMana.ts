@@ -30,7 +30,7 @@ export function useUnclaimedMana(suffixId, inventoryId) {
   });
 }
 
-export function useClaimedMana(suffixId, inventoryId) {
+export function useClaimedMana(variables) {
   const GET_CLAIMED_MANA = gql`
     query GetClaimedMana($suffixId: String!, $inventoryId: Int!) {
       manas(
@@ -66,18 +66,20 @@ export function useClaimedMana(suffixId, inventoryId) {
     }
   `;
   return useQuery<ManaData, ManaVars>(GET_CLAIMED_MANA, {
-    variables: { suffixId: String(suffixId), inventoryId: inventoryId }
+    variables
   });
 }
 
-export function useManaByOwner(currentOwner: String) {
+export function useManaBagsByOwner(currentOwner: String) {
   const GET_UNCLAIMED_MANA_BY_OWNER = gql`
     query GetUnclaimedMana($currentOwner: String!) {
       bags(where: { currentOwner: $currentOwner }) {
         id
         manasClaimed
         ${inventory.map((item) => item.label.toLowerCase()).join("\n")}
-        ${inventory.map((item) => `${item.label.toLowerCase()}SuffixId`).join("\n")}
+        ${inventory
+          .map((item) => `${item.label.toLowerCase()}SuffixId`)
+          .join("\n")}
         manas {
           id
           suffixId {
@@ -104,13 +106,11 @@ export function useManaByOwner(currentOwner: String) {
 export function useManaCountByOrders() {
   const GET_MANA_COUNT_BY_ORDERS = gql`
     query GetManaCountByOrders {
-      orders (orderBy: id) {
+      orders(orderBy: id) {
         id
         manasHeld
       }
     }
   `;
-  return useQuery<ManaByOrdersData>(
-    GET_MANA_COUNT_BY_ORDERS
-  );
+  return useQuery<ManaByOrdersData>(GET_MANA_COUNT_BY_ORDERS);
 }

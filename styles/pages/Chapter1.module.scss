@@ -29,15 +29,22 @@
 
   div.mana_list {
     display: grid;
-    grid-template-columns: 50px 1fr 1fr;
+    grid-template-columns: 50px 1fr 150px;
     width: 100%;
     align-content: start;
   }
 
   div.mana_list > span {
-    white-space: nowrap;
     text-align: left;
-    padding: 0 0 20px 0;
+    padding: 0 20px 20px 0;
+
+    a {
+      padding-left: 8px;
+      color: white;
+      &:hover {
+        text-decoration: underline;
+      }
+    }
   }
 
   button {
@@ -62,5 +69,9 @@
 
 
 @media screen and (max-width: 600px) {
- 
+  div.bag_list {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
 }
