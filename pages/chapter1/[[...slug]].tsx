@@ -12,7 +12,7 @@ import { shortenAddress } from "@utils/formatters";
 import { useWalletContext } from "hooks/useWalletContext";
 import GenesisManaChart from "@components/charts/GenesisManaChart";
 import { OpenseaLink } from "@components/common/OpenseaLink";
-import Image from 'next/image'
+import Image from "next/image";
 
 export default function Chapter1(): ReactElement {
   return (
@@ -40,10 +40,15 @@ function ManaBagsList(): ReactElement {
   const inventoryNames = inventory.map((item) => item.label.toLowerCase());
   const { mintMana } = useManaContract();
   const [mintsInProgress, setMintsInProgress] = useState<any[]>([]);
+  const [successFulMints, setSuccessFulMints] = useState<any[]>([]);
+
   function isMintInProgress(id) {
     return mintsInProgress.includes(id);
   }
 
+  function isMintSuccessful(id) {
+    return successFulMints.includes(id);
+  }
   function mintKey(bag) {
     return [bag.lootId, bag.inventoryId].join("-");
   }
@@ -58,6 +63,7 @@ function ManaBagsList(): ReactElement {
       const done = await transaction.wait();
       console.log(done);
       setTimeout(async () => {
+        setSuccessFulMints([...successFulMints, mintKey(bag)]);
         await refetchManaBags();
       }, 1000);
     } catch (e) {
@@ -73,12 +79,25 @@ function ManaBagsList(): ReactElement {
       return (
         <span>
           {item.hasMinted ? "Minted" : "UnMinted"}{" "}
-          <OpenseaLink address={item.ownedByOther} tokenid={undefined} text={shortenAddress(item.ownedByOther)}/>
+          <OpenseaLink
+            address={item.ownedByOther}
+            tokenid={undefined}
+            text={shortenAddress(item.ownedByOther)}
+          />
         </span>
       );
     }
     if (item.hasMinted) {
-      return <span>Minted!</span>;
+      return (
+        <span>
+          Minted!{" "}
+          <OpenseaLink
+            address={account as string}
+            tokenid={undefined}
+            text={shortenAddress(account)}
+          />
+        </span>
+      );
     }
     if (isMintInProgress(mintKey(item))) {
       return <span>Minting...</span>;
@@ -88,9 +107,11 @@ function ManaBagsList(): ReactElement {
 
   function transformMana(name, bag) {
     const inventoryId = inventoryNames.findIndex((item) => item == name);
-    const foundMana = bag.manas.find((mana) => inventoryId === mana?.inventoryId);
+    const foundMana = bag.manas.find(
+      (mana) => inventoryId === mana?.inventoryId
+    );
     const item = {
-      id: foundMana?.id ?? '#',
+      id: foundMana?.id ?? "#",
       lootId: bag.id,
       name: bag[name],
       hasMinted: !!foundMana,
@@ -99,6 +120,9 @@ function ManaBagsList(): ReactElement {
       inventoryId,
       accessoryItem: null
     };
+    if (isMintSuccessful(mintKey(item))) {
+      item.hasMinted = true;
+    }
     item.accessoryItem = accessoryItem(item);
     return item;
   }
@@ -127,7 +151,7 @@ function ManaBagsList(): ReactElement {
 function ManaBag({ bag }) {
   return (
     <div className={styles.bag_list}>
-      <Image src={bag.data?.image} width={300} height={300} />
+      <Image src={bag.data?.image} width={400} height={400} />
       <div className={styles.mana_list}>
         {bag.manas.map((item) => (
           <>
