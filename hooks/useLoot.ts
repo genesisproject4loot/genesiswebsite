@@ -43,7 +43,7 @@ type LootData = {
   manas?: any[];
 };
 
-export function useLootById(lootId: string) {
+export function lookupLootById(lootId: string) {
   const lootMap = {} as { [key: string]: LootData };
   if (lootMap[lootId]) {
     return lootMap[lootId];

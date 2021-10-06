@@ -9,7 +9,7 @@ import type {
 import inventory from "@data/inventory.json";
 import { useWalletContext } from "./useWalletContext";
 import { useMemo, useState } from "react";
-import { useLootById, useLootContract } from "./useLoot";
+import { lookupLootById, useLootContract } from "./useLoot";
 import { ethers } from "ethers";
 import suffices from "data/suffices.json";
 
@@ -152,7 +152,7 @@ export function useManaFromWallet() {
       const bags = [];
       for (let i = 0; i < events.length; i++) {
         const tokenId = ethers.BigNumber.from(events[i].topics[3]);
-        const bag = useLootById(String(tokenId));
+        const bag = lookupLootById(String(tokenId));
         const manaBag = transformBag(bag);
         manaBag.id = bag.id;
         manaBag.currentOwner = {id:wallet.account}

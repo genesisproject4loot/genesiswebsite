@@ -5,13 +5,14 @@ import Layout from "@components/Layout"; // Layout wrapper
 import styles from "@styles/pages/Chapter1.module.scss"; // Styles
 import { useManaBagsByOwner, useManaFromWallet } from "hooks/useMana";
 import { useManaContract } from "hooks/useManaContract";
-import { useLootById } from "hooks/useLoot";
+import { lookupLootById } from "hooks/useLoot";
 import inventory from "data/inventory.json";
 import { useRouter } from "next/router";
 import { shortenAddress } from "@utils/formatters";
 import { useWalletContext } from "hooks/useWalletContext";
 import GenesisManaChart from "@components/charts/GenesisManaChart";
 import { OpenseaLink } from "@components/common/OpenseaLink";
+import Image from 'next/image'
 
 export default function Chapter1(): ReactElement {
   return (
@@ -103,7 +104,7 @@ function ManaBagsList(): ReactElement {
   }
 
   const bags = (data?.bags ?? []).map((bag) => {
-    const data = useLootById(String(bag.id));
+    const data = lookupLootById(String(bag.id));
     const manas = inventoryNames
       .filter((name) => bag[`${name}SuffixId`] > 0)
       .map((name) => transformMana(name, bag));
@@ -126,7 +127,7 @@ function ManaBagsList(): ReactElement {
 function ManaBag({ bag }) {
   return (
     <div className={styles.bag_list}>
-      <img src={bag.data?.image} width={300} height={300} />
+      <Image src={bag.data?.image} width={300} height={300} />
       <div className={styles.mana_list}>
         {bag.manas.map((item) => (
           <>
