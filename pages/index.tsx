@@ -69,6 +69,11 @@ export default function Home(): ReactElement {
                     Instructions
                   </a>
                 </div>
+                <div className={[styles.extrainfo].join(' ')}>
+                  <Link href="/chapter1"><span className={styles.btn_sm}>Mint</span></Link>
+                  <Link href="/manafinder"><span className={styles.btn_sm}>Find</span></Link>
+                  <a href="https://nftx.io/vault/0x2d77f5b3efa51821ad6483adaf38ea4cb1824cc5/buy" target="_blank" rel="noreferrer"><span className={styles.btn_sm}>Trade</span></a>
+                </div>
               </li>
               <li>
                 <div className={styles.btn}><a href="#chapter2"><p className={styles.label}>Chapter 2</p><p>Genesis Adventurer</p></a></div>
@@ -133,6 +138,7 @@ export default function Home(): ReactElement {
           <hr id="chapter1"/>
           <h2>Chapter 1 : Genesis Mana</h2>
           <Chapter1ProgressBars type="spread"/>
+
           <blockquote>
           <p>
           You walk to the edge, and take the Holy Chestplate of Brilliance from your Loot bag.
@@ -168,10 +174,13 @@ export default function Home(): ReactElement {
           <br/>
           <Chapter1ProgressBars type="progress"/>
           <div className={[styles.cta].join(' ')}>
-            <div className={[styles.btn, styles.cta].join(' ')}><Link href="https://etherscan.io/address/0xf4b6040a4b1b30f1d1691699a8f3bf957b03e463#writeContract">Distill Genesis Mana</Link></div>
+            <div className={[styles.btn, styles.cta].join(' ')}>
+              <Link href="/chapter1">Distill Genesis Mana</Link>
+            </div>
             <div className={[styles.moreinfo].join(' ')}>
-              <Link href="https://twitter.com/genesisloot/status/1436084847827570689?s=21">Instructions</Link>
-              <Link href="https://opensea.io/collection/genesis-mana">Buy Genesis Mana</Link>
+              <Link href="/manafinder">Find Mana</Link>
+              <a href="https://opensea.io/collection/genesis-mana" target="_blank" rel="noreferrer">OpenSea</a>
+              <a href="https://nftx.io/vault/0x2d77f5b3efa51821ad6483adaf38ea4cb1824cc5/buy" target="_blank" rel="noreferrer">NFTx</a>
             </div>
           </div>
         </div>
