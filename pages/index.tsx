@@ -91,14 +91,11 @@ export default function Home(): ReactElement {
               </li>
               <li>
                 <div className={styles.btn}><a href="#chapter3"><p className={styles.label}>Chapter 3</p><p>$ATIME</p></a></div>
-                <div className={[styles.moreinfo, styles.inactive].join(' ')}>
-                  <a href="#" onClick={(e) => {e.preventDefault() }}  target="_blank" rel="noopener noreferrer">
-                    OpenSea
-                  </a>
-                  <a href="#" onClick={(e) => {e.preventDefault() }} target="_blank" rel="noopener noreferrer">
+                <div className={[styles.moreinfo].join(' ')}>
+                  <a href="https://etherscan.io/token/0x810f86eb43ccaacd401ef50dfab87945a514f9cf#writeContract" target="_blank" rel="noopener noreferrer">
                     Etherscan
                   </a>
-                  <a href="#" onClick={(e) => {e.preventDefault() }} target="_blank" rel="noopener noreferrer">
+                  <a href="https://mirror.xyz/0xa70630CD61867D2dbB5b80AcaD7726c6ed21EDF0/ekKqPDGdAQaKwZkpeNDyP1gEpg_JiBBPnfNJDjP6RkQ" target="_blank" rel="noopener noreferrer">
                     Instructions
                   </a>
                 </div>
@@ -259,7 +256,7 @@ export default function Home(): ReactElement {
           </blockquote>
           <br/><br/>
           <div className={[styles.cta].join(' ')}>
-            <div className={[styles.btn, styles.disabled, styles.cta].join(" ")}><a>Retrieve $ATIME</a></div>
+            <div className={[styles.btn, styles.disabled, styles.cta].join(" ")}><a href="https://etherscan.io/token/0x810f86eb43ccaacd401ef50dfab87945a514f9cf#writeContract" target="_blank" rel="noopener noreferrer">Retrieve $ATIME</a></div>
           </div>
         </div>
       </div>
