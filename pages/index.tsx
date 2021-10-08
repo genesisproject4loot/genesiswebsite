@@ -92,6 +92,9 @@ export default function Home(): ReactElement {
               <li>
                 <div className={styles.btn}><a href="#chapter3"><p className={styles.label}>Chapter 3</p><p>$ATIME</p></a></div>
                 <div className={[styles.moreinfo].join(' ')}>
+                  <a href="#" style={{color: "#888", cursor: "default"}} onClick={(e) => {e.preventDefault() }}  target="_blank" rel="noopener noreferrer">
+                    OpenSea
+                  </a>
                   <a href="https://etherscan.io/token/0x810f86eb43ccaacd401ef50dfab87945a514f9cf#writeContract" target="_blank" rel="noopener noreferrer">
                     Etherscan
                   </a>
@@ -256,7 +259,7 @@ export default function Home(): ReactElement {
           </blockquote>
           <br/><br/>
           <div className={[styles.cta].join(' ')}>
-            <div className={[styles.btn, styles.disabled, styles.cta].join(" ")}><a href="https://etherscan.io/token/0x810f86eb43ccaacd401ef50dfab87945a514f9cf#writeContract" target="_blank" rel="noopener noreferrer">Retrieve $ATIME</a></div>
+            <div className={[styles.btn, styles.cta].join(" ")}><a href="https://etherscan.io/token/0x810f86eb43ccaacd401ef50dfab87945a514f9cf#writeContract" target="_blank" rel="noopener noreferrer">Retrieve $ATIME</a></div>
           </div>
         </div>
       </div>
