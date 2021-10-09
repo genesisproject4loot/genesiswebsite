@@ -25,22 +25,9 @@ export function useLootContract() {
   };
 }
 
-
 type LootData = {
-  characterImage: string;
-  chest: string;
-  foot: string;
-  hand: string;
-  head: string;
   id: string;
-  image: string;
-  neck: string;
-  ring: string;
-  waist: string;
-  weapon: string;
-  name: string;
-  tokenId: string;
-  manas?: any[];
+  inventory: string[];
 };
 
 export function lookupLootById(lootId: string) {

@@ -133,7 +133,11 @@ function ManaBagsList(): ReactElement {
 function ManaBag({ bag }) {
   return (
     <div className={styles.bag_list}>
-      <Image src={bag.data?.image} width={400} height={400} />
+      <ul>
+        {bag.data.inventory.map((item) => (
+          <li key={item}>{item}</li>
+        ))}
+      </ul>
       <div className={styles.mana_list}>
         {bag.manas.map((item) => (
           <>
@@ -147,14 +151,16 @@ function ManaBag({ bag }) {
               )}
               {!item.hasMinted && item.id}
             </span>
-            <span>{item.hasMinted && (
+            <span>
+              {item.hasMinted && (
                 <OpenseaLink
                   address={GM_CONTRACT_ADDRESS}
                   tokenid={item.id}
                   text={item.name}
                 />
               )}
-              {!item.hasMinted && item.name}</span>
+              {!item.hasMinted && item.name}
+            </span>
             <span>{item.accessoryItem}</span>
           </>
         ))}
