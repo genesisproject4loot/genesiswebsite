@@ -103,11 +103,11 @@ function useWallet() {
       const signer = provider.getSigner();
       setSigner(signer);
       setProvider(provider);
-      setIsConnected(true);
       const address = await signer.getAddress();
       if (address) {
         await updateAccount(provider, address);
       }
+      setIsConnected(true);
 
       if (rawProvider) {
         rawProvider.on("accountsChanged", async (accounts) => {

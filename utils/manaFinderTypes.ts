@@ -2,7 +2,10 @@ export interface Mana {
   id: number;
   itemName: string;
   inventoryId: number;
+  suffixId: Order;
+  lootTokenId: Bag;
   currentOwner: Wallet;
+  price?: number;
 }
 
 export interface ManaData {
