@@ -256,11 +256,13 @@ function useManaWithPricing({ address, orderId, wallets }) {
     lootTokenId_gt: "0",
     currentOwner_not_in: [
       ...DAO_ADDRESSES,
-      ...(isOpenseaQuery && wallets ? wallets : [])
+      ...(isOpenseaQuery && wallets
+        ? wallets.map((wallet) => wallet?.toLowerCase())
+        : [])
     ]
   };
   if (!isOpenseaQuery) {
-    claimedQuery.currentOwner = address;
+    claimedQuery.currentOwner = address?.toLowerCase();
   }
   const { data: claimedData } = useClaimedManaRawQuery(claimedQuery);
   const { data: openSeaManaData } = useOpenseaManaData(
