@@ -15,21 +15,21 @@ import suffices from "data/suffices.json";
 
 const EXCLUDE_OWNERS = `
 currentOwner_not_in: [
-  "0x1884d71487bfd7f595061221801e783efcd0bf6a"
-  "0x9bbda2777c8623d8894b21120bed1fff72b024f8"
-  "0xb6b3eb3ec30bd8979df60d7f47b173a389310dd9"
-  "0xc3e33b881aea922bce6df56bc2c6f0686a3a421a"
-  "0xdcab536df6dd9ad5d332180edf1ba1ec71669ae2"
-  "0x4cf7e239f5bc882e007d9790a7b49b4abdfeb510"
-  "0x338aef050ac689246490aa75b691ac03fe0a81c8"
-  "0xea0a3aae1dda17d0a17a488196801f59ca96854c"
-  "0x1f5fe23574d5aec1660a8c6b209135da5723042f"
-  "0xd431a116a7d0eca9371614d5652cdfffb7c5b6eb"
-  "0x0780529f0ecfac1048d2faae5007fe62ce318c79"
-  "0xf935c944a8e03181ae3229774d4b93d7bba816d4"
-  "0xaba619a78032abcfe0346c1592835df563ba3bfa"
-  "0xe1e5072fc1ff1a419d17bf9b5c5b6ddd12c19f08"
-  "0x17498d27433849a510165cc1fc618582ac54229b"
+  "0x1884d71487bfd7f595061221801e783efcd0bf6a",
+  "0x9bbda2777c8623d8894b21120bed1fff72b024f8",
+  "0xb6b3eb3ec30bd8979df60d7f47b173a389310dd9",
+  "0xc3e33b881aea922bce6df56bc2c6f0686a3a421a",
+  "0xdcab536df6dd9ad5d332180edf1ba1ec71669ae2",
+  "0x4cf7e239f5bc882e007d9790a7b49b4abdfeb510",
+  "0x338aef050ac689246490aa75b691ac03fe0a81c8",
+  "0xea0a3aae1dda17d0a17a488196801f59ca96854c",
+  "0x1f5fe23574d5aec1660a8c6b209135da5723042f",
+  "0xd431a116a7d0eca9371614d5652cdfffb7c5b6eb",
+  "0x0780529f0ecfac1048d2faae5007fe62ce318c79",
+  "0xf935c944a8e03181ae3229774d4b93d7bba816d4",
+  "0xaba619a78032abcfe0346c1592835df563ba3bfa",
+  "0xe1e5072fc1ff1a419d17bf9b5c5b6ddd12c19f08",
+  "0x17498d27433849a510165cc1fc618582ac54229b",
   "0xb1dea25cb8b997913f86076b372aa75f06c53c99"
 ]`;
 
@@ -60,8 +60,12 @@ export function useClaimedManaByOwner(owner: String) {
     query GetClaimedMana($currentOwner: String!) {
       manas(where: { currentOwner: $currentOwner, ${EXCLUDE_OWNERS} }) {
         id
+        suffixId {
+          id
+        }
         itemName
-        currentOwner {
+        inventoryId
+        lootTokenId {
           id
         }
       }
@@ -76,11 +80,15 @@ export function useClaimedMana(suffixId, inventoryId) {
   const GET_CLAIMED_MANA = gql`
     query GetClaimedMana($suffixId: String!, $inventoryId: Int!) {
       manas(
-        where: { suffixId: $suffixId, inventoryId: $inventoryId ${EXCLUDE_OWNERS} }
+        where: { suffixId: $suffixId, inventoryId: $inventoryId, lootTokenId_gt:"0", ${EXCLUDE_OWNERS} }
       ) {
         id
+        suffixId {
+          id
+        }
         itemName
-        currentOwner {
+        inventoryId
+        lootTokenId {
           id
         }
       }
@@ -88,6 +96,47 @@ export function useClaimedMana(suffixId, inventoryId) {
   `;
   return useQuery<ManaData, ManaVars>(GET_CLAIMED_MANA, {
     variables: { suffixId: String(suffixId), inventoryId: inventoryId }
+  });
+}
+
+export function useClaimedManaRawQuery(variables) {
+  function getType(value) {
+    let type = typeof value;
+    if (type === "number") return "Int";
+    else return "String";
+  }
+  function getTypeForKey(key) {
+    if (Array.isArray(variables[key]))
+      return `[${getType(variables[key][0])}]!`;
+    return `${getType(variables[key])}!`;
+  }
+
+  const GET_CLAIMED_MANA = gql`
+    query GetClaimedMana(${Object.keys(variables)
+      .map((key) => `$${key}: ${getTypeForKey(key)}`)
+      .join(", ")}) {
+      manas(
+        where: {  ${Object.keys(variables)
+          .map((key) => `${key}: $${key}`)
+          .join(", ")} }
+      ) {
+        id
+        suffixId {
+          id
+        }
+        itemName
+        inventoryId
+        lootTokenId {
+          id
+        }
+        currentOwner {
+          id
+        }
+      }
+    }
+  `;
+  return useQuery<ManaData, any>(GET_CLAIMED_MANA, {
+    variables
   });
 }
 
@@ -108,6 +157,9 @@ export function useManaBagsByOwner(currentOwner: String) {
           }
           itemName
           inventoryId
+          lootTokenId {
+            id
+          }
         }
         currentOwner {
           id
@@ -155,7 +207,7 @@ export function useManaFromWallet() {
         const bag = lookupLootById(String(tokenId));
         const manaBag = transformBag(bag);
         manaBag.id = bag.id;
-        manaBag.currentOwner = {id:wallet.account}
+        manaBag.currentOwner = { id: wallet.account };
         manaBag.manas = [];
         manaBag.manasClaimed = 0;
         bags.push(manaBag);
@@ -176,12 +228,10 @@ export function useManaFromWallet() {
   }, [lootContract, wallet.account, retry]);
 
   return {
-    data: { bags: manaBags},
+    data: { bags: manaBags },
     refetch
   };
 }
-
-
 
 const INVENTORY = [
   "weapon",
@@ -199,14 +249,14 @@ function extractOrder(text) {
 }
 
 function findOrder(orderLabel) {
-    return Number(
-        (
-          suffices.find(
-            (order) =>
-              order.label.toLowerCase().indexOf(orderLabel.toLowerCase()) > -1
-          ) ?? { value: "0" }
-        ).value
-      )
+  return Number(
+    (
+      suffices.find(
+        (order) =>
+          order.label.toLowerCase().indexOf(orderLabel.toLowerCase()) > -1
+      ) ?? { value: "0" }
+    ).value
+  );
 }
 
 function transformBag(bag) {

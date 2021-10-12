@@ -1,10 +1,9 @@
 import { Chart } from "react-google-charts";
 import { useManaCountByOrders } from "hooks/useMana";
+import { ReactElement } from "react";
 
-export default function GenesisManaChart() {
-  const {
-    data
-  } = useManaCountByOrders();
+export default function GenesisManaChart(): ReactElement {
+  const { data } = useManaCountByOrders();
   let chartData = [];
 
   if (data?.orders) {
@@ -13,7 +12,13 @@ export default function GenesisManaChart() {
       return map;
     }, {});
     chartData = [
-      [ "Genesis Mana", "Distilled", { role: "style" }, "Unclaimed", { role: "style" } ],
+      [
+        "Genesis Mana",
+        "Distilled",
+        { role: "style" },
+        "Unclaimed",
+        { role: "style" }
+      ],
       ["Power", orderLookup["1"], "191D7E", 1328, "silver"],
       ["Giants", orderLookup["2"], "DAC931", 1384, "silver"],
       ["Titans", orderLookup["3"], "B45FBB", 1304, "silver"],
@@ -44,7 +49,7 @@ export default function GenesisManaChart() {
         chartArea: { width: "85%", height: "80%" },
         isStacked: true,
         legend: "none",
-        backgroundColor: "#1a1a1a",
+        backgroundColor: "#1f1f1f",
         vAxis: {
           title: "Count (log scale)",
           scaleType: "log",

@@ -337,11 +337,13 @@ export default function Home(): ReactElement {
             </div>
           </div>
         </div>
-        <div className={styles.home__feature}>
+        <div className={[styles.home__feature, 'flex flex-col gap-4 items-center'].join(' ')}>
           <span>Example Genesis Mana:</span>
-          <img src="img/genesismana/1.svg" />
-          <img src="img/genesismana/2.svg" />
-          <img src="img/genesismana/3.svg" />
+          <div className="flex gap-2">
+            <img src="img/genesismana/1.svg" />
+            <img src="img/genesismana/2.svg" />
+            <img src="img/genesismana/3.svg" />
+          </div>
         </div>
 
         <div className={styles.home__chapters}>
@@ -409,11 +411,13 @@ export default function Home(): ReactElement {
             </div>
           </div>
         </div>
-        <div className={styles.home__feature}>
+        <div className={[styles.home__feature, 'flex flex-col gap-4 items-center'].join(' ')}>
           <span>Example Genesis Adventurer:</span>
+          <div className="flex gap-2">
           <img src="img/genesisadventurer/1.svg" />
           <img src="img/genesisadventurer/2.svg" />
           <img src="img/genesisadventurer/3.svg" />
+          </div>
         </div>
 
         <div className={styles.home__chapters}>

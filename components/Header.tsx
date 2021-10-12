@@ -1,5 +1,4 @@
 import Link from "next/link"; // Routing
-import { useRouter } from "next/router"; // Routing
 import styles from "@styles/components/Layout.module.scss"; // Styles
 import { useWalletContext } from "hooks/useWalletContext";
 
@@ -12,16 +11,16 @@ export default function Header() {
       {/* Main logo */}
       <div className={styles.header__logo}>
         <Link href="/">
-          <a>
-            <img src="/genesis-icon.png" height="35px"></img> Genesis Project
-            (for Loot)
+          <a className="flex">
+            <img src="/genesis-icon.png" className="h-8 mr-4"></img> Genesis
+            Project (for Loot)
           </a>
         </Link>
       </div>
       <div className={styles.header__account}>
         {isConnected && (
           <span>
-            {displayName} {" "}
+            {displayName}{" "}
             <a
               className={styles.header__links_active}
               onClick={disconnectWallet}
