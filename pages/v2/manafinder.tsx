@@ -1,10 +1,4 @@
-import React, {
-  ReactElement,
-  useState,
-  Fragment,
-  useEffect,
-  useMemo
-} from "react";
+import React, { ReactElement, useState, useEffect, useMemo } from "react";
 import GenesisManaChart from "@components/charts/GenesisManaChart";
 import Layout_V2 from "@components/Layout_V2";
 import { useManaBagsByOwner, useClaimedManaRawQuery } from "hooks/useMana";
@@ -30,6 +24,7 @@ import { useDebounce } from "usehooks-ts";
 import { CheckIcon } from "@components/icons";
 import { useNFTXFloorPrice } from "hooks/useNTFX";
 import { useOpenseaBagsData, useOpenseaManaData } from "hooks/useOpensea";
+import styles from "@styles/pages/ManafinderV2.module.scss"; // Styles
 
 export default function Home_V2(): ReactElement {
   const { account } = useWalletContext();
@@ -115,18 +110,17 @@ export default function Home_V2(): ReactElement {
   }
 
   return (
-    <div>
-      <Layout_V2>
+    <Layout_V2>
+      <div className={styles.manafinder__app}>
         <GenesisManaHeader />
-        <div className="m-8 mx-10">
+        <div className={styles.main}>
           <GenesisManaFilters
             onOrderSelect={setSelectedOrder}
             selectedOrder={selectedOrder}
           />
-
-          <div className="py-10 flex gap-8 relative">
-            <div className="w-full">
-              <div className="flex" style={{ marginRight: 380 }}>
+          <div className={styles.builder}>
+            <div className={styles.finder}>
+              <div className={styles.gm_tabs}>
                 <QueryTabs
                   wallets={wallets}
                   tabIdx={tabIdx}
@@ -137,7 +131,7 @@ export default function Home_V2(): ReactElement {
                   onRemoveWallet={onRemoveWallet}
                 />
               </div>
-              <div style={{ marginRight: 380 }}>
+              <div className={styles.gm_results}>
                 <GenesisManaCards
                   address={wallets[tabIdx] as string}
                   orderId={selectedOrder?.value}
@@ -151,12 +145,8 @@ export default function Home_V2(): ReactElement {
               </div>
             </div>
             <GenesisAdventurerCard
-              className={`absolute border-gray-400 shadow-lg rounded-md right-0 transition-top`}
-              style={{
-                width: 340,
-                top: debouncedAdventureCardTop,
-                transition: "top 1s ease 0s"
-              }}
+              className={styles.ga}
+              style={{ top: debouncedAdventureCardTop }}
               orderId={selectedOrder?.value}
               selectedManas={selectedMana}
             />
@@ -170,16 +160,16 @@ export default function Home_V2(): ReactElement {
           }}
           onAdd={onAddWallet}
         />
-      </Layout_V2>
-    </div>
+      </div>
+    </Layout_V2>
   );
 }
 
 function GenesisManaHeader() {
   return (
-    <div className="py-10 bg-gray-0 text-white">
-      <h1 className="text-center text-3xl">Genesis Mana Finder</h1>
-      <div className="max-w-screen-lg m-auto md:w-full">
+    <div className={styles.hdr}>
+      <h1>Genesis Mana Finder</h1>
+      <div className={styles.chart}>
         <GenesisManaChart />
       </div>
     </div>
@@ -188,14 +178,14 @@ function GenesisManaHeader() {
 
 function GenesisManaFilters({ onOrderSelect, selectedOrder }) {
   return (
-    <div>
-      <label className="font-semibold text-lg">Select an Order: </label>
+    <div className={styles.filters}>
+      <label>Select an Order: </label>
       <Select
         placeholder="Choose an Order"
         value={selectedOrder}
         isClearable={true}
         onChange={onOrderSelect}
-        className={"w-60"}
+        className="w-60"
         options={[...SUFFICES]}
       />
     </div>
@@ -235,13 +225,11 @@ function QueryTabs({
   }
 
   return (
-    <ul className="flex gap-4 pb-4 text-lg items-center flex-1">
+    <ul className={styles.wallets}>
       {wallets.map((wallet, idx) => (
         <li
           key={wallet as string}
-          className={
-            idx === tabIdx ? "border-b border-black" : "cursor-pointer"
-          }
+          className={idx === tabIdx ? "border-b text-black" : "text-gray-300"}
           onClick={() => onChange(idx)}
         >
           {displayTab(wallet)}
@@ -352,31 +340,24 @@ function GenesisManaCards({
     ]);
 
   return (
-    <div className="flex flex-col gap-4">
-      <div className="pb-2 text-sm flex gap-4">
-        <span className="cursor-pointer" onClick={onExpandAll}>
-          Expand All (+)
-        </span>{" "}
-        <span className="cursor-pointer" onClick={onCollapseAll}>
-          Collapse All (-)
-        </span>
+    <div className={styles.ctr}>
+      <div className={styles.controls}>
+        <span onClick={onExpandAll}>Expand All (+)</span>{" "}
+        <span onClick={onCollapseAll}>Collapse All (-)</span>
       </div>
       {INVENTORY.map((item, idx) => {
         const row = manas.filter(
           (mana) => mana.inventoryId == parseInt(item.value)
         );
         return (
-          <div key={item.value}>
+          <div key={item.value} className={styles.inventory_row}>
             <h1
-              className="flex justify-center items-center pb-2 cursor-pointer"
+              className={row.length == 0 ? "text-gray-400" : ""}
               onClick={() => onToggleExpand(idx)}
             >
-              <span className="pr-2">{collapsed[idx] ? "+" : "-"}</span>
+              <span>{collapsed[idx] ? "+" : "-"}</span>
               {idx + 1}. {item.label} ({row.length}){" "}
-              <span
-                className="flex-1 bg-gray-200 ml-4"
-                style={{ height: 1 }}
-              ></span>
+              <span className={styles.line}></span>
             </h1>
             <div className="flex gap-4 overflow-x-scroll">
               {collapsed[idx]
@@ -443,20 +424,8 @@ function GenesisManaCard({
   const openseaUrl = formatOpenseaUrl(mana);
   const nftxUrl = formatNFTXUrl(mana);
   return (
-    <div {...props} className="p-2 border border-gray-300 rounded-md">
-      <div
-        className={[
-          "text-white",
-          "p-2",
-          "w-72",
-          "h-72",
-          "rounded-md",
-          "flex",
-          "flex-col",
-          `bg-gm-${mana.suffixId.id}`
-        ].join(" ")}
-        style={{ fontSize: 12 }}
-      >
+    <div {...props} className={styles.gm_card_ctr}>
+      <div className={[styles.card, `bg-gm-${mana.suffixId.id}`].join(" ")}>
         <div className="flex-1 cursor-pointer" onClick={onClick}>
           <div>Order: {order}</div>
           <div>
@@ -469,15 +438,8 @@ function GenesisManaCard({
         </div>
       </div>
       <div className="pt-2">
-        {showMint && (
-          <button className=" w-full block px-2 border bg-blue-400 text-white rounded-md mb-1">
-            mint
-          </button>
-        )}
-        <div
-          className="grid grid-cols-2 justify-center items-center text-xs"
-          style={{ gridTemplateColumns: "1fr auto" }}
-        >
+        {showMint && <button className={styles.mint}>mint</button>}
+        <div className={styles.details}>
           {isMinted && (
             <>
               <label>Id </label>
@@ -487,11 +449,8 @@ function GenesisManaCard({
           <label>Order </label>
           <span className="text-right">{order}</span>
           <label>{rarityDescription(mana.itemName)} </label>
-          <span className="flex justify-self-end">
-            <span
-              className="w-2 h-2 rounded-full block"
-              style={{ backgroundColor: rarityColor(mana.itemName) }}
-            ></span>
+          <span className={styles.rarity_indicator}>
+            <span style={{ backgroundColor: rarityColor(mana.itemName) }} />
           </span>
 
           <label>{mana.price > 0 ? `${mana.price.toFixed(3)} ♦` : ""}</label>
@@ -579,14 +538,13 @@ function GenesisAdventurerCard({
   }
   return (
     <div {...props}>
-      <ul className="m-4 pt-4 bg-black text-white text-xs">
+      <ul className={styles.card}>
         {manas.map((mana, idx) => (
-          <li key={idx} className="flex gap-2 h-7 items-center px-4">
-            {/* {INVENTORY.find((item) => idx == parseInt(item.value)).label}:{" "} */}
+          <li className={styles.item} key={idx}>
             {mana?.itemName ? (
               <>
                 <span className="flex-1">
-                  <span className="pr-1">{idx + 1}.</span> {mana.itemName}
+                  <span>{idx + 1}.</span> {mana.itemName}
                 </span>{" "}
                 <span>
                   <AccessoryItem mana={mana} />
@@ -594,13 +552,13 @@ function GenesisAdventurerCard({
               </>
             ) : (
               <>
-                <span>{idx + 1}. </span>
-                <span className="flex-1 bg-white" style={{ height: 1 }}></span>
+                <span>{idx + 1}.</span>
+                <span className={styles.line}></span>
               </>
             )}
           </li>
         ))}
-        <li className={`bg-gm-${orderId} text-white px-4 py-3 mt-16`}>
+        <li className={[styles.footer, `bg-gm-${orderId}`].join(" ")}>
           Genesis Adventurer of{" "}
           {SUFFICES.find((order) => order.value === orderId)?.label}
         </li>
@@ -621,7 +579,10 @@ function AddWalletModal({ isOpen, onClose, onAdd }: AddWalletModalProps) {
       <div>
         <div className="mt-2">
           <input
-            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+            className={[
+              styles.manafinder__app_input_text,
+              "focus:outline-none focus:shadow-outline"
+            ].join(" ")}
             type="text"
             value={address}
             onChange={(e) => {
@@ -634,7 +595,10 @@ function AddWalletModal({ isOpen, onClose, onAdd }: AddWalletModalProps) {
         <div className="mt-4">
           <button
             type="button"
-            className="inline-flex justify-center px-4 py-2 text-sm font-medium text-blue-900 bg-blue-100 border border-transparent rounded-md hover:bg-blue-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-blue-500"
+            className={[
+              styles.manafinder__app_btn,
+              "hover:bg-blue-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-blue-500"
+            ].join(" ")}
             onClick={() => onAdd(address)}
           >
             Add Wallet
