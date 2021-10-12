@@ -13,10 +13,14 @@
           margin-right: 380px;
 
           .wallets {
-            @apply flex gap-4 pb-4 text-lg items-center flex-1;
+            @apply flex gap-4 pb-4 text-lg items-center w-full overflow-x-scroll mr-8;
 
             > li {
-              @apply cursor-pointer border-black;
+              @apply cursor-pointer border-black whitespace-nowrap;
+            }
+            > li:last-child {
+              @apply absolute z-10;
+              right: 380px;
             }
           }
         }
@@ -104,7 +108,6 @@
             @apply text-white px-4 py-3 mt-16;
           }
         }
-
       }
     }
   }
@@ -135,4 +138,31 @@
 }
 .manafinder__app_btn {
   @apply inline-flex justify-center px-4 py-2 text-sm font-medium text-blue-900 bg-blue-100 border border-transparent rounded-md;
+}
+
+// Responsive
+@media screen and (max-width: 850px) {
+  .manafinder__app {
+    .main {
+      .builder {
+        .finder {
+          .gm_tabs {
+            margin-right: 0px;
+            .wallets {
+              @apply flex gap-4 pb-4 text-lg items-center w-full overflow-x-scroll mr-8;
+              > li:last-child {
+                @apply absolute right-0 z-10;
+              }
+            }
+          }
+          .gm_results {
+            margin-right: 0px;
+          }
+        }
+        .ga {
+          @apply hidden;          
+        }
+      }
+    }
+  }
 }

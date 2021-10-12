@@ -27,17 +27,23 @@ import { useOpenseaBagsData, useOpenseaManaData } from "hooks/useOpensea";
 import styles from "@styles/pages/ManafinderV2.module.scss"; // Styles
 
 export default function Home_V2(): ReactElement {
-  const { account } = useWalletContext();
+  const { account, isConnected } = useWalletContext();
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [selectedMana, setSelectedMana] = useState<Mana[]>([]);
-  const [wallets, setWallets] = useState<String[]>([]);
+  const [wallets, setWallets] = useState<String[]>([
+    NFTX_ADDRESS,
+    OPENSEA_ADDRESS
+  ]);
   const [isAddWalletModalOpen, setIsAddWalletModalOpen] = useState(false);
   const [tabIdx, setTabIdx] = useState(0);
   const [adventureCardTop, setAdventureCardTop] = useState(60);
   const debouncedAdventureCardTop = useDebounce<number>(adventureCardTop, 1);
 
   useEffect(() => {
-    if (!account) return;
+    if (!account) {
+      setWallets([NFTX_ADDRESS, OPENSEA_ADDRESS]);
+      return;
+    }
 
     setWallets([account.toLowerCase(), NFTX_ADDRESS, OPENSEA_ADDRESS]);
   }, [account]);
@@ -98,7 +104,7 @@ export default function Home_V2(): ReactElement {
       NFTX_ADDRESS,
       OPENSEA_ADDRESS,
       ...wallets
-        .slice(2)
+        .slice(isConnected ? 3 : 2)
         .filter((item) => item?.toLowerCase() !== wallet?.toLowerCase())
     ];
     setWallets(updated);
