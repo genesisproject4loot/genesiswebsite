@@ -1,0 +1,138 @@
+.manafinder__app {
+  .main {
+    @apply m-8 mx-10;
+
+    .builder {
+      @apply py-10 flex gap-8 relative;
+
+      .finder {
+        @apply w-full;
+
+        .gm_tabs {
+          @apply flex;
+          margin-right: 380px;
+
+          .wallets {
+            @apply flex gap-4 pb-4 text-lg items-center flex-1;
+
+            > li {
+              @apply cursor-pointer border-black;
+            }
+          }
+        }
+
+        .gm_results {
+          margin-right: 380px;
+
+          .ctr {
+            @apply flex flex-col gap-4;
+
+            .controls {
+              @apply pb-2 text-sm flex gap-4;
+
+              > span {
+                @apply cursor-pointer;
+              }
+            }
+          }
+
+          .inventory_row {
+            > h1 {
+              @apply flex justify-center items-center pb-2 cursor-pointer;
+
+              > span:first-child {
+                @apply pr-2;
+              }
+
+              .line {
+                @apply flex-1 bg-gray-200 ml-4;
+                height: 1px;
+              }
+            }
+          }
+
+          .gm_card_ctr {
+            @apply p-2 border border-gray-300 rounded-md;
+
+            .card {
+              @apply text-white p-2 w-72 h-72 rounded-md flex flex-col;
+              font-size: 12px;
+            }
+
+            .mint {
+              @apply w-full block px-2 border bg-blue-400 text-white rounded-md mb-1
+            }
+            .details {
+              @apply grid grid-cols-2 justify-center items-center text-xs;
+              grid-template-columns: 1fr auto;
+
+              .rarity_indicator {
+                @apply flex justify-self-end;
+                > span:first-child {
+                  @apply w-2 h-2 rounded-full block;
+                }
+              }
+            }
+          }
+        }
+      }  
+
+      .ga {
+        @apply absolute border-gray-400 shadow-lg rounded-md right-0;
+        transition: top 1s ease 0s;
+        width: 340px;
+
+        .card {
+          @apply m-4 pt-4 bg-black text-white text-xs;
+
+          > .item {
+            @apply flex gap-2 h-7 items-center px-4;
+
+            > span {
+              :first-child {
+                @apply pr-1;
+              }
+            }
+
+            .line {
+              @apply flex-1 bg-white;
+              height: 1px;
+            }
+          }
+
+          > .footer {
+            @apply text-white px-4 py-3 mt-16;
+          }
+        }
+
+      }
+    }
+  }
+
+  .filters {
+    > label {
+      @apply font-semibold text-lg;
+    }
+  }
+
+  .hdr {
+    @apply py-10 bg-gray-0 text-white;
+
+    > h1 {
+      @apply text-center text-3xl;
+    }
+
+    .chart {
+      @apply max-w-screen-lg m-auto md:w-full;
+    }
+  }
+
+  
+}
+
+.manafinder__app_input_text {
+  @apply shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight;
+}
+.manafinder__app_btn {
+  @apply inline-flex justify-center px-4 py-2 text-sm font-medium text-blue-900 bg-blue-100 border border-transparent rounded-md;
+}
