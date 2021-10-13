@@ -492,14 +492,16 @@ function GenesisManaCard({
                 NTFx
               </a>
             )}
-            <a
-              className="underline text-right"
-              href={openseaUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Opensea
-            </a>
+            {!nftxUrl && (
+              <a
+                className="underline text-right"
+                href={openseaUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Opensea
+              </a>
+            )}
           </div>
         </div>
       </div>
