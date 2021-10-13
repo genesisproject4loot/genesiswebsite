@@ -48,7 +48,7 @@ function ATime() {
       <button onClick={() => setMenuOpen(!menuOpen)}>
         {atimeBalance} $ATIME{" "}
       </button>
-      {menuOpen && (
+      {/* {menuOpen && (
         <ul
           ref={menuRef}
           className="absolute bg-white rounded-md text-black w-40 z-50"
@@ -56,7 +56,7 @@ function ATime() {
           <li className="px-4 py-2">Claim All</li>
           <li className="px-4 py-2">Claim By Realm</li>
         </ul>
-      )}
+      )} */}
     </div>
   );
 }
