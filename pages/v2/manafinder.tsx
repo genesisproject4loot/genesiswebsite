@@ -25,6 +25,8 @@ import { CheckIcon } from "@components/icons";
 import { useNFTXFloorPrice } from "hooks/useNTFX";
 import { useOpenseaBagsData, useOpenseaManaData } from "hooks/useOpensea";
 import styles from "@styles/pages/ManafinderV2.module.scss"; // Styles
+import { useManaContractMinter } from "hooks/useManaContract";
+import LoadingIcon from "@components/icons/LoadingIcon";
 
 export default function Home_V2(): ReactElement {
   const { account, isConnected } = useWalletContext();
@@ -332,8 +334,6 @@ function GenesisManaCards({
   onSelect,
   wallets
 }: GenesisManaCardsProps): ReactElement {
-  const { account } = useWalletContext();
-  const canMint = (owner) => account?.toLowerCase() === owner?.toLowerCase();
   const { manas } = useManaWithPricing({ address, orderId, wallets });
   const truthy = [true, true, true, true, true, true, true, true];
   const falsy = [false, false, false, false, false, false, false, false];
@@ -377,7 +377,6 @@ function GenesisManaCards({
                       }}
                       key={`${idx}-${mana.itemName}-${mana.lootTokenId?.id}}-`}
                       mana={mana}
-                      canMint={canMint(mana.currentOwner?.id)}
                     />
                   ))}
             </div>
@@ -410,21 +409,27 @@ function ExternalManaLink({ mana, text }: { mana: Mana; text: String }) {
 
 interface GenesisManaCardProps extends React.HTMLAttributes<HTMLDivElement> {
   mana: Mana;
-  canMint: boolean;
 }
 
 function GenesisManaCard({
   mana,
-  canMint,
   onClick,
   ...props
 }: GenesisManaCardProps): ReactElement {
+  const { account } = useWalletContext();
+
   const inventoryLabel = INVENTORY.find(
     (item) => String(mana.inventoryId) === item.value
   ).label;
+  const { mintMana, isManaMintInProgress, isManaMintSuccessful } =
+    useManaContractMinter();
+
   const isArmor = [0, 7].indexOf(mana.inventoryId) === -1;
-  const isMinted = mana.id > 0;
-  const showMint = canMint && !isMinted;
+  const isMinted = mana.id > 0 || isManaMintSuccessful(mana);
+  const isInProgress = isManaMintInProgress(mana);
+  const doesOwnMana =
+    account?.toLowerCase() === mana.currentOwner?.id?.toLowerCase();
+  const showMint = doesOwnMana && !isMinted;
   const order = SUFFICES.find(
     (suffix) => suffix.value === String(mana.suffixId.id)
   ).label;
@@ -446,7 +451,21 @@ function GenesisManaCard({
         </div>
       </div>
       <div className="pt-2">
-        {showMint && <button className={styles.mint}>mint</button>}
+        {isInProgress && (
+          <span className="flex justify-center items-center">
+            <LoadingIcon />
+          </span>
+        )}
+        {!isInProgress && showMint && (
+          <button
+            onClick={() => {
+              mintMana(mana);
+            }}
+            className={styles.mint}
+          >
+            mint
+          </button>
+        )}
         <div className={styles.details}>
           {isMinted && (
             <>

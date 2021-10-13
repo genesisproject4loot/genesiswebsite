@@ -2,9 +2,10 @@ import { useState, useEffect, useMemo } from "react";
 import { ethers } from "ethers";
 import manaABI from "data/genesismana-abi.json";
 import { useWalletContext } from "./useWalletContext";
-import { Bag } from "@utils/manaFinderTypes";
 
-export const GM_CONTRACT_ADDRESS = process.env.NEXT_PUBLIC_GM_CONTRACT_ADDRESS ?? "0xf4B6040A4b1B30f1d1691699a8F3BF957b03e463";
+export const GM_CONTRACT_ADDRESS =
+  process.env.NEXT_PUBLIC_GM_CONTRACT_ADDRESS ??
+  "0xf4B6040A4b1B30f1d1691699a8F3BF957b03e463";
 export function useManaContract() {
   const wallet = useWalletContext();
   const [manaContract, setManaContract] = useState<ethers.Contract>();
@@ -76,5 +77,57 @@ export function useManaFromWallet() {
   return {
     manas,
     refresh
+  };
+}
+
+export function useManaContractMinter() {
+  const { mintMana } = useManaContract();
+  const [mintsInProgress, setMintsInProgress] = useState<any[]>([]);
+  const [successFulMints, setSuccessFulMints] = useState<any[]>([]);
+
+  function isManaMintInProgress(mana) {
+    return mintsInProgress.includes(getManaMintKey(mana));
+  }
+
+  function isManaMintSuccessful(mana) {
+    return successFulMints.includes(getManaMintKey(mana));
+  }
+  function getManaMintKey(mana) {
+    return [mana.lootTokenId?.id, mana.inventoryId].join("-");
+  }
+
+  async function onMintMana(mana) {
+    if (isManaMintInProgress(getManaMintKey(mana))) {
+      return;
+    }
+    setMintsInProgress([...mintsInProgress, getManaMintKey(mana)]);
+    try {
+      const transaction = await mintMana(
+        mana.lootTokenId?.id,
+        mana.inventoryId + 1
+      );
+      const done = await transaction.wait();
+      console.log(done);
+      setTimeout(async () => {
+        setSuccessFulMints([...successFulMints, getManaMintKey(mana)]);
+        setMintsInProgress(
+          mintsInProgress.filter((id) => id !== getManaMintKey(mana))
+        );
+        //TODO add success callback
+      }, 1000);
+    } catch (e) {
+      e = e?.error ?? e;
+      setMintsInProgress(
+        mintsInProgress.filter((id) => id !== getManaMintKey(mana))
+      );
+      //TODO add error callback
+      alert(e?.data?.message ?? e?.message ?? "Error");
+    }
+  }
+
+  return {
+    mintMana: onMintMana,
+    isManaMintSuccessful,
+    isManaMintInProgress
   };
 }
