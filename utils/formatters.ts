@@ -15,6 +15,6 @@ export function formatOpenseaUrl(mana: Mana) {
 
 export function formatNFTXUrl(mana: Mana) {
   return mana.currentOwner?.id?.toLowerCase() === NFTX_ADDRESS
-    ? "https://nftx.io/vault/0x2d77f5b3efa51821ad6483adaf38ea4cb1824cc5/buy/"
+    ? `https://nftx.io/vault/0x2d77f5b3efa51821ad6483adaf38ea4cb1824cc5/${mana.id}`
     : "";
 }
