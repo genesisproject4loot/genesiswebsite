@@ -27,6 +27,7 @@ import { useOpenseaBagsData, useOpenseaManaData } from "hooks/useOpensea";
 import styles from "@styles/pages/ManafinderV2.module.scss"; // Styles
 import { useManaContractMinter } from "hooks/useManaContract";
 import LoadingIcon from "@components/icons/LoadingIcon";
+import { useAdventurerContract } from "hooks/useAdventurerContract";
 
 export default function Home_V2(): ReactElement {
   const { account, isConnected } = useWalletContext();
@@ -34,6 +35,11 @@ export default function Home_V2(): ReactElement {
   const [selectedMana, setSelectedMana] = useState<Mana[]>([]);
   const [wallets, setWallets] = useState<String[]>([]);
   const [isAddWalletModalOpen, setIsAddWalletModalOpen] = useState(false);
+  const [
+    isGenesisAdventurerMintModalOpen,
+    setIsGenesisAdventurerMintModalOpen
+  ] = useState(false);
+
   const [tabIdx, setTabIdx] = useState(0);
   const [adventureCardTop, setAdventureCardTop] = useState(60);
   const debouncedAdventureCardTop = useDebounce<number>(adventureCardTop, 1);
@@ -59,6 +65,7 @@ export default function Home_V2(): ReactElement {
 
   useEffect(() => {
     setSelectedMana([]);
+    setIsGenesisAdventurerMintModalOpen(false);
     if (isConnected) {
       setTabIdx(0);
     }
@@ -172,16 +179,27 @@ export default function Home_V2(): ReactElement {
               style={{ top: debouncedAdventureCardTop }}
               orderId={selectedOrder?.value}
               selectedManas={selectedMana}
+              onMint={() => {
+                setIsGenesisAdventurerMintModalOpen(true);
+              }}
             />
           </div>
         </div>
         <AddWalletModal
-          key={new Date().getTime()}
+          key={new Date().getTime() + "-add-modal"}
           isOpen={isAddWalletModalOpen}
           onClose={() => {
             setIsAddWalletModalOpen(false);
           }}
           onAdd={onAddWallet}
+        />
+        <GenesisAdventurerMintInstructionsModal
+          key={new Date().getTime() + "-ga-modal"}
+          isOpen={isGenesisAdventurerMintModalOpen}
+          onClose={() => {
+            setIsGenesisAdventurerMintModalOpen(false);
+          }}
+          selectedManas={selectedMana}
         />
       </div>
     </Layout_V2>
@@ -204,6 +222,7 @@ function GenesisManaFilters({ onOrderSelect, selectedOrder }) {
     <div className={styles.filters}>
       <label>Select an Order: </label>
       <Select
+        instanceId="mana-filters"
         placeholder="Choose an Order"
         value={selectedOrder}
         isClearable={true}
@@ -564,27 +583,50 @@ interface GenesisAdventurerCardProps
   extends React.HTMLAttributes<HTMLDivElement> {
   orderId?: string;
   selectedManas: Mana[];
+  onMint: (manas: Mana[]) => void;
 }
 function GenesisAdventurerCard({
   selectedManas,
   orderId,
+  onMint,
   ...props
 }: GenesisAdventurerCardProps): React.ReactElement {
   const { account } = useWalletContext();
+  const { mintMana, isManaMintInProgress, isManaMintSuccessful } =
+    useManaContractMinter();
+
   let manas = INVENTORY.map((item) =>
     selectedManas.find((mana) => mana.inventoryId === parseInt(item.value))
   );
 
+  const canMint =
+    manas.filter(
+      (mana) => mana?.currentOwner?.id?.toLowerCase() === account?.toLowerCase()
+    ).length === 8;
+
   function AccessoryItem({ mana }: { mana: Mana }) {
+    const isMinted = mana.id > 0 || isManaMintSuccessful(mana);
+    const isInProgress = isManaMintInProgress(mana);
+    const doesOwnMana =
+      account?.toLowerCase() === mana.currentOwner?.id?.toLowerCase();
+
     //Owned By Current Wallet
-    if (mana.currentOwner?.id?.toLowerCase() === account?.toLowerCase()) {
-      //Already Minted
-      if (mana.id > 0) {
+    if (doesOwnMana) {
+      if (isMinted) {
         return <CheckIcon className="text-green-200" />;
-      }
-      //Allow mint
-      else {
-        return <button>Mint</button>;
+      } else if (isInProgress) {
+        return <LoadingIcon className="text-white" />;
+      } else {
+        return (
+          <button
+            onClick={() => {
+              mintMana(mana);
+            }}
+            className={styles.mint}
+          >
+            mint
+          </button>
+        );
       }
     }
     //Don't own
@@ -622,6 +664,17 @@ function GenesisAdventurerCard({
           {SUFFICES.find((order) => order.value === orderId)?.label}
         </li>
       </ul>
+      <div className="text-blue-400 px-4 pb-4 font-extrabold">
+        {canMint && (
+          <button
+            onClick={() => {
+              onMint(selectedManas);
+            }}
+          >
+            Congrats, instructions to mint!
+          </button>
+        )}
+      </div>
     </div>
   );
 }
@@ -663,6 +716,73 @@ function AddWalletModal({ isOpen, onClose, onAdd }: AddWalletModalProps) {
             Add Wallet
           </button>
         </div>
+      </div>
+    </Modal>
+  );
+}
+
+interface GenesisAdventurerMintInstructionsModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  selectedManas: Mana[];
+}
+function GenesisAdventurerMintInstructionsModal({
+  isOpen,
+  onClose,
+  selectedManas
+}: GenesisAdventurerMintInstructionsModalProps) {
+  const { getPublicPrice, adventurerContract } = useAdventurerContract();
+  const [price, setPrice] = useState(0);
+  if (selectedManas.length < 8) {
+    return null;
+  }
+
+  useEffect(() => {
+    if (!adventurerContract) return;
+    getPublicPrice().then((price) => {
+      setPrice(price);
+    });
+  }, [adventurerContract]);
+
+  return (
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      title="Genesis Adventurer Mint Instructions"
+    >
+      <div className="pt-12 pb-8">
+        <ul>
+          <li className="flex pb-4">
+            <span className="flex-1"></span>
+            <span>
+              resurrectGA on{" "}
+              <a
+                href="https://etherscan.io/token/0x8db687aceb92c66f013e1d614137238cc698fedb#writeProxyContract"
+                target="_blank"
+                className="text-blue-400"
+                rel="noopener noreferrer"
+              >
+                Etherscan
+              </a>
+            </span>
+          </li>
+          <li className="flex">
+            <span className="flex-1">payableAmount (mint price):</span>
+            <span>{price}♦</span>
+          </li>
+          {INVENTORY.map((item) => (
+            <li className="flex border-t border-gray-200 py-1">
+              <span className="w-1/2">{item.label.toLowerCase()}TokenId:</span>
+              <span className="w-1/2 text-right">
+                {
+                  selectedManas.find(
+                    (mana) => mana.inventoryId === parseInt(item.value)
+                  )?.id
+                }
+              </span>
+            </li>
+          ))}
+        </ul>
       </div>
     </Modal>
   );
