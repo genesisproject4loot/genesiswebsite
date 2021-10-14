@@ -99,7 +99,7 @@ export function useClaimedMana(suffixId, inventoryId) {
   });
 }
 
-export function useClaimedManaRawQuery(variables) {
+export function useClaimedManaRawQuery(variables, skip?: boolean) {
   function getType(value) {
     let type = typeof value;
     if (type === "number") return "Int";
@@ -136,11 +136,12 @@ export function useClaimedManaRawQuery(variables) {
     }
   `;
   return useQuery<ManaData, any>(GET_CLAIMED_MANA, {
-    variables
+    variables,
+    skip: !!skip
   });
 }
 
-export function useManaBagsByOwner(currentOwner: String) {
+export function useManaBagsByOwner(currentOwner: String, skip?: boolean) {
   const GET_UNCLAIMED_MANA_BY_OWNER = gql`
     query GetUnclaimedMana($currentOwner: String!) {
       bags(where: { currentOwner: $currentOwner }) {
@@ -171,7 +172,8 @@ export function useManaBagsByOwner(currentOwner: String) {
   return useQuery<BagData, { currentOwner: String }>(
     GET_UNCLAIMED_MANA_BY_OWNER,
     {
-      variables: { currentOwner: currentOwner?.toLowerCase() }
+      variables: { currentOwner: currentOwner?.toLowerCase() },
+      skip: !!skip
     }
   );
 }

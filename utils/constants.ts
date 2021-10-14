@@ -4,7 +4,7 @@ import INVENTORY from "data/inventory.json";
 export const OS_MANA_URL = "0xf4b6040a4b1b30f1d1691699a8f3bf957b03e463";
 export const OS_LOOT_URL = "0xff9c1b15b16263c61d017ee9f65c50e4ae0113d7";
 export const NFTX_ADDRESS = "0x2d77f5b3efa51821ad6483adaf38ea4cb1824cc5";
-export const OPENSEA_ADDRESS = "OpenSea"; //Hack
+export const GM_ALL_ADDRESS = "All";
 export const DAO_ADDRESSES = [
   "0x1884d71487bfd7f595061221801e783efcd0bf6a",
   "0x9bbda2777c8623d8894b21120bed1fff72b024f8",

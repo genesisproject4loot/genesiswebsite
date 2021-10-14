@@ -13,15 +13,12 @@
           margin-right: 380px;
 
           .wallets {
-            @apply flex gap-4 pb-4 text-lg items-center w-full overflow-x-scroll mr-8;
+            @apply flex gap-4 pb-4 text-lg items-center overflow-x-scroll mr-8;
 
             > li {
               @apply cursor-pointer border-black whitespace-nowrap;
             }
-            > li:last-child {
-              @apply absolute z-10;
-              right: 380px;
-            }
+           
           }
         }
 
