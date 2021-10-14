@@ -37,6 +37,9 @@ export function useAdventurerContract() {
   }, [wallet?.signer]);
 
   async function getPublicPrice() {
+    if (!adventurerContract) {
+      return 0;
+    }
     const price = await adventurerContract.publicPrice();
     return parseFloat(parseFloat(ethers.utils.formatUnits(price)).toFixed(4));
   }

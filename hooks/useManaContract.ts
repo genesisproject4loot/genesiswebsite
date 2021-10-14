@@ -26,17 +26,9 @@ export function useManaContract() {
     return transaction;
   }
 
-  async function getPublicPrice() {
-    const price = await manaContract.publicPrice();
-    console.log(price);
-    return price;
-    // return parseFloat(parseFloat(ethers.utils.formatUnits(price)).toFixed(4));
-  }
-
   return {
     manaContract,
-    mintMana,
-    getPublicPrice
+    mintMana
   };
 }
 

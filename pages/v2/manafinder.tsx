@@ -69,7 +69,7 @@ export default function Home_V2(): ReactElement {
     if (isConnected) {
       setTabIdx(0);
     }
-  }, [selectedOrder]);
+  }, [selectedOrder, isConnected]);
 
   function onSelectManaCard(mana: Mana) {
     const foundIdx = selectedMana.findIndex(
@@ -193,14 +193,16 @@ export default function Home_V2(): ReactElement {
           }}
           onAdd={onAddWallet}
         />
-        <GenesisAdventurerMintInstructionsModal
-          key={new Date().getTime() + "-ga-modal"}
-          isOpen={isGenesisAdventurerMintModalOpen}
-          onClose={() => {
-            setIsGenesisAdventurerMintModalOpen(false);
-          }}
-          selectedManas={selectedMana}
-        />
+        {isGenesisAdventurerMintModalOpen && (
+          <GenesisAdventurerMintInstructionsModal
+            key={new Date().getTime() + "-ga-modal"}
+            isOpen={isGenesisAdventurerMintModalOpen}
+            onClose={() => {
+              setIsGenesisAdventurerMintModalOpen(false);
+            }}
+            selectedManas={selectedMana}
+          />
+        )}
       </div>
     </Layout_V2>
   );
@@ -733,16 +735,17 @@ function GenesisAdventurerMintInstructionsModal({
 }: GenesisAdventurerMintInstructionsModalProps) {
   const { getPublicPrice, adventurerContract } = useAdventurerContract();
   const [price, setPrice] = useState(0);
-  if (selectedManas.length < 8) {
-    return null;
-  }
 
   useEffect(() => {
     if (!adventurerContract) return;
     getPublicPrice().then((price) => {
       setPrice(price);
     });
-  }, [adventurerContract]);
+  }, [adventurerContract, getPublicPrice]);
+
+  if (selectedManas.length < 8) {
+    return null;
+  }
 
   return (
     <Modal
@@ -771,7 +774,7 @@ function GenesisAdventurerMintInstructionsModal({
             <span>{price}♦</span>
           </li>
           {INVENTORY.map((item) => (
-            <li className="flex border-t border-gray-200 py-1">
+            <li key={item.label} className="flex border-t border-gray-200 py-1">
               <span className="w-1/2">{item.label.toLowerCase()}TokenId:</span>
               <span className="w-1/2 text-right">
                 {
