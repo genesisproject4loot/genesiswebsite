@@ -25,6 +25,7 @@ export function useManaContract() {
     );
     return transaction;
   }
+
   return {
     manaContract,
     mintMana

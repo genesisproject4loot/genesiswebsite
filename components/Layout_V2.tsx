@@ -22,7 +22,7 @@ function Header() {
     <div className="h-16 flex w-full justify-center items-center px-10 border-b border-white-15 bg-gray-0 text-white fixed top-0 z-50">
       {/* Main logo */}
       <div className="flex-1 font-bold text-sm md:text-lg">
-        <Link href="/">
+        <Link href="/" passHref={true}>
           <span className="flex items-center gap-3">
             <GenesisLogo /> <span>Genesis Project (for Loot)</span>
           </span>
