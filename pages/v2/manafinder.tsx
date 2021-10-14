@@ -4,10 +4,10 @@ import Layout_V2 from "@components/Layout_V2";
 import { useManaBagsByOwner, useClaimedManaRawQuery } from "hooks/useMana";
 import {
   DAO_ADDRESSES,
-  NFTX_ADDRESS,
-  OPENSEA_ADDRESS,
+  GM_ALL_ADDRESS,
   SUFFICES,
-  INVENTORY
+  INVENTORY,
+  NFTX_ADDRESS
 } from "utils/constants";
 import { useWalletContext } from "hooks/useWalletContext";
 import { Modal } from "components/Modal";
@@ -32,10 +32,7 @@ export default function Home_V2(): ReactElement {
   const { account, isConnected } = useWalletContext();
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [selectedMana, setSelectedMana] = useState<Mana[]>([]);
-  const [wallets, setWallets] = useState<String[]>([
-    NFTX_ADDRESS,
-    OPENSEA_ADDRESS
-  ]);
+  const [wallets, setWallets] = useState<String[]>([]);
   const [isAddWalletModalOpen, setIsAddWalletModalOpen] = useState(false);
   const [tabIdx, setTabIdx] = useState(0);
   const [adventureCardTop, setAdventureCardTop] = useState(60);
@@ -43,11 +40,10 @@ export default function Home_V2(): ReactElement {
 
   useEffect(() => {
     if (!account) {
-      setWallets([NFTX_ADDRESS, OPENSEA_ADDRESS]);
+      setWallets([GM_ALL_ADDRESS]);
       return;
     }
-
-    setWallets([account.toLowerCase(), NFTX_ADDRESS, OPENSEA_ADDRESS]);
+    setWallets([account.toLowerCase(), GM_ALL_ADDRESS]);
   }, [account]);
 
   const handleScroll = () => {
@@ -63,6 +59,9 @@ export default function Home_V2(): ReactElement {
 
   useEffect(() => {
     setSelectedMana([]);
+    if (isConnected) {
+      setTabIdx(0);
+    }
   }, [selectedOrder]);
 
   function onSelectManaCard(mana: Mana) {
@@ -103,8 +102,7 @@ export default function Home_V2(): ReactElement {
   function onRemoveWallet(wallet: string) {
     const updated = [
       account.toLowerCase(),
-      NFTX_ADDRESS,
-      OPENSEA_ADDRESS,
+      GM_ALL_ADDRESS,
       ...wallets
         .slice(isConnected ? 3 : 2)
         .filter((item) => item?.toLowerCase() !== wallet?.toLowerCase())
@@ -115,6 +113,21 @@ export default function Home_V2(): ReactElement {
         setTabIdx(updated.length - 1);
       }, 100);
     }
+  }
+
+  function onCardsLoaded(manas) {
+    const selectCards = [];
+    for (let i = 0; i < INVENTORY.length; i++) {
+      const mana = selectedMana.find((mana) => mana.inventoryId === i);
+      if (!mana) {
+        const row = manas.filter((mana) => mana.inventoryId == i);
+        if (row[0]) {
+          selectCards.push(row[0]);
+        }
+      }
+    }
+    const newDeck = [...selectedMana, ...selectCards];
+    setSelectedMana(newDeck);
   }
 
   return (
@@ -141,12 +154,14 @@ export default function Home_V2(): ReactElement {
               </div>
               <div className={styles.gm_results}>
                 <GenesisManaCards
+                  key={wallets[tabIdx] as string}
                   address={wallets[tabIdx] as string}
                   orderId={selectedOrder?.value}
                   onSelect={onSelectManaCard}
+                  onLoad={onCardsLoaded}
                   wallets={
                     wallets.filter(
-                      (wallet) => wallet !== OPENSEA_ADDRESS
+                      (wallet) => wallet !== GM_ALL_ADDRESS
                     ) as string[]
                   }
                 />
@@ -212,10 +227,8 @@ function QueryTabs({
   function displayTab(wallet) {
     if (wallet?.toLowerCase() === account?.toLowerCase()) {
       return "My Wallet";
-    } else if (wallet?.toLowerCase() === NFTX_ADDRESS?.toLowerCase()) {
-      return "NFTx";
-    } else if (wallet == OPENSEA_ADDRESS) {
-      return OPENSEA_ADDRESS;
+    } else if (wallet == GM_ALL_ADDRESS) {
+      return GM_ALL_ADDRESS;
     }
     return (
       <span>
@@ -254,28 +267,39 @@ function QueryTabs({
 
 function useManaWithPricing({ address, orderId, wallets }) {
   const { floorPrice: nftxFloorPrice } = useNFTXFloorPrice();
-  const isOpenseaQuery = OPENSEA_ADDRESS === address;
-  const { data: bagData } = useManaBagsByOwner(address);
+  const isAllQuery = GM_ALL_ADDRESS === address;
+  const { data: bagData } = useManaBagsByOwner(address, isAllQuery);
   const { data: openSeaBagData } = useOpenseaBagsData(
     bagData?.bags?.map((bag) => String(bag.id)) ?? []
   );
-  const claimedQuery: any = {
+
+  const walletQuery: any = {
+    suffixId: orderId,
+    lootTokenId_gt: "0",
+    currentOwner: isAllQuery ? NFTX_ADDRESS : address?.toLowerCase()
+  };
+
+  const openseaQuery: any = {
     suffixId: orderId,
     lootTokenId_gt: "0",
     currentOwner_not_in: [
       ...DAO_ADDRESSES,
-      ...(isOpenseaQuery && wallets
-        ? wallets.map((wallet) => wallet?.toLowerCase())
-        : [])
+      ...(wallets ? wallets.map((wallet) => wallet?.toLowerCase()) : [])
     ]
   };
-  if (!isOpenseaQuery) {
-    claimedQuery.currentOwner = address?.toLowerCase();
-  }
-  const { data: claimedData } = useClaimedManaRawQuery(claimedQuery);
-  const { data: openSeaManaData } = useOpenseaManaData(
-    claimedData?.manas?.map((mana) => String(mana.id)) ?? []
+
+  const { data: walletResults } = useClaimedManaRawQuery(walletQuery);
+  const { data: openseaResults } = useClaimedManaRawQuery(
+    openseaQuery,
+    !isAllQuery
   );
+  const { data: openSeaManaData } = useOpenseaManaData(
+    openseaResults?.manas?.map((mana) => String(mana.id)) ?? []
+  );
+
+  const claimedData = {
+    manas: [...(walletResults?.manas ?? []), ...(openseaResults?.manas ?? [])]
+  };
   const applyFilters = (mana) => {
     if (!orderId) {
       return false;
@@ -326,19 +350,25 @@ type GenesisManaCardsProps = {
   address: string;
   orderId: string;
   onSelect: (mana: Mana) => void;
+  onLoad: (manas: Mana[]) => void;
   wallets?: string[];
 };
 function GenesisManaCards({
   address,
   orderId,
   onSelect,
+  onLoad,
   wallets
 }: GenesisManaCardsProps): ReactElement {
   const { manas } = useManaWithPricing({ address, orderId, wallets });
   const truthy = [true, true, true, true, true, true, true, true];
   const falsy = [false, false, false, false, false, false, false, false];
 
-  const [collapsed, setCollapsed] = useState([...falsy]);
+  useEffect(() => {
+    onLoad(manas as Mana[]);
+  }, [manas?.length ?? 0]);
+
+  const [collapsed, setCollapsed] = useState([...truthy]);
   const onCollapseAll = () => setCollapsed([...truthy]);
   const onExpandAll = () => setCollapsed([...falsy]);
 
