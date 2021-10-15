@@ -32,6 +32,7 @@ import LoadingIcon from "@components/icons/LoadingIcon";
 import { useAdventurerContract } from "hooks/useAdventurerContract";
 import ListIcon from "@components/icons/ListIcon";
 import GridIcon from "@components/icons/GridIcon";
+import { useEnsLookup } from "hooks/useEns";
 
 export default function Home_V2(): ReactElement {
   const { account, isConnected } = useWalletContext();
@@ -248,7 +249,7 @@ function GenesisManaFilters({
           value={selectedOrder}
           isClearable={true}
           onChange={onOrderChange}
-          className="w-52"
+          className="w-40 md:w-52"
           options={[...SUFFICES]}
         />
       </div>
@@ -258,7 +259,7 @@ function GenesisManaFilters({
           instanceId="mana-sort"
           value={selectedSort}
           onChange={onSortChange}
-          className="w-52"
+          className="w-40 md:w-52"
           options={GM_SORT_OPTIONS}
         />
       </div>
@@ -357,13 +358,11 @@ function useManaWithPricing({ address, orderId, wallets }) {
 
   const walletQuery: any = {
     suffixId: orderId,
-    lootTokenId_gt: "0",
     currentOwner: isAllQuery ? NFTX_ADDRESS : address?.toLowerCase()
   };
 
   const openseaQuery: any = {
     suffixId: orderId,
-    lootTokenId_gt: "0",
     currentOwner_not_in: [
       ...DAO_ADDRESSES,
       ...(wallets ? wallets.map((wallet) => wallet?.toLowerCase()) : [])
@@ -557,14 +556,7 @@ function GenesisManaListRow({ manas, onSelect }) {
             {mana.itemName}
           </span>
           <span className="w-1/5 text-right">
-            <a
-              className="underline text-right"
-              href={`https://opensea.io/${mana?.currentOwner?.id}`}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              {shortenAddress(mana?.currentOwner?.id)}
-            </a>
+            <ManaOwnerLink mana={mana} />
           </span>
           <span className="w-1/5 text-right">
             <ExternalManaLink
@@ -578,6 +570,24 @@ function GenesisManaListRow({ manas, onSelect }) {
   );
 }
 
+function ManaOwnerLink({ mana }) {
+  const address = mana?.currentOwner?.id;
+  const { address: ensName } = useEnsLookup(address);
+  return (
+    <a
+      className="underline text-right"
+      href={
+        isNFTX(mana)
+          ? "https://nftx.io/vault/0x2d77f5b3efa51821ad6483adaf38ea4cb1824cc5/buy/"
+          : `https://opensea.io/${address}`
+      }
+      target="_blank"
+      rel="noopener noreferrer"
+    >
+      {isNFTX(mana) ? "NFTx" : ensName || shortenAddress(address)}
+    </a>
+  );
+}
 function isNFTX(mana: Mana) {
   return mana?.currentOwner?.id?.toLowerCase() === NFTX_ADDRESS;
 }
@@ -637,7 +647,11 @@ function GenesisManaCard({
           </div>
         </div>
         <div>
-          <div>Distilled from Loot Bag #{mana?.lootTokenId?.id}</div>
+          <div>
+            {mana?.lootTokenId?.id
+              ? `Distilled from Loot Bag #${mana?.lootTokenId?.id}`
+              : "Distilled from"}
+          </div>
           <div>{mana.itemName}</div>
         </div>
       </div>
@@ -662,14 +676,20 @@ function GenesisManaCard({
           <span className="text-right">
             {mana.id ? `#${mana.id}` : "Unclaimed"}
           </span>
-          <label>Order </label>
-          <span className="text-right">{order}</span>
-          <label>{rarityDescription(mana.itemName)} </label>
-          <span className={styles.rarity_indicator}>
-            <span style={{ backgroundColor: rarityColor(mana.itemName) }} />
+          <label>Rarity</label>
+          <span className="flex items-center justify-end gap-2">
+            <span className="text-right">
+              {rarityDescription(mana.itemName)}
+            </span>
+            <span className={styles.rarity_indicator}>
+              <span style={{ backgroundColor: rarityColor(mana.itemName) }} />
+            </span>
           </span>
-
-          <label>{mana.price > 0 ? `${mana.price.toFixed(3)} ♦` : ""}</label>
+          <label>Owner </label>
+          <span className="text-right">
+            <ManaOwnerLink mana={mana} />
+          </span>
+          <label>Buy</label>
           <span className="flex justify-end">
             {nftxUrl?.length > 0 && (
               <a
@@ -678,7 +698,7 @@ function GenesisManaCard({
                 target="_blank"
                 rel="noopener noreferrer"
               >
-                NTFx
+                {mana.price > 0 ? `${mana.price.toFixed(3)} ♦` : "NFTx"}
               </a>
             )}
             {!nftxUrl && (
@@ -688,7 +708,7 @@ function GenesisManaCard({
                 target="_blank"
                 rel="noopener noreferrer"
               >
-                Opensea
+                {mana.price > 0 ? `${mana.price.toFixed(3)} ♦` : "Opensea"}
               </a>
             )}
           </span>

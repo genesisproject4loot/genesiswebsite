@@ -117,14 +117,14 @@
   }
 
   .hdr {
-    @apply py-10 bg-gray-0 text-white;
+    @apply py-10 bg-gray-0 text-white md:w-full;
 
     > h1 {
       @apply text-center text-3xl;
     }
 
     .chart {
-      @apply max-w-screen-lg m-auto md:w-full;
+      @apply max-w-screen-lg m-auto md:w-full md:max-w-full;
     }
   }
 
@@ -142,6 +142,7 @@
 @media screen and (max-width: 850px) {
   .manafinder__app {
     .main {
+      @apply m-4;
       .builder {
         .finder {
           .gm_tabs {
