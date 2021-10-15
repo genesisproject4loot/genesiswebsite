@@ -472,7 +472,7 @@ function GenesisManaCards({
       return;
     }
     setSortConfig({ ...sort });
-  }, [sort?.value]);
+  }, [sort?.value, setSortConfig, sortConfig?.value]);
 
   const truthy = [true, true, true, true, true, true, true, true];
   const falsy = [false, false, false, false, false, false, false, false];
@@ -482,7 +482,7 @@ function GenesisManaCards({
     if (!isManaLoading) {
       onLoad(manas as Mana[]);
     }
-  }, [manas?.length, orderId, isManaLoading]);
+  }, [manas?.length, orderId, isManaLoading, onLoad]);
 
   const [collapsed, setCollapsed] = useState([...falsy]);
   const onCollapseAll = () => setCollapsed([...truthy]);
@@ -544,7 +544,7 @@ function GenesisManaListRow({ manas, onSelect }) {
   return (
     <div>
       {manas.map((mana) => (
-        <div className="flex ml-4">
+        <div key={mana.id + mana?.lootTokenId?.id} className="flex ml-4">
           <span
             onClick={() => onSelect(mana)}
             className="w-1/5 cursor-pointer underline"
