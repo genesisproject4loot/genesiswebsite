@@ -46,7 +46,7 @@
               }
 
               .line {
-                @apply flex-1 bg-gray-200 ml-4;
+                @apply flex-1 ml-4;
                 height: 1px;
               }
             }
@@ -110,7 +110,7 @@
   }
 
   .filters {
-    @apply flex gap-8;
+    @apply flex gap-4;
     > label {
       @apply font-semibold text-lg;
     }
