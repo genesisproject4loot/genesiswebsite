@@ -44,4 +44,15 @@ export const GM_SORT_OPTIONS = [
   }
 ];
 
+export const GM_VIEW_OPTIONS = [
+  {
+    value: "grid",
+    label: "Grid"
+  },
+  {
+    value: "list",
+    label: "List"
+  }
+];
+
 export { SUFFICES, INVENTORY };

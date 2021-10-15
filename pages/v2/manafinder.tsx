@@ -8,7 +8,8 @@ import {
   SUFFICES,
   INVENTORY,
   NFTX_ADDRESS,
-  GM_SORT_OPTIONS
+  GM_SORT_OPTIONS,
+  GM_VIEW_OPTIONS
 } from "utils/constants";
 import { useWalletContext } from "hooks/useWalletContext";
 import { Modal } from "components/Modal";
@@ -29,11 +30,14 @@ import styles from "@styles/pages/ManafinderV2.module.scss"; // Styles
 import { useManaContractMinter } from "hooks/useManaContract";
 import LoadingIcon from "@components/icons/LoadingIcon";
 import { useAdventurerContract } from "hooks/useAdventurerContract";
+import ListIcon from "@components/icons/ListIcon";
+import GridIcon from "@components/icons/GridIcon";
 
 export default function Home_V2(): ReactElement {
   const { account, isConnected } = useWalletContext();
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [selectedSort, setSelectedSort] = useState(GM_SORT_OPTIONS[0]);
+  const [selectedView, setSelectedView] = useState(GM_VIEW_OPTIONS[0]);
 
   const [selectedMana, setSelectedMana] = useState<Mana[]>([]);
   const [wallets, setWallets] = useState<String[]>([]);
@@ -162,6 +166,8 @@ export default function Home_V2(): ReactElement {
                     setIsAddWalletModalOpen(true);
                   }}
                   onRemoveWallet={onRemoveWallet}
+                  onViewChange={setSelectedView}
+                  selectedView={selectedView}
                 />
               </div>
               <div className={styles.gm_results}>
@@ -171,6 +177,7 @@ export default function Home_V2(): ReactElement {
                   orderId={selectedOrder?.value}
                   onSelect={onSelectManaCard}
                   onLoad={onCardsLoaded}
+                  selectedView={selectedView}
                   wallets={
                     wallets.filter(
                       (wallet) => wallet !== GM_ALL_ADDRESS
@@ -241,7 +248,7 @@ function GenesisManaFilters({
           value={selectedOrder}
           isClearable={true}
           onChange={onOrderChange}
-          className="w-60"
+          className="w-52"
           options={[...SUFFICES]}
         />
       </div>
@@ -251,7 +258,7 @@ function GenesisManaFilters({
           instanceId="mana-sort"
           value={selectedSort}
           onChange={onSortChange}
-          className="w-60"
+          className="w-52"
           options={GM_SORT_OPTIONS}
         />
       </div>
@@ -264,7 +271,9 @@ function QueryTabs({
   onChange,
   wallets,
   onAddWalletClick,
-  onRemoveWallet
+  onRemoveWallet,
+  onViewChange,
+  selectedView
 }) {
   const { account } = useWalletContext();
 
@@ -304,6 +313,20 @@ function QueryTabs({
         <button className="flex items-center" onClick={onAddWalletClick}>
           <PlusIcon />
         </button>
+      </li>
+      <li className="">
+        <div className="border border-gray-300 rounded-md flex items-center p-2 gap-2">
+          <button onClick={() => onViewChange(GM_VIEW_OPTIONS[0])}>
+            <GridIcon
+              className={selectedView.value === "grid" ? "" : "text-gray-300"}
+            />
+          </button>
+          <button onClick={() => onViewChange(GM_VIEW_OPTIONS[1])}>
+            <ListIcon
+              className={selectedView.value === "list" ? "" : "text-gray-300"}
+            />
+          </button>
+        </div>
       </li>
     </ul>
   );
@@ -421,6 +444,7 @@ type GenesisManaCardsProps = {
   onLoad: (manas: Mana[]) => void;
   wallets?: string[];
   sort?: any;
+  selectedView?: any;
 };
 function GenesisManaCards({
   address,
@@ -428,7 +452,8 @@ function GenesisManaCards({
   onSelect,
   onLoad,
   wallets,
-  sort
+  sort,
+  selectedView
 }: GenesisManaCardsProps): ReactElement {
   const { manas: manasWithPricing, loading: isManaLoading } =
     useManaWithPricing({
@@ -485,24 +510,71 @@ function GenesisManaCards({
             >
               <span>{collapsed[idx] ? "+" : "-"}</span>
               {idx + 1}. {item.label} ({row.length}){" "}
-              <span className={styles.line}></span>
+              <span className={[styles.line, `bg-gray-200`].join(" ")}></span>
             </h1>
-            <div className="flex gap-4 overflow-x-scroll">
-              {collapsed[idx]
-                ? null
-                : row.map((mana) => (
-                    <GenesisManaCard
-                      onClick={() => {
-                        onSelect(mana);
-                      }}
-                      key={`${idx}-${mana.itemName}-${mana.lootTokenId?.id}}-`}
-                      mana={mana}
-                    />
-                  ))}
-            </div>
+            {collapsed[idx] ? null : selectedView?.value === "list" ? (
+              <GenesisManaListRow manas={row} onSelect={onSelect} />
+            ) : (
+              <GenesisManaCardRow manas={row} idx={idx} onSelect={onSelect} />
+            )}
           </div>
         );
       })}
+    </div>
+  );
+}
+
+function GenesisManaCardRow({ manas, idx, onSelect }) {
+  return (
+    <div className="flex gap-4 overflow-x-scroll">
+      {manas.map((mana) => (
+        <GenesisManaCard
+          onClick={() => {
+            onSelect(mana);
+          }}
+          key={`${idx}-${mana.itemName}-${mana.lootTokenId?.id}}`}
+          mana={mana}
+        />
+      ))}
+    </div>
+  );
+}
+
+function GenesisManaListRow({ manas, onSelect }) {
+  return (
+    <div>
+      {manas.map((mana) => (
+        <div className="flex ml-4">
+          <span
+            onClick={() => onSelect(mana)}
+            className="w-1/5 cursor-pointer underline"
+          >
+            {mana.id ? `${mana.id}` : `${mana?.lootTokenId?.id} (loot)`}
+          </span>
+          <span
+            onClick={() => onSelect(mana)}
+            className="w-2/5 cursor-pointer underline"
+          >
+            {mana.itemName}
+          </span>
+          <span className="w-1/5 text-right">
+            <a
+              className="underline text-right"
+              href={`https://opensea.io/${mana?.currentOwner?.id}`}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              {shortenAddress(mana?.currentOwner?.id)}
+            </a>
+          </span>
+          <span className="w-1/5 text-right">
+            <ExternalManaLink
+              mana={mana}
+              text={mana?.price > 0 ? `${mana?.price?.toFixed(3)} ♦` : "buy"}
+            />
+          </span>
+        </div>
+      ))}
     </div>
   );
 }
