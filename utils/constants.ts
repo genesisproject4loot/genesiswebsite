@@ -23,5 +23,25 @@ export const DAO_ADDRESSES = [
   "0x17498d27433849a510165cc1fc618582ac54229b",
   "0xb1dea25cb8b997913f86076b372aa75f06c53c99"
 ];
+export const GM_SORT_OPTIONS = [
+  {
+    value: "price_asc",
+    key: "price",
+    direction: "ascending",
+    label: "Price: Low to High"
+  },
+  {
+    value: "price_desc",
+    key: "price",
+    direction: "descending",
+    label: "Price: High to Low"
+  },
+  {
+    value: "rarity_desc",
+    key: "rarity",
+    direction: "descending",
+    label: "Rarity: High to Low"
+  }
+];
 
 export { SUFFICES, INVENTORY };

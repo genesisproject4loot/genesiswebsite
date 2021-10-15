@@ -99,21 +99,20 @@ export function useClaimedMana(suffixId, inventoryId) {
   });
 }
 
-export function useClaimedManaRawQuery(variables, skip?: boolean) {
-  function getType(value) {
-    let type = typeof value;
-    if (type === "number") return "Int";
-    else return "String";
-  }
-  function getTypeForKey(key) {
-    if (Array.isArray(variables[key]))
-      return `[${getType(variables[key][0])}]!`;
-    return `${getType(variables[key])}!`;
-  }
+function getType(value) {
+  let type = typeof value;
+  if (type === "number") return "Int";
+  else return "String";
+}
+function getTypeForKey(obj, key) {
+  if (Array.isArray(obj[key])) return `[${getType(obj[key][0])}]!`;
+  return `${getType(obj[key])}!`;
+}
 
+export function useClaimedManaRawQuery(variables, skip?: boolean) {
   const GET_CLAIMED_MANA = gql`
     query GetClaimedMana(${Object.keys(variables)
-      .map((key) => `$${key}: ${getTypeForKey(key)}`)
+      .map((key) => `$${key}: ${getTypeForKey(variables, key)}`)
       .join(", ")}) {
       manas(
         where: {  ${Object.keys(variables)
@@ -136,6 +135,44 @@ export function useClaimedManaRawQuery(variables, skip?: boolean) {
     }
   `;
   return useQuery<ManaData, any>(GET_CLAIMED_MANA, {
+    variables,
+    skip: !!skip
+  });
+}
+
+export function useManaBagsRawQuery(variables, skip?: boolean) {
+  const GET_UNCLAIMED_MANA_BY_OWNER = gql`
+    query GetUnclaimedMana(${Object.keys(variables)
+      .map((key) => `$${key}: ${getTypeForKey(variables, key)}`)
+      .join(", ")}) {
+      bags(where:  {  ${Object.keys(variables)
+        .map((key) => `${key}: $${key}`)
+        .join(", ")} }) {
+        id
+        manasClaimed
+        ${inventory.map((item) => item.label.toLowerCase()).join("\n")}
+        ${inventory
+          .map((item) => `${item.label.toLowerCase()}SuffixId`)
+          .join("\n")}
+        manas {
+          id
+          suffixId {
+            id
+          }
+          itemName
+          inventoryId
+          lootTokenId {
+            id
+          }
+        }
+        currentOwner {
+          id
+        }
+      }
+    }
+  `;
+
+  return useQuery<BagData, any>(GET_UNCLAIMED_MANA_BY_OWNER, {
     variables,
     skip: !!skip
   });

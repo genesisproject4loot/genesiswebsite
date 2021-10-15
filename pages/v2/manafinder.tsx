@@ -1,20 +1,21 @@
 import React, { ReactElement, useState, useEffect, useMemo } from "react";
 import GenesisManaChart from "@components/charts/GenesisManaChart";
 import Layout_V2 from "@components/Layout_V2";
-import { useManaBagsByOwner, useClaimedManaRawQuery } from "hooks/useMana";
+import { useClaimedManaRawQuery, useManaBagsRawQuery } from "hooks/useMana";
 import {
   DAO_ADDRESSES,
   GM_ALL_ADDRESS,
   SUFFICES,
   INVENTORY,
-  NFTX_ADDRESS
+  NFTX_ADDRESS,
+  GM_SORT_OPTIONS
 } from "utils/constants";
 import { useWalletContext } from "hooks/useWalletContext";
 import { Modal } from "components/Modal";
 import Select from "react-select";
 import PlusIcon from "components/icons/PlusIcon";
 import { Mana, Wallet } from "@utils/manaFinderTypes";
-import { rarityColor, rarityDescription } from "loot-rarity";
+import { rarityColor, rarityDescription, itemRarity } from "loot-rarity";
 import {
   formatNFTXUrl,
   formatOpenseaUrl,
@@ -32,6 +33,8 @@ import { useAdventurerContract } from "hooks/useAdventurerContract";
 export default function Home_V2(): ReactElement {
   const { account, isConnected } = useWalletContext();
   const [selectedOrder, setSelectedOrder] = useState(null);
+  const [selectedSort, setSelectedSort] = useState(GM_SORT_OPTIONS[0]);
+
   const [selectedMana, setSelectedMana] = useState<Mana[]>([]);
   const [wallets, setWallets] = useState<String[]>([]);
   const [isAddWalletModalOpen, setIsAddWalletModalOpen] = useState(false);
@@ -143,8 +146,10 @@ export default function Home_V2(): ReactElement {
         <GenesisManaHeader />
         <div className={styles.main}>
           <GenesisManaFilters
-            onOrderSelect={setSelectedOrder}
+            onOrderChange={setSelectedOrder}
             selectedOrder={selectedOrder}
+            onSortChange={setSelectedSort}
+            selectedSort={selectedSort}
           />
           <div className={styles.builder}>
             <div className={styles.finder}>
@@ -171,6 +176,7 @@ export default function Home_V2(): ReactElement {
                       (wallet) => wallet !== GM_ALL_ADDRESS
                     ) as string[]
                   }
+                  sort={selectedSort}
                 />
               </div>
             </div>
@@ -219,19 +225,36 @@ function GenesisManaHeader() {
   );
 }
 
-function GenesisManaFilters({ onOrderSelect, selectedOrder }) {
+function GenesisManaFilters({
+  onOrderChange,
+  selectedOrder,
+  selectedSort,
+  onSortChange
+}) {
   return (
     <div className={styles.filters}>
-      <label>Select an Order: </label>
-      <Select
-        instanceId="mana-filters"
-        placeholder="Choose an Order"
-        value={selectedOrder}
-        isClearable={true}
-        onChange={onOrderSelect}
-        className="w-60"
-        options={[...SUFFICES]}
-      />
+      <div>
+        <label>Select an Order: </label>
+        <Select
+          instanceId="mana-filters"
+          placeholder="Choose an Order"
+          value={selectedOrder}
+          isClearable={true}
+          onChange={onOrderChange}
+          className="w-60"
+          options={[...SUFFICES]}
+        />
+      </div>
+      <div>
+        <label>Sort</label>
+        <Select
+          instanceId="mana-sort"
+          value={selectedSort}
+          onChange={onSortChange}
+          className="w-60"
+          options={GM_SORT_OPTIONS}
+        />
+      </div>
     </div>
   );
 }
@@ -289,10 +312,25 @@ function QueryTabs({
 function useManaWithPricing({ address, orderId, wallets }) {
   const { floorPrice: nftxFloorPrice } = useNFTXFloorPrice();
   const isAllQuery = GM_ALL_ADDRESS === address;
-  const { data: bagData } = useManaBagsByOwner(address, isAllQuery);
-  const { data: openSeaBagData } = useOpenseaBagsData(
-    bagData?.bags?.map((bag) => String(bag.id)) ?? []
-  );
+  const bagsQuery: any = {
+    manasUnclaimed_not: "0",
+    ...INVENTORY.reduce((ctx, item) => {
+      ctx[`${item.label.toLowerCase()}SuffixId_in`] = [0, parseInt(orderId)];
+      return ctx;
+    }, {})
+  };
+  if (!isAllQuery) {
+    bagsQuery.currentOwner = address?.toLowerCase();
+  } else {
+    bagsQuery.currentOwner_not_in = [
+      ...DAO_ADDRESSES,
+      ...(wallets ? wallets.map((wallet) => wallet?.toLowerCase()) : [])
+    ];
+  }
+  const { data: bagData, loading: isUnclaimedBagsLoading } =
+    useManaBagsRawQuery(bagsQuery);
+  const { data: openSeaBagData, loading: isOSUnclaimedBagsLoading } =
+    useOpenseaBagsData(bagData?.bags?.map((bag) => String(bag.id)) ?? []);
 
   const walletQuery: any = {
     suffixId: orderId,
@@ -309,11 +347,10 @@ function useManaWithPricing({ address, orderId, wallets }) {
     ]
   };
 
-  const { data: walletResults } = useClaimedManaRawQuery(walletQuery);
-  const { data: openseaResults } = useClaimedManaRawQuery(
-    openseaQuery,
-    !isAllQuery
-  );
+  const { data: walletResults, loading: isClaimedManaLoading } =
+    useClaimedManaRawQuery(walletQuery);
+  const { data: openseaResults, loading: isOSClaimedManaLoading } =
+    useClaimedManaRawQuery(openseaQuery, !isAllQuery);
   const { data: openSeaManaData } = useOpenseaManaData(
     openseaResults?.manas?.map((mana) => String(mana.id)) ?? []
   );
@@ -321,11 +358,17 @@ function useManaWithPricing({ address, orderId, wallets }) {
   const claimedData = {
     manas: [...(walletResults?.manas ?? []), ...(openseaResults?.manas ?? [])]
   };
-  const applyFilters = (mana) => {
-    if (!orderId) {
-      return false;
-    }
-    return mana?.suffixId?.id == orderId;
+  const applyFilters = () => {
+    const cache = {};
+    return (mana) => {
+      if (!orderId) {
+        return false;
+      }
+      const key = mana?.suffixId?.id + mana?.lootTokenId?.id;
+      if (cache[key]) return false;
+      cache[key] = true;
+      return mana?.suffixId?.id == orderId;
+    };
   };
 
   const mapOpenseaManaPricing = (mana) => {
@@ -335,7 +378,8 @@ function useManaWithPricing({ address, orderId, wallets }) {
         ? nftxFloorPrice
         : openSeaManaData?.queryManas?.manas?.find(
             (item) => item.id == mana?.id
-          )?.price || undefined
+          )?.price || undefined,
+      rarity: itemRarity(mana.itemName)
     };
   };
 
@@ -345,7 +389,8 @@ function useManaWithPricing({ address, orderId, wallets }) {
       price:
         openSeaBagData?.queryBags?.bags?.find(
           (bag) => bag.id == mana?.lootTokenId?.id
-        )?.price || undefined
+        )?.price || undefined,
+      rarity: itemRarity(mana.itemName)
     };
   };
 
@@ -357,14 +402,16 @@ function useManaWithPricing({ address, orderId, wallets }) {
         .flat()
         .map(mapOpenseaBagPricing)
     )
-    .filter(applyFilters);
+    .filter(applyFilters());
 
-  const {
-    items: sortedMana
-    // requestSort,
-    // sortConfig
-  } = useSortableData(manas, { key: "price", direction: "ascending" });
-  return { manas: sortedMana };
+  return {
+    manas,
+    loading:
+      isUnclaimedBagsLoading ||
+      isOSUnclaimedBagsLoading ||
+      isClaimedManaLoading ||
+      isOSClaimedManaLoading
+  };
 }
 
 type GenesisManaCardsProps = {
@@ -373,33 +420,55 @@ type GenesisManaCardsProps = {
   onSelect: (mana: Mana) => void;
   onLoad: (manas: Mana[]) => void;
   wallets?: string[];
+  sort?: any;
 };
 function GenesisManaCards({
   address,
   orderId,
   onSelect,
   onLoad,
-  wallets
+  wallets,
+  sort
 }: GenesisManaCardsProps): ReactElement {
-  const { manas } = useManaWithPricing({ address, orderId, wallets });
+  const { manas: manasWithPricing, loading: isManaLoading } =
+    useManaWithPricing({
+      address,
+      orderId,
+      wallets
+    });
+  const {
+    items: manas,
+    setSortConfig,
+    sortConfig
+  } = useSortableData(manasWithPricing, sort);
+
+  useEffect(() => {
+    if (sortConfig?.value === sort?.value) {
+      return;
+    }
+    setSortConfig({ ...sort });
+  }, [sort?.value]);
+
   const truthy = [true, true, true, true, true, true, true, true];
   const falsy = [false, false, false, false, false, false, false, false];
 
+  // console.log(manas);
   useEffect(() => {
-    onLoad(manas as Mana[]);
-  }, [manas?.length ?? 0]);
+    if (!isManaLoading) {
+      onLoad(manas as Mana[]);
+    }
+  }, [manas?.length, orderId, isManaLoading]);
 
-  const [collapsed, setCollapsed] = useState([...truthy]);
+  const [collapsed, setCollapsed] = useState([...falsy]);
   const onCollapseAll = () => setCollapsed([...truthy]);
   const onExpandAll = () => setCollapsed([...falsy]);
-
   const onToggleExpand = (selectedIdx) =>
     setCollapsed([
       ...collapsed.map((val, idx) => (idx === selectedIdx ? !val : val))
     ]);
 
   return (
-    <div className={styles.ctr}>
+    <div className={styles.ctr} key={sort?.value + "-cards"}>
       <div className={styles.controls}>
         <span onClick={onExpandAll}>Expand All (+)</span>{" "}
         <span onClick={onCollapseAll}>Collapse All (-)</span>
@@ -518,12 +587,10 @@ function GenesisManaCard({
           </button>
         )}
         <div className={styles.details}>
-          {isMinted && (
-            <>
-              <label>Id </label>
-              <span className="text-right">#{mana.id}</span>
-            </>
-          )}
+          <label>Id </label>
+          <span className="text-right">
+            {mana.id ? `#${mana.id}` : "Unclaimed"}
+          </span>
           <label>Order </label>
           <span className="text-right">{order}</span>
           <label>{rarityDescription(mana.itemName)} </label>
@@ -532,10 +599,10 @@ function GenesisManaCard({
           </span>
 
           <label>{mana.price > 0 ? `${mana.price.toFixed(3)} ♦` : ""}</label>
-          <div className="flex gap-2">
+          <span className="flex justify-end">
             {nftxUrl?.length > 0 && (
               <a
-                className="underline text-right"
+                className="underline"
                 href={nftxUrl}
                 target="_blank"
                 rel="noopener noreferrer"
@@ -545,7 +612,7 @@ function GenesisManaCard({
             )}
             {!nftxUrl && (
               <a
-                className="underline text-right"
+                className="underline"
                 href={openseaUrl}
                 target="_blank"
                 rel="noopener noreferrer"
@@ -553,7 +620,7 @@ function GenesisManaCard({
                 Opensea
               </a>
             )}
-          </div>
+          </span>
         </div>
       </div>
     </div>
@@ -815,6 +882,7 @@ const useSortableData = (items, config = null) => {
         if (a[sortConfig.key] > b[sortConfig.key]) {
           return sortConfig.direction === "ascending" ? 1 : -1;
         }
+
         return 0;
       });
     }
@@ -832,5 +900,5 @@ const useSortableData = (items, config = null) => {
     }
     setSortConfig({ key, direction });
   };
-  return { items: sortedItems, requestSort, sortConfig };
+  return { items: sortedItems, setSortConfig, requestSort, sortConfig };
 };
