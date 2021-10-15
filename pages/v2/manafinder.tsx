@@ -539,6 +539,9 @@ function GenesisManaCardRow({ manas, idx, onSelect }) {
 }
 
 function GenesisManaListRow({ manas, onSelect }) {
+  const { account } = useWalletContext();
+  const isCurrentOwner = (mana) =>
+    mana?.currentOwner?.id.toLowerCase() === account?.toLowerCase();
   return (
     <div>
       {manas.map((mana) => (
@@ -559,10 +562,14 @@ function GenesisManaListRow({ manas, onSelect }) {
             <ManaOwnerLink mana={mana} />
           </span>
           <span className="w-1/5 text-right">
-            <ExternalManaLink
-              mana={mana}
-              text={mana?.price > 0 ? `${mana?.price?.toFixed(3)} ♦` : "buy"}
-            />
+            {isCurrentOwner(mana) ? (
+              "Yours"
+            ) : (
+              <ExternalManaLink
+                mana={mana}
+                text={mana?.price > 0 ? `${mana?.price?.toFixed(3)} ♦` : "buy"}
+              />
+            )}
           </span>
         </div>
       ))}
@@ -689,29 +696,33 @@ function GenesisManaCard({
           <span className="text-right">
             <ManaOwnerLink mana={mana} />
           </span>
-          <label>Buy</label>
-          <span className="flex justify-end">
-            {nftxUrl?.length > 0 && (
-              <a
-                className="underline"
-                href={nftxUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                {mana.price > 0 ? `${mana.price.toFixed(3)} ♦` : "NFTx"}
-              </a>
-            )}
-            {!nftxUrl && (
-              <a
-                className="underline"
-                href={openseaUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                {mana.price > 0 ? `${mana.price.toFixed(3)} ♦` : "Opensea"}
-              </a>
-            )}
-          </span>
+          {!doesOwnMana && (
+            <>
+              <label>Buy</label>
+              <span className="flex justify-end">
+                {nftxUrl?.length > 0 && (
+                  <a
+                    className="underline"
+                    href={nftxUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    {mana.price > 0 ? `${mana.price.toFixed(3)} ♦` : "NFTx"}
+                  </a>
+                )}
+                {!nftxUrl && (
+                  <a
+                    className="underline"
+                    href={openseaUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    {mana.price > 0 ? `${mana.price.toFixed(3)} ♦` : "Opensea"}
+                  </a>
+                )}
+              </span>
+            </>
+          )}
         </div>
       </div>
     </div>
