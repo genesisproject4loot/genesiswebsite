@@ -376,7 +376,6 @@ function useManaWithPricing({ address, orderId, wallets }) {
   const { data: openSeaManaData } = useOpenseaManaData(
     openseaResults?.manas?.map((mana) => String(mana.id)) ?? []
   );
-
   const claimedData = {
     manas: [...(walletResults?.manas ?? []), ...(openseaResults?.manas ?? [])]
   };
@@ -386,7 +385,7 @@ function useManaWithPricing({ address, orderId, wallets }) {
       if (!orderId) {
         return false;
       }
-      const key = mana?.suffixId?.id + mana?.lootTokenId?.id;
+      const key = mana?.suffixId?.id + (mana?.lootTokenId?.id ?? mana.itemName);
       if (cache[key]) return false;
       cache[key] = true;
       return mana?.suffixId?.id == orderId;
