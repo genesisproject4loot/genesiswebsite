@@ -110,6 +110,7 @@
   }
 
   .filters {
+    @apply flex gap-8;
     > label {
       @apply font-semibold text-lg;
     }

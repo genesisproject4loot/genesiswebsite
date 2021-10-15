@@ -6,6 +6,7 @@ export interface Mana {
   lootTokenId: Bag;
   currentOwner: Wallet;
   price?: number;
+  rarity?: number;
 }
 
 export interface ManaData {
