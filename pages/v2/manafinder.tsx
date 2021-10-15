@@ -472,17 +472,16 @@ function GenesisManaCards({
       return;
     }
     setSortConfig({ ...sort });
-  }, [sort?.value, setSortConfig, sortConfig?.value]);
+  }, [sort?.value]);
 
   const truthy = [true, true, true, true, true, true, true, true];
   const falsy = [false, false, false, false, false, false, false, false];
 
-  // console.log(manas);
   useEffect(() => {
     if (!isManaLoading) {
       onLoad(manas as Mana[]);
     }
-  }, [manas?.length, orderId, isManaLoading, onLoad]);
+  }, [manas?.length, orderId, isManaLoading]);
 
   const [collapsed, setCollapsed] = useState([...falsy]);
   const onCollapseAll = () => setCollapsed([...truthy]);
