@@ -101,7 +101,7 @@ export default function Home(): ReactElement {
                   <Link href="/chapter1">
                     <span className={styles.btn_sm}>Mint</span>
                   </Link>
-                  <Link href="/manafinder">
+                  <Link href="/v2/manafinder">
                     <span className={styles.btn_sm}>Find</span>
                   </Link>
                   <a
@@ -319,7 +319,7 @@ export default function Home(): ReactElement {
               <Link href="/chapter1">Distill Genesis Mana</Link>
             </div>
             <div className={[styles.moreinfo].join(" ")}>
-              <Link href="/manafinder">Find Mana</Link>
+              <Link href="/v2/manafinder">Find Mana</Link>
               <a
                 href="https://opensea.io/collection/genesis-mana"
                 target="_blank"
@@ -337,7 +337,12 @@ export default function Home(): ReactElement {
             </div>
           </div>
         </div>
-        <div className={[styles.home__feature, 'flex flex-col gap-4 items-center'].join(' ')}>
+        <div
+          className={[
+            styles.home__feature,
+            "flex flex-col gap-4 items-center"
+          ].join(" ")}
+        >
           <span>Example Genesis Mana:</span>
           <div className="flex gap-2">
             <img src="img/genesismana/1.svg" />
@@ -411,12 +416,17 @@ export default function Home(): ReactElement {
             </div>
           </div>
         </div>
-        <div className={[styles.home__feature, 'flex flex-col gap-4 items-center'].join(' ')}>
+        <div
+          className={[
+            styles.home__feature,
+            "flex flex-col gap-4 items-center"
+          ].join(" ")}
+        >
           <span>Example Genesis Adventurer:</span>
           <div className="flex gap-2">
-          <img src="img/genesisadventurer/1.svg" />
-          <img src="img/genesisadventurer/2.svg" />
-          <img src="img/genesisadventurer/3.svg" />
+            <img src="img/genesisadventurer/1.svg" />
+            <img src="img/genesisadventurer/2.svg" />
+            <img src="img/genesisadventurer/3.svg" />
           </div>
         </div>
 
