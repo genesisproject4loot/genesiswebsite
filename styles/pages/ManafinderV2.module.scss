@@ -56,9 +56,9 @@
             @apply p-2 border border-gray-300 rounded-md;
 
             .card {
-              @apply text-white p-2 w-72 h-72 rounded-md flex flex-col;
+              @apply p-2 w-72 h-72 rounded-md flex flex-col relative;
               font-size: 12px;
-            }
+            }    
 
             .mint {
               @apply w-full block px-2 border bg-blue-400 text-white rounded-md mb-1 h-8
