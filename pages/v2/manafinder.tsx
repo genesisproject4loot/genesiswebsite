@@ -74,9 +74,6 @@ export default function Home_V2(): ReactElement {
   useEffect(() => {
     setSelectedMana([]);
     setIsGenesisAdventurerMintModalOpen(false);
-    if (isConnected) {
-      setTabIdx(0);
-    }
   }, [selectedOrder, isConnected]);
 
   function onSelectManaCard(mana: Mana) {
@@ -172,11 +169,12 @@ export default function Home_V2(): ReactElement {
                 />
               </div>
               <div className={styles.gm_results}>
-                <GenesisManaCards
-                  key={wallets[tabIdx] as string}
+                <GenesisManaCardsByInventory
+                  key={wallets[tabIdx] + selectedOrder?.value}
                   address={wallets[tabIdx] as string}
                   orderId={selectedOrder?.value}
                   onSelect={onSelectManaCard}
+                  selectedMana={selectedMana}
                   onLoad={onCardsLoaded}
                   selectedView={selectedView}
                   wallets={
@@ -435,24 +433,26 @@ function useManaWithPricing({ address, orderId, wallets }) {
   };
 }
 
-type GenesisManaCardsProps = {
+type GenesisManaCardsByInventoryProps = {
   address: string;
   orderId: string;
   onSelect: (mana: Mana) => void;
   onLoad: (manas: Mana[]) => void;
+  selectedMana?: Mana[];
   wallets?: string[];
   sort?: any;
   selectedView?: any;
 };
-function GenesisManaCards({
+function GenesisManaCardsByInventory({
   address,
   orderId,
   onSelect,
   onLoad,
   wallets,
+  selectedMana,
   sort,
   selectedView
-}: GenesisManaCardsProps): ReactElement {
+}: GenesisManaCardsByInventoryProps): ReactElement {
   const { manas: manasWithPricing, loading: isManaLoading } =
     useManaWithPricing({
       address,
@@ -477,7 +477,9 @@ function GenesisManaCards({
 
   useEffect(() => {
     if (!isManaLoading) {
-      onLoad(manas as Mana[]);
+      setTimeout(() => {
+        onLoad(manas as Mana[]);
+      }, 100);
     }
   }, [manas?.length, orderId, isManaLoading]);
 
@@ -510,9 +512,22 @@ function GenesisManaCards({
               <span className={[styles.line, `bg-gray-200`].join(" ")}></span>
             </h1>
             {collapsed[idx] ? null : selectedView?.value === "list" ? (
-              <GenesisManaListRow manas={row} onSelect={onSelect} />
+              <GenesisManaListRow
+                manas={row}
+                onSelect={onSelect}
+                selectedMana={selectedMana?.find(
+                  (mana) => mana.inventoryId === idx
+                )}
+              />
             ) : (
-              <GenesisManaCardRow manas={row} idx={idx} onSelect={onSelect} />
+              <GenesisManaCardRow
+                manas={row}
+                idx={idx}
+                selectedMana={selectedMana?.find(
+                  (mana) => mana.inventoryId === idx
+                )}
+                onSelect={onSelect}
+              />
             )}
           </div>
         );
@@ -521,7 +536,7 @@ function GenesisManaCards({
   );
 }
 
-function GenesisManaCardRow({ manas, idx, onSelect }) {
+function GenesisManaCardRow({ manas, idx, onSelect, selectedMana }) {
   return (
     <div className="flex gap-4 overflow-x-scroll">
       {manas.map((mana) => (
@@ -529,6 +544,11 @@ function GenesisManaCardRow({ manas, idx, onSelect }) {
           onClick={() => {
             onSelect(mana);
           }}
+          isSelected={
+            mana.id > 0
+              ? mana.id === selectedMana?.id
+              : mana.lootTokenId?.id === selectedMana?.lootTokenId?.id
+          }
           key={`${idx}-${mana.itemName}-${mana.lootTokenId?.id}}`}
           mana={mana}
         />
@@ -537,27 +557,38 @@ function GenesisManaCardRow({ manas, idx, onSelect }) {
   );
 }
 
-function GenesisManaListRow({ manas, onSelect }) {
+function GenesisManaListRow({ manas, onSelect, selectedMana }) {
   const { account } = useWalletContext();
   const isCurrentOwner = (mana) =>
     mana?.currentOwner?.id.toLowerCase() === account?.toLowerCase();
+  const isManaSelected = (mana) =>
+    mana.id > 0
+      ? mana.id === selectedMana?.id
+      : mana.lootTokenId?.id === selectedMana?.lootTokenId?.id;
   return (
     <div>
       {manas.map((mana) => (
-        <div key={mana.id + mana?.lootTokenId?.id} className="flex ml-4">
+        <div key={mana.id + mana?.lootTokenId?.id} className="flex">
           <span
+            title="Add"
+            className="w-1/5 cursor-pointer"
             onClick={() => onSelect(mana)}
-            className="w-1/5 cursor-pointer underline"
           >
-            {mana.id ? `${mana.id}` : `${mana?.lootTokenId?.id} (loot)`}
+            <span className="w-4 inline-block mr-2">
+              {isManaSelected(mana) ? "(x) " : ""}
+            </span>
+            <span className="underline">
+              {mana.id ? `${mana.id}` : `${mana?.lootTokenId?.id} (loot)`}
+            </span>
           </span>
           <span
+            title="Add"
             onClick={() => onSelect(mana)}
             className="w-2/5 cursor-pointer underline"
           >
             {mana.itemName}
           </span>
-          <span className="w-1/5 text-right">
+          <span className="w-1/5 text-right" title="Owner">
             <ManaOwnerLink mana={mana} />
           </span>
           <span className="w-1/5 text-right">
@@ -616,11 +647,13 @@ function ExternalManaLink({ mana, text }: { mana: Mana; text: String }) {
 
 interface GenesisManaCardProps extends React.HTMLAttributes<HTMLDivElement> {
   mana: Mana;
+  isSelected?: boolean;
 }
 
 function GenesisManaCard({
   mana,
   onClick,
+  isSelected,
   ...props
 }: GenesisManaCardProps): ReactElement {
   const { account } = useWalletContext();
@@ -645,12 +678,29 @@ function GenesisManaCard({
   const nftxUrl = formatNFTXUrl(mana);
   return (
     <div {...props} className={styles.gm_card_ctr}>
-      <div className={[styles.card, `bg-gm-${mana.suffixId.id}`].join(" ")}>
-        <div className="flex-1 cursor-pointer" onClick={onClick}>
+      <div
+        className={[
+          styles.card,
+          isSelected ? "bg-white" : `bg-gm-${mana.suffixId.id}`,
+          "cursor-pointer",
+          "border-4",
+          isSelected ? `text-gm-${mana.suffixId.id}` : "text-white",
+          `border-gm-${mana.suffixId.id}`,
+          "hover:bg-white",
+          `hover:text-gm-${mana.suffixId.id}`
+        ].join(" ")}
+        onClick={onClick}
+      >
+        <div>
           <div>Order: {order}</div>
           <div>
             Equipment Type: {inventoryLabel} {isArmor ? "Armor" : ""}
           </div>
+        </div>
+        <div
+          className={`flex-1 flex text-base justify-center items-center text-gm-${mana.suffixId.id}`}
+        >
+          {isSelected ? "Selected" : "Add"}
         </div>
         <div>
           <div>
