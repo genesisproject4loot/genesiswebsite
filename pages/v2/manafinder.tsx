@@ -34,13 +34,13 @@ import ListIcon from "@components/icons/ListIcon";
 import GridIcon from "@components/icons/GridIcon";
 import { useEnsLookup } from "hooks/useEns";
 
-export default function Home_V2(): ReactElement {
+export default function Manafinder_V2(): ReactElement {
   const { account, isConnected } = useWalletContext();
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [selectedSort, setSelectedSort] = useState(GM_SORT_OPTIONS[0]);
   const [selectedView, setSelectedView] = useState(GM_VIEW_OPTIONS[0]);
-
   const [selectedMana, setSelectedMana] = useState<Mana[]>([]);
+  const [loadedMana, setLoadedMana] = useState<Mana[]>([]);
   const [wallets, setWallets] = useState<String[]>([]);
   const [isAddWalletModalOpen, setIsAddWalletModalOpen] = useState(false);
   const [
@@ -75,6 +75,21 @@ export default function Home_V2(): ReactElement {
     setSelectedMana([]);
     setIsGenesisAdventurerMintModalOpen(false);
   }, [selectedOrder, isConnected]);
+
+  useEffect(() => {
+    const selectCards = [];
+    for (let i = 0; i < INVENTORY.length; i++) {
+      const mana = selectedMana.find((mana) => mana.inventoryId === i);
+      if (!mana) {
+        const row = loadedMana?.filter((mana) => mana.inventoryId == i);
+        if (row[0]) {
+          selectCards.push(row[0]);
+        }
+      }
+    }
+    const newDeck = [...selectedMana, ...selectCards];
+    setSelectedMana(newDeck);
+  }, [loadedMana]);
 
   function onSelectManaCard(mana: Mana) {
     const foundIdx = selectedMana.findIndex(
@@ -127,21 +142,6 @@ export default function Home_V2(): ReactElement {
     }
   }
 
-  function onCardsLoaded(manas) {
-    const selectCards = [];
-    for (let i = 0; i < INVENTORY.length; i++) {
-      const mana = selectedMana.find((mana) => mana.inventoryId === i);
-      if (!mana) {
-        const row = manas.filter((mana) => mana.inventoryId == i);
-        if (row[0]) {
-          selectCards.push(row[0]);
-        }
-      }
-    }
-    const newDeck = [...selectedMana, ...selectCards];
-    setSelectedMana(newDeck);
-  }
-
   return (
     <Layout_V2>
       <div className={styles.manafinder__app}>
@@ -175,7 +175,7 @@ export default function Home_V2(): ReactElement {
                   orderId={selectedOrder?.value}
                   onSelect={onSelectManaCard}
                   selectedMana={selectedMana}
-                  onLoad={onCardsLoaded}
+                  onLoad={setLoadedMana}
                   selectedView={selectedView}
                   wallets={
                     wallets.filter(
@@ -477,9 +477,7 @@ function GenesisManaCardsByInventory({
 
   useEffect(() => {
     if (!isManaLoading) {
-      setTimeout(() => {
-        onLoad(manas as Mana[]);
-      }, 100);
+      onLoad(manas as Mana[]);
     }
   }, [manas?.length, orderId, isManaLoading]);
 
@@ -685,9 +683,9 @@ function GenesisManaCard({
           "cursor-pointer",
           "border-4",
           isSelected ? `text-gm-${mana.suffixId.id}` : "text-white",
-          `border-gm-${mana.suffixId.id}`,
-          "hover:bg-white",
-          `hover:text-gm-${mana.suffixId.id}`
+          `border-gm-${mana.suffixId.id}`
+          // "hover:bg-white",
+          // `hover:text-gm-${mana.suffixId.id}`
         ].join(" ")}
         onClick={onClick}
       >
