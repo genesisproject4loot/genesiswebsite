@@ -344,7 +344,7 @@ export default function Home(): ReactElement {
           ].join(" ")}
         >
           <span>Example Genesis Mana:</span>
-          <div className="flex gap-2">
+          <div className="flex flex-col md:flex-row gap-2">
             <img src="img/genesismana/1.svg" />
             <img src="img/genesismana/2.svg" />
             <img src="img/genesismana/3.svg" />
@@ -423,7 +423,7 @@ export default function Home(): ReactElement {
           ].join(" ")}
         >
           <span>Example Genesis Adventurer:</span>
-          <div className="flex gap-2">
+          <div className="flex flex-col md:flex-row gap-2">
             <img src="img/genesisadventurer/1.svg" />
             <img src="img/genesisadventurer/2.svg" />
             <img src="img/genesisadventurer/3.svg" />
