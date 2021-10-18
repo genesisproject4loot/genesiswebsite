@@ -47,6 +47,16 @@ export default function Home(): ReactElement {
             })}
           </ul>
 
+          <h2 className="text-3xl pb-6">
+            <a
+              href="https://genesisproject.notion.site/The-Genesis-Project-6144d1b50af34803be5cc791dd5b5970"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Roadmap: Learn More
+            </a>
+          </h2>
+
           {/* CTA Description */}
           <p>
             The Genesis Project is a community of builders, designers,
