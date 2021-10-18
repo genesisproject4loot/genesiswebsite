@@ -41,6 +41,7 @@ export default function Manafinder_V2(): ReactElement {
   const [selectedView, setSelectedView] = useState(GM_VIEW_OPTIONS[0]);
   const [selectedMana, setSelectedMana] = useState<Mana[]>([]);
   const [loadedMana, setLoadedMana] = useState<Mana[]>([]);
+  const [isManaLoadingOpen, setIsManaLoadingOpen] = useState(false);
   const [wallets, setWallets] = useState<String[]>([]);
   const [isAddWalletModalOpen, setIsAddWalletModalOpen] = useState(false);
   const [
@@ -126,6 +127,11 @@ export default function Manafinder_V2(): ReactElement {
     setIsAddWalletModalOpen(false);
   }
 
+  function onManaLoaded(mana: Mana[]) {
+    setLoadedMana(mana);
+    setIsManaLoadingOpen(false);
+  }
+
   function onRemoveWallet(wallet: string) {
     const updated = [
       account.toLowerCase(),
@@ -148,7 +154,10 @@ export default function Manafinder_V2(): ReactElement {
         <GenesisManaHeader />
         <div className={styles.main}>
           <GenesisManaFilters
-            onOrderChange={setSelectedOrder}
+            onOrderChange={(val) => {
+              setIsManaLoadingOpen(true);
+              setSelectedOrder(val);
+            }}
             selectedOrder={selectedOrder}
             onSortChange={setSelectedSort}
             selectedSort={selectedSort}
@@ -175,7 +184,7 @@ export default function Manafinder_V2(): ReactElement {
                   orderId={selectedOrder?.value}
                   onSelect={onSelectManaCard}
                   selectedMana={selectedMana}
-                  onLoad={setLoadedMana}
+                  onLoad={onManaLoaded}
                   selectedView={selectedView}
                   wallets={
                     wallets.filter(
@@ -184,6 +193,11 @@ export default function Manafinder_V2(): ReactElement {
                   }
                   sort={selectedSort}
                 />
+                {isManaLoadingOpen && (
+                  <div className="absolute w-full h-full top-32 left-0 bg-black bg-opacity-10 flex justify-center z-50">
+                    <LoadingIcon className="mt-40 w-28 h-28" />{" "}
+                  </div>
+                )}
               </div>
             </div>
             <GenesisAdventurerCard
@@ -369,13 +383,49 @@ function useManaWithPricing({ address, orderId, wallets }) {
 
   const { data: walletResults, loading: isClaimedManaLoading } =
     useClaimedManaRawQuery(walletQuery);
-  const { data: openseaResults, loading: isOSClaimedManaLoading } =
-    useClaimedManaRawQuery(openseaQuery, !isAllQuery);
+
+  // Currently there's a limit of 100 items per subgraph call. Query items individually
+  // till we're able to include pricing data.
+  const { data: openseaWeaponResults, loading: isOSClaimedWeaponManaLoading } =
+    useClaimedManaRawQuery({ ...openseaQuery, inventoryId: 0 }, !isAllQuery);
+
+  const { data: openseaChestResults, loading: isOSClaimedChestManaLoading } =
+    useClaimedManaRawQuery({ ...openseaQuery, inventoryId: 1 }, !isAllQuery);
+
+  const { data: openseaHeadResults, loading: isOSClaimedHeadManaLoading } =
+    useClaimedManaRawQuery({ ...openseaQuery, inventoryId: 2 }, !isAllQuery);
+
+  const { data: openseaWaistResults, loading: isOSClaimedWaistManaLoading } =
+    useClaimedManaRawQuery({ ...openseaQuery, inventoryId: 3 }, !isAllQuery);
+
+  const { data: openseaFootResults, loading: isOSClaimedFootManaLoading } =
+    useClaimedManaRawQuery({ ...openseaQuery, inventoryId: 4 }, !isAllQuery);
+
+  const { data: openseaHandResults, loading: isOSClaimedHandManaLoading } =
+    useClaimedManaRawQuery({ ...openseaQuery, inventoryId: 5 }, !isAllQuery);
+
+  const { data: openseaNeckResults, loading: isOSClaimedNeckManaLoading } =
+    useClaimedManaRawQuery({ ...openseaQuery, inventoryId: 6 }, !isAllQuery);
+
+  const { data: openseaRingResults, loading: isOSClaimedRingManaLoading } =
+    useClaimedManaRawQuery({ ...openseaQuery, inventoryId: 7 }, !isAllQuery);
+
+  const openseaResults = [
+    ...(openseaWeaponResults?.manas ?? []),
+    ...(openseaChestResults?.manas ?? []),
+    ...(openseaHeadResults?.manas ?? []),
+    ...(openseaWaistResults?.manas ?? []),
+    ...(openseaFootResults?.manas ?? []),
+    ...(openseaHandResults?.manas ?? []),
+    ...(openseaNeckResults?.manas ?? []),
+    ...(openseaRingResults?.manas ?? [])
+  ];
   const { data: openSeaManaData } = useOpenseaManaData(
-    openseaResults?.manas?.map((mana) => String(mana.id)) ?? []
+    [...openseaResults].map((mana) => String(mana.id)) ?? []
   );
+
   const claimedData = {
-    manas: [...(walletResults?.manas ?? []), ...(openseaResults?.manas ?? [])]
+    manas: [...(walletResults?.manas ?? []), ...(openseaResults ?? [])]
   };
   const applyFilters = () => {
     const cache = {};
@@ -429,7 +479,14 @@ function useManaWithPricing({ address, orderId, wallets }) {
       isUnclaimedBagsLoading ||
       isOSUnclaimedBagsLoading ||
       isClaimedManaLoading ||
-      isOSClaimedManaLoading
+      isOSClaimedWeaponManaLoading ||
+      isOSClaimedChestManaLoading ||
+      isOSClaimedHeadManaLoading ||
+      isOSClaimedWaistManaLoading ||
+      isOSClaimedFootManaLoading ||
+      isOSClaimedHandManaLoading ||
+      isOSClaimedNeckManaLoading ||
+      isOSClaimedRingManaLoading
   };
 }
 
@@ -582,9 +639,16 @@ function GenesisManaListRow({ manas, onSelect, selectedMana }) {
           <span
             title="Add"
             onClick={() => onSelect(mana)}
-            className="w-2/5 cursor-pointer underline"
+            className="w-2/5 cursor-pointer flex items-center"
           >
-            {mana.itemName}
+            <span className="underline mr-4">{mana.itemName}</span> [
+            <span
+              className="text-xs"
+              style={{ color: rarityColor(mana.itemName) }}
+            >
+              {rarityDescription(mana.itemName)}
+            </span>
+            ]
           </span>
           <span className="w-1/5 text-right" title="Owner">
             <ManaOwnerLink mana={mana} />
