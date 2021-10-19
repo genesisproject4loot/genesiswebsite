@@ -1,4 +1,13 @@
-import React, { ReactElement, useState, useEffect, useMemo } from "react";
+import React, {
+  ReactElement,
+  useState,
+  useEffect,
+  useMemo,
+  createContext,
+  useReducer,
+  useContext,
+  Dispatch
+} from "react";
 import GenesisManaChart from "@components/charts/GenesisManaChart";
 import Layout_V2 from "@components/Layout_V2";
 import { useClaimedManaRawQuery, useManaBagsRawQuery } from "hooks/useMana";
@@ -34,33 +43,251 @@ import ListIcon from "@components/icons/ListIcon";
 import GridIcon from "@components/icons/GridIcon";
 import { useEnsLookup } from "hooks/useEns";
 
+type SelectOption = { value: string; label: string };
+type SelectSortOption = SelectOption & { direction: string; key: string };
+
+interface ManaFinderState {
+  selectedOrder: SelectOption;
+  selectedView: SelectOption;
+  selectedSort: SelectSortOption;
+  selectedManaBuild: Mana[];
+  manaResults: Mana[];
+  isManaLoading: boolean;
+  wallets: string[];
+  isAddWalletModalOpen: boolean;
+  isGenesisAdventurerMintModalOpen: boolean;
+  selectedTabIdx: number;
+}
+const defaultManaFinderState: ManaFinderState = {
+  selectedOrder: null,
+  selectedView: GM_VIEW_OPTIONS[0],
+  selectedSort: GM_SORT_OPTIONS[0],
+  selectedManaBuild: [],
+  manaResults: [],
+  isManaLoading: false,
+  wallets: [],
+  isAddWalletModalOpen: false,
+  isGenesisAdventurerMintModalOpen: false,
+  selectedTabIdx: 0
+};
+
+type ManaFinderAction =
+  | { type: "setSelectedOrder"; payload: SelectOption }
+  | { type: "setSelectedView"; payload: SelectOption }
+  | { type: "setSelectedSort"; payload: SelectSortOption }
+  | { type: "setSelectedManaBuild"; payload: Mana[] }
+  | { type: "setManaResults"; payload: Mana[] }
+  | { type: "setIsManaLoading"; payload: boolean }
+  | { type: "setWallets"; payload: string[] }
+  | { type: "setIsAddWalletModalOpen"; payload: boolean }
+  | { type: "setIsGenesisAdventurerMintModalOpen"; payload: boolean }
+  | { type: "setSelectedTabIdx"; payload: number }
+  | { type: "onSelectMana"; payload: Mana }
+  | { type: "onAddWallet"; payload: string }
+  | { type: "onRemoveWallet"; payload: string };
+
+const ManaFinderContext = createContext<{
+  state: ManaFinderState;
+  dispatch: Dispatch<ManaFinderAction>;
+}>({
+  state: defaultManaFinderState,
+  dispatch: (_: ManaFinderAction) => {}
+});
+
+function ManaFinderReducer(state: ManaFinderState, action: ManaFinderAction) {
+  switch (action.type) {
+    case "setSelectedOrder":
+      return {
+        ...state,
+        selectedOrder: action.payload,
+        selectedManaBuild: [],
+        isGenesisAdventurerMintModalOpen: false
+      };
+    case "setSelectedView":
+      return { ...state, selectedView: action.payload };
+    case "setSelectedSort":
+      return { ...state, selectedSort: action.payload };
+    case "setSelectedManaBuild":
+      return { ...state, selectedManaBuild: [...action.payload] };
+    case "setManaResults":
+      const newState = {
+        ...state,
+        manaResults: [...action.payload],
+        isManaLoading: false
+      };
+      const selectCards = [];
+      for (let i = 0; i < INVENTORY.length; i++) {
+        const mana = state.selectedManaBuild.find(
+          (mana) => mana.inventoryId === i
+        );
+        if (!mana) {
+          const row = newState.manaResults?.filter(
+            (mana) => mana.inventoryId == i
+          );
+          if (row[0]) {
+            selectCards.push(row[0]);
+          }
+        }
+      }
+      newState.selectedManaBuild = [
+        ...newState.selectedManaBuild,
+        ...selectCards
+      ];
+      return newState;
+    case "setIsManaLoading":
+      return { ...state, isManaLoading: action.payload };
+    case "setWallets":
+      return { ...state, wallets: [...action.payload] };
+    case "setIsAddWalletModalOpen":
+      return { ...state, isAddWalletModalOpen: action.payload };
+    case "setIsGenesisAdventurerMintModalOpen":
+      return { ...state, isGenesisAdventurerMintModalOpen: action.payload };
+    case "setSelectedTabIdx":
+      if (action.payload >= state.wallets.length) {
+        return state;
+      }
+      return { ...state, selectedTabIdx: action.payload };
+    case "onSelectMana":
+      const foundIdx = state.selectedManaBuild.findIndex(
+        (selected) => selected.inventoryId === action.payload.inventoryId
+      );
+      if (foundIdx === -1) {
+        return {
+          ...state,
+          selectedManaBuild: [...state.selectedManaBuild, action.payload]
+        };
+      } else {
+        const found = state.selectedManaBuild[foundIdx];
+        let newSelectedMana = [...state.selectedManaBuild];
+        newSelectedMana.splice(foundIdx, 1);
+        if (found.id !== action.payload.id) {
+          newSelectedMana = [...newSelectedMana, action.payload];
+        }
+        return { ...state, selectedManaBuild: newSelectedMana };
+      }
+    case "onAddWallet":
+      if (!action.payload) {
+        alert("Invalid Wallet");
+      } else if (state.wallets.includes(action.payload)) {
+        return {
+          ...state,
+          selectedTabIndex: state.wallets.findIndex(
+            (item) => action.payload === item
+          ),
+          isAddWalletModalOpen: false
+        };
+      } else {
+        const updated = [...state.wallets, action.payload];
+        return {
+          ...state,
+          wallets: updated,
+          isAddWalletModalOpen: false
+        };
+      }
+    default:
+      return state;
+  }
+}
+
 export default function Manafinder_V2(): ReactElement {
-  const { account, isConnected } = useWalletContext();
-  const [selectedOrder, setSelectedOrder] = useState(null);
-  const [selectedSort, setSelectedSort] = useState(GM_SORT_OPTIONS[0]);
-  const [selectedView, setSelectedView] = useState(GM_VIEW_OPTIONS[0]);
-  const [selectedMana, setSelectedMana] = useState<Mana[]>([]);
-  const [loadedMana, setLoadedMana] = useState<Mana[]>([]);
-  const [isManaLoadingOpen, setIsManaLoadingOpen] = useState(false);
-  const [wallets, setWallets] = useState<String[]>([]);
-  const [isAddWalletModalOpen, setIsAddWalletModalOpen] = useState(false);
-  const [
-    isGenesisAdventurerMintModalOpen,
-    setIsGenesisAdventurerMintModalOpen
-  ] = useState(false);
+  const { account } = useWalletContext();
+  const [state, dispatch] = useReducer(
+    ManaFinderReducer,
+    defaultManaFinderState
+  );
+  const { top: genesisAdventurerCardTopPostion } =
+    useGenesisAdventurerTopPosition();
 
-  const [tabIdx, setTabIdx] = useState(0);
+  //Add connected wallet if logged in
+  const onConnectedAcountUpdate = () => {
+    dispatch({
+      type: "setWallets",
+      payload: !account
+        ? [GM_ALL_ADDRESS]
+        : [account.toLowerCase(), GM_ALL_ADDRESS]
+    });
+  };
+  useEffect(onConnectedAcountUpdate, [account]);
+
+  return (
+    <ManaFinderContext.Provider value={{ state, dispatch }}>
+      <Layout_V2>
+        <div className={styles.manafinder__app}>
+          <GenesisManaHeader />
+          <div className={styles.main}>
+            <GenesisManaFilters />
+            <div className={styles.builder}>
+              <div className={styles.finder}>
+                <div className={styles.gm_tabs}>
+                  <QueryTabs />
+                </div>
+                <div className={styles.gm_results}>
+                  <GenesisManaCardsByInventory
+                    key={
+                      state.wallets[state.selectedTabIdx] +
+                      state.selectedOrder?.value
+                    }
+                    address={state.wallets[state.selectedTabIdx] as string}
+                  />
+                  {state.isManaLoading && (
+                    <div className="absolute w-full h-full top-32 left-0 bg-black bg-opacity-10 flex justify-center z-50">
+                      <LoadingIcon className="mt-40 w-28 h-28" />{" "}
+                    </div>
+                  )}
+                </div>
+              </div>
+              <GenesisAdventurerCard
+                className={styles.ga}
+                style={{ top: genesisAdventurerCardTopPostion }}
+                orderId={state.selectedOrder?.value}
+                selectedManas={state.selectedManaBuild}
+                onMint={() => {
+                  dispatch({
+                    type: "setIsGenesisAdventurerMintModalOpen",
+                    payload: true
+                  });
+                }}
+              />
+            </div>
+          </div>
+          <AddWalletModal
+            key={new Date().getTime() + "-add-modal"}
+            isOpen={state.isAddWalletModalOpen}
+            onClose={() => {
+              dispatch({ type: "setIsAddWalletModalOpen", payload: false });
+            }}
+            onAdd={(val) => {
+              dispatch({ type: "onAddWallet", payload: val });
+              dispatch({
+                type: "setSelectedTabIdx",
+                payload: state.wallets.length
+              });
+            }}
+          />
+          {state.isGenesisAdventurerMintModalOpen && (
+            <GenesisAdventurerMintInstructionsModal
+              key={new Date().getTime() + "-ga-modal"}
+              isOpen={state.isGenesisAdventurerMintModalOpen}
+              onClose={() => {
+                dispatch({
+                  type: "setIsGenesisAdventurerMintModalOpen",
+                  payload: false
+                });
+              }}
+              selectedManas={state.selectedManaBuild}
+            />
+          )}
+        </div>
+      </Layout_V2>
+    </ManaFinderContext.Provider>
+  );
+}
+
+function useGenesisAdventurerTopPosition() {
+  // Positioning for GA Builder
   const [adventureCardTop, setAdventureCardTop] = useState(60);
+  // Debounce top value for performance
   const debouncedAdventureCardTop = useDebounce<number>(adventureCardTop, 1);
-
-  useEffect(() => {
-    if (!account) {
-      setWallets([GM_ALL_ADDRESS]);
-      return;
-    }
-    setWallets([account.toLowerCase(), GM_ALL_ADDRESS]);
-  }, [account]);
-
   const handleScroll = () => {
     const position = window.pageYOffset;
     setAdventureCardTop(position > 500 ? position - 500 + 20 : 20);
@@ -71,167 +298,9 @@ export default function Manafinder_V2(): ReactElement {
       window.removeEventListener("scroll", handleScroll);
     };
   }, []);
-
-  useEffect(() => {
-    setSelectedMana([]);
-    setIsGenesisAdventurerMintModalOpen(false);
-  }, [selectedOrder, isConnected]);
-
-  useEffect(() => {
-    const selectCards = [];
-    for (let i = 0; i < INVENTORY.length; i++) {
-      const mana = selectedMana.find((mana) => mana.inventoryId === i);
-      if (!mana) {
-        const row = loadedMana?.filter((mana) => mana.inventoryId == i);
-        if (row[0]) {
-          selectCards.push(row[0]);
-        }
-      }
-    }
-    const newDeck = [...selectedMana, ...selectCards];
-    setSelectedMana(newDeck);
-  }, [loadedMana]);
-
-  function onSelectManaCard(mana: Mana) {
-    const foundIdx = selectedMana.findIndex(
-      (selected) => selected.inventoryId === mana.inventoryId
-    );
-
-    if (foundIdx === -1) {
-      setSelectedMana([...selectedMana, mana]);
-    } else {
-      const found = selectedMana[foundIdx];
-      const newSelectedMana = [...selectedMana];
-      newSelectedMana.splice(foundIdx, 1);
-      if (
-        found.lootTokenId?.id === mana.lootTokenId?.id &&
-        found.id === mana.id
-      ) {
-        setSelectedMana(newSelectedMana);
-      } else {
-        setSelectedMana([...newSelectedMana, mana]);
-      }
-    }
-  }
-
-  function onAddWallet(wallet: string) {
-    if (!wallet) {
-      alert("Invalid Wallet");
-    } else if (wallets.includes(wallet)) {
-      setTabIdx(wallets.findIndex((item) => wallet === item));
-    } else {
-      const updated = [...wallets, wallet];
-      setWallets(updated);
-      setTabIdx(updated.length - 1);
-    }
-    setIsAddWalletModalOpen(false);
-  }
-
-  function onManaLoaded(mana: Mana[]) {
-    setLoadedMana(mana);
-    setIsManaLoadingOpen(false);
-  }
-
-  function onRemoveWallet(wallet: string) {
-    const updated = [
-      account.toLowerCase(),
-      GM_ALL_ADDRESS,
-      ...wallets
-        .slice(isConnected ? 3 : 2)
-        .filter((item) => item?.toLowerCase() !== wallet?.toLowerCase())
-    ];
-    setWallets(updated);
-    if (updated.length >= tabIdx) {
-      setTimeout(() => {
-        setTabIdx(updated.length - 1);
-      }, 100);
-    }
-  }
-
-  return (
-    <Layout_V2>
-      <div className={styles.manafinder__app}>
-        <GenesisManaHeader />
-        <div className={styles.main}>
-          <GenesisManaFilters
-            onOrderChange={(val) => {
-              setIsManaLoadingOpen(true);
-              setSelectedOrder(val);
-            }}
-            selectedOrder={selectedOrder}
-            onSortChange={setSelectedSort}
-            selectedSort={selectedSort}
-          />
-          <div className={styles.builder}>
-            <div className={styles.finder}>
-              <div className={styles.gm_tabs}>
-                <QueryTabs
-                  wallets={wallets}
-                  tabIdx={tabIdx}
-                  onChange={setTabIdx}
-                  onAddWalletClick={() => {
-                    setIsAddWalletModalOpen(true);
-                  }}
-                  onRemoveWallet={onRemoveWallet}
-                  onViewChange={setSelectedView}
-                  selectedView={selectedView}
-                />
-              </div>
-              <div className={styles.gm_results}>
-                <GenesisManaCardsByInventory
-                  key={wallets[tabIdx] + selectedOrder?.value}
-                  address={wallets[tabIdx] as string}
-                  orderId={selectedOrder?.value}
-                  onSelect={onSelectManaCard}
-                  selectedMana={selectedMana}
-                  onLoad={onManaLoaded}
-                  selectedView={selectedView}
-                  wallets={
-                    wallets.filter(
-                      (wallet) => wallet !== GM_ALL_ADDRESS
-                    ) as string[]
-                  }
-                  sort={selectedSort}
-                />
-                {isManaLoadingOpen && (
-                  <div className="absolute w-full h-full top-32 left-0 bg-black bg-opacity-10 flex justify-center z-50">
-                    <LoadingIcon className="mt-40 w-28 h-28" />{" "}
-                  </div>
-                )}
-              </div>
-            </div>
-            <GenesisAdventurerCard
-              className={styles.ga}
-              style={{ top: debouncedAdventureCardTop }}
-              orderId={selectedOrder?.value}
-              selectedManas={selectedMana}
-              onMint={() => {
-                setIsGenesisAdventurerMintModalOpen(true);
-              }}
-            />
-          </div>
-        </div>
-        <AddWalletModal
-          key={new Date().getTime() + "-add-modal"}
-          isOpen={isAddWalletModalOpen}
-          onClose={() => {
-            setIsAddWalletModalOpen(false);
-          }}
-          onAdd={onAddWallet}
-        />
-        {isGenesisAdventurerMintModalOpen && (
-          <GenesisAdventurerMintInstructionsModal
-            key={new Date().getTime() + "-ga-modal"}
-            isOpen={isGenesisAdventurerMintModalOpen}
-            onClose={() => {
-              setIsGenesisAdventurerMintModalOpen(false);
-            }}
-            selectedManas={selectedMana}
-          />
-        )}
-      </div>
-    </Layout_V2>
-  );
+  return {
+    top: debouncedAdventureCardTop
+  };
 }
 
 function GenesisManaHeader() {
@@ -245,12 +314,13 @@ function GenesisManaHeader() {
   );
 }
 
-function GenesisManaFilters({
-  onOrderChange,
-  selectedOrder,
-  selectedSort,
-  onSortChange
-}) {
+function GenesisManaFilters() {
+  const { state, dispatch } = useContext(ManaFinderContext);
+  const onOrderChange = (val) =>
+    dispatch({ type: "setSelectedOrder", payload: val });
+  const onSortChange = (val) =>
+    dispatch({ type: "setSelectedSort", payload: val });
+
   return (
     <div className={styles.filters}>
       <div>
@@ -258,7 +328,7 @@ function GenesisManaFilters({
         <Select
           instanceId="mana-filters"
           placeholder="Choose an Order"
-          value={selectedOrder}
+          value={state.selectedOrder}
           isClearable={true}
           onChange={onOrderChange}
           className="w-40 md:w-52"
@@ -269,7 +339,7 @@ function GenesisManaFilters({
         <label>Sort</label>
         <Select
           instanceId="mana-sort"
-          value={selectedSort}
+          value={state.selectedSort}
           onChange={onSortChange}
           className="w-40 md:w-52"
           options={GM_SORT_OPTIONS}
@@ -279,16 +349,26 @@ function GenesisManaFilters({
   );
 }
 
-function QueryTabs({
-  tabIdx,
-  onChange,
-  wallets,
-  onAddWalletClick,
-  onRemoveWallet,
-  onViewChange,
-  selectedView
-}) {
-  const { account } = useWalletContext();
+function QueryTabs() {
+  const { account, isConnected } = useWalletContext();
+  const { state, dispatch } = useContext(ManaFinderContext);
+
+  function onRemoveWallet(wallet: string) {
+    const updated = [
+      account.toLowerCase(),
+      GM_ALL_ADDRESS,
+      ...state.wallets
+        .slice(isConnected ? 3 : 2)
+        .filter((item) => item?.toLowerCase() !== wallet?.toLowerCase())
+    ];
+    dispatch({ type: "setWallets", payload: updated });
+
+    if (updated.length >= state.selectedTabIdx) {
+      setTimeout(() => {
+        dispatch({ type: "setSelectedTabIdx", payload: updated.length - 1 });
+      }, 100);
+    }
+  }
 
   function displayTab(wallet) {
     if (wallet?.toLowerCase() === account?.toLowerCase()) {
@@ -313,30 +393,51 @@ function QueryTabs({
 
   return (
     <ul className={styles.wallets}>
-      {wallets.map((wallet, idx) => (
+      {state.wallets.map((wallet, idx) => (
         <li
           key={wallet as string}
-          className={idx === tabIdx ? "border-b text-black" : "text-gray-300"}
-          onClick={() => onChange(idx)}
+          className={
+            idx === state.selectedTabIdx
+              ? "border-b text-black"
+              : "text-gray-300"
+          }
+          onClick={() => dispatch({ type: "setSelectedTabIdx", payload: idx })}
         >
           {displayTab(wallet)}
         </li>
       ))}
       <li>
-        <button className="flex items-center" onClick={onAddWalletClick}>
+        <button
+          className="flex items-center"
+          onClick={() =>
+            dispatch({ type: "setIsAddWalletModalOpen", payload: true })
+          }
+        >
           <PlusIcon />
         </button>
       </li>
       <li className="">
         <div className="border border-gray-300 rounded-md flex items-center p-2 gap-2">
-          <button onClick={() => onViewChange(GM_VIEW_OPTIONS[0])}>
+          <button
+            onClick={() =>
+              dispatch({ type: "setSelectedView", payload: GM_VIEW_OPTIONS[0] })
+            }
+          >
             <GridIcon
-              className={selectedView.value === "grid" ? "" : "text-gray-300"}
+              className={
+                state.selectedView.value === "grid" ? "" : "text-gray-300"
+              }
             />
           </button>
-          <button onClick={() => onViewChange(GM_VIEW_OPTIONS[1])}>
+          <button
+            onClick={() =>
+              dispatch({ type: "setSelectedView", payload: GM_VIEW_OPTIONS[1] })
+            }
+          >
             <ListIcon
-              className={selectedView.value === "list" ? "" : "text-gray-300"}
+              className={
+                state.selectedView.value === "list" ? "" : "text-gray-300"
+              }
             />
           </button>
         </div>
@@ -433,8 +534,11 @@ function useManaWithPricing({ address, orderId, wallets }) {
       if (!orderId) {
         return false;
       }
-      const key = mana?.suffixId?.id + (mana?.lootTokenId?.id ?? mana.itemName);
-      if (cache[key]) return false;
+      const key =
+        mana?.suffixId?.id + mana.itemName + (mana?.lootTokenId?.id ?? mana.id);
+      if (cache[key]) {
+        return false;
+      }
       cache[key] = true;
       return mana?.suffixId?.id == orderId;
     };
@@ -492,51 +596,39 @@ function useManaWithPricing({ address, orderId, wallets }) {
 
 type GenesisManaCardsByInventoryProps = {
   address: string;
-  orderId: string;
-  onSelect: (mana: Mana) => void;
-  onLoad: (manas: Mana[]) => void;
-  selectedMana?: Mana[];
-  wallets?: string[];
-  sort?: any;
-  selectedView?: any;
 };
 function GenesisManaCardsByInventory({
-  address,
-  orderId,
-  onSelect,
-  onLoad,
-  wallets,
-  selectedMana,
-  sort,
-  selectedView
+  address
 }: GenesisManaCardsByInventoryProps): ReactElement {
+  const { state, dispatch } = useContext(ManaFinderContext);
+
   const { manas: manasWithPricing, loading: isManaLoading } =
     useManaWithPricing({
       address,
-      orderId,
-      wallets
+      orderId: state.selectedOrder?.value,
+      wallets: state.wallets
     });
   const {
     items: manas,
     setSortConfig,
     sortConfig
-  } = useSortableData(manasWithPricing, sort);
+  } = useSortableData(manasWithPricing, state.selectedSort);
 
   useEffect(() => {
-    if (sortConfig?.value === sort?.value) {
+    if (sortConfig?.value === state.selectedSort?.value) {
       return;
     }
-    setSortConfig({ ...sort });
-  }, [sort?.value]);
+    setSortConfig({ ...state.selectedSort });
+  }, [state.selectedSort?.value]);
 
   const truthy = [true, true, true, true, true, true, true, true];
   const falsy = [false, false, false, false, false, false, false, false];
 
   useEffect(() => {
     if (!isManaLoading) {
-      onLoad(manas as Mana[]);
+      dispatch({ type: "setManaResults", payload: manas });
     }
-  }, [manas?.length, orderId, isManaLoading]);
+  }, [manas?.length, state.selectedOrder?.value, isManaLoading]);
 
   const [collapsed, setCollapsed] = useState([...falsy]);
   const onCollapseAll = () => setCollapsed([...truthy]);
@@ -546,8 +638,11 @@ function GenesisManaCardsByInventory({
       ...collapsed.map((val, idx) => (idx === selectedIdx ? !val : val))
     ]);
 
+  const onSelect = (mana: Mana) =>
+    dispatch({ type: "onSelectMana", payload: mana });
+
   return (
-    <div className={styles.ctr} key={sort?.value + "-cards"}>
+    <div className={styles.ctr} key={state.selectedSort?.value + "-cards"}>
       <div className={styles.controls}>
         <span onClick={onExpandAll}>Expand All (+)</span>{" "}
         <span onClick={onCollapseAll}>Collapse All (-)</span>
@@ -566,11 +661,11 @@ function GenesisManaCardsByInventory({
               {idx + 1}. {item.label} ({row.length}){" "}
               <span className={[styles.line, `bg-gray-200`].join(" ")}></span>
             </h1>
-            {collapsed[idx] ? null : selectedView?.value === "list" ? (
+            {collapsed[idx] ? null : state.selectedView?.value === "list" ? (
               <GenesisManaListRow
                 manas={row}
                 onSelect={onSelect}
-                selectedMana={selectedMana?.find(
+                selectedMana={state.selectedManaBuild?.find(
                   (mana) => mana.inventoryId === idx
                 )}
               />
@@ -578,7 +673,7 @@ function GenesisManaCardsByInventory({
               <GenesisManaCardRow
                 manas={row}
                 idx={idx}
-                selectedMana={selectedMana?.find(
+                selectedMana={state.selectedManaBuild?.find(
                   (mana) => mana.inventoryId === idx
                 )}
                 onSelect={onSelect}
@@ -604,7 +699,7 @@ function GenesisManaCardRow({ manas, idx, onSelect, selectedMana }) {
               ? mana.id === selectedMana?.id
               : mana.lootTokenId?.id === selectedMana?.lootTokenId?.id
           }
-          key={`${idx}-${mana.itemName}-${mana.lootTokenId?.id}}`}
+          key={`${idx}-${mana.id}-${mana.lootTokenId?.id}}`}
           mana={mana}
         />
       ))}
@@ -748,8 +843,6 @@ function GenesisManaCard({
           "border-4",
           isSelected ? `text-gm-${mana.suffixId.id}` : "text-white",
           `border-gm-${mana.suffixId.id}`
-          // "hover:bg-white",
-          // `hover:text-gm-${mana.suffixId.id}`
         ].join(" ")}
         onClick={onClick}
       >
@@ -880,7 +973,7 @@ function GenesisAdventurerCard({
   let manas = INVENTORY.map((item) =>
     selectedManas.find((mana) => mana.inventoryId === parseInt(item.value))
   );
-
+  //GDC
   const canMint =
     manas.filter(
       (mana) => mana?.currentOwner?.id?.toLowerCase() === account?.toLowerCase()
@@ -1038,14 +1131,38 @@ function GenesisAdventurerMintInstructionsModal({
           <li className="flex pb-4">
             <span className="flex-1"></span>
             <span>
-              resurrectGA on{" "}
+              1. setApprovalForAll on{" "}
+              <a
+                href="https://etherscan.io/address/0xf4b6040a4b1b30f1d1691699a8f3bf957b03e463#writeContract"
+                target="_blank"
+                className="text-blue-400"
+                rel="noopener noreferrer"
+              >
+                Etherscan (GM Contract)
+              </a>
+            </span>
+          </li>
+          <li className="flex items-center border-t border-gray-200 py-1">
+            <span className="flex-1">operator:</span>
+            <span className="text-xs">
+              0x8db687aceb92c66f013e1d614137238cc698fedb
+            </span>
+          </li>
+          <li className="flex mb-4 border-t border-gray-200 py-1">
+            <span className="flex-1">approved (bool):</span>
+            <span>true</span>
+          </li>
+          <li className="flex pb-4">
+            <span className="flex-1"></span>
+            <span>
+              2. resurrectGA on{" "}
               <a
                 href="https://etherscan.io/token/0x8db687aceb92c66f013e1d614137238cc698fedb#writeProxyContract"
                 target="_blank"
                 className="text-blue-400"
                 rel="noopener noreferrer"
               >
-                Etherscan
+                Etherscan (GA contract)
               </a>
             </span>
           </li>
