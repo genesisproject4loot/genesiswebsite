@@ -42,6 +42,7 @@ import { useAdventurerContract } from "hooks/useAdventurerContract";
 import ListIcon from "@components/icons/ListIcon";
 import GridIcon from "@components/icons/GridIcon";
 import { useEnsLookup } from "hooks/useEns";
+import _ from "lodash";
 
 type SelectOption = { value: string; label: string };
 type SelectSortOption = SelectOption & { direction: string; key: string };
@@ -101,7 +102,8 @@ function ManaFinderReducer(state: ManaFinderState, action: ManaFinderAction) {
         ...state,
         selectedOrder: action.payload,
         selectedManaBuild: [],
-        isGenesisAdventurerMintModalOpen: false
+        isGenesisAdventurerMintModalOpen: false,
+        isManaLoading: true
       };
     case "setSelectedView":
       return { ...state, selectedView: action.payload };
@@ -446,8 +448,224 @@ function QueryTabs() {
   );
 }
 
-function useManaWithPricing({ address, orderId, wallets }) {
+function useClaimedManaWithPricing({ address, orderId, wallets }) {
   const { floorPrice: nftxFloorPrice } = useNFTXFloorPrice();
+  const isAllQuery = GM_ALL_ADDRESS === address;
+
+  const queryByAddress: any = {
+    suffixId: orderId,
+    currentOwner: isAllQuery ? NFTX_ADDRESS : address?.toLowerCase()
+  };
+
+  const openseaQuery: any = {
+    suffixId: orderId,
+    currentOwner_not_in: [
+      ...DAO_ADDRESSES,
+      ...(wallets ? wallets.map((wallet) => wallet?.toLowerCase()) : [])
+    ]
+  };
+
+  const { data: queryByAddressResults, loading: isClaimedManaLoading } =
+    useClaimedManaRawQuery(queryByAddress, !orderId);
+
+  // Currently there's a limit of 100 items per subgraph call. Query items individually
+  // till we're able to include pricing data.
+  const { data: openseaWeaponResults, loading: isOSClaimedWeaponManaLoading } =
+    useClaimedManaRawQuery(
+      { ...openseaQuery, inventoryId: 0 },
+      !isAllQuery || !orderId
+    );
+
+  const { data: openseaChestResults, loading: isOSClaimedChestManaLoading } =
+    useClaimedManaRawQuery(
+      { ...openseaQuery, inventoryId: 1 },
+      !isAllQuery || !orderId
+    );
+
+  const { data: openseaHeadResults, loading: isOSClaimedHeadManaLoading } =
+    useClaimedManaRawQuery(
+      { ...openseaQuery, inventoryId: 2 },
+      !isAllQuery || !orderId
+    );
+
+  const { data: openseaWaistResults, loading: isOSClaimedWaistManaLoading } =
+    useClaimedManaRawQuery(
+      { ...openseaQuery, inventoryId: 3 },
+      !isAllQuery || !orderId
+    );
+
+  const { data: openseaFootResults, loading: isOSClaimedFootManaLoading } =
+    useClaimedManaRawQuery(
+      { ...openseaQuery, inventoryId: 4 },
+      !isAllQuery || !orderId
+    );
+
+  const { data: openseaHandResults, loading: isOSClaimedHandManaLoading } =
+    useClaimedManaRawQuery(
+      { ...openseaQuery, inventoryId: 5 },
+      !isAllQuery || !orderId
+    );
+
+  const { data: openseaNeckResults, loading: isOSClaimedNeckManaLoading } =
+    useClaimedManaRawQuery(
+      { ...openseaQuery, inventoryId: 6 },
+      !isAllQuery || !orderId
+    );
+
+  const { data: openseaRingResults, loading: isOSClaimedRingManaLoading } =
+    useClaimedManaRawQuery(
+      { ...openseaQuery, inventoryId: 7 },
+      !isAllQuery || !orderId
+    );
+
+  const openseaResults = [
+    ...(openseaWeaponResults?.manas ?? []),
+    ...(openseaChestResults?.manas ?? []),
+    ...(openseaHeadResults?.manas ?? []),
+    ...(openseaWaistResults?.manas ?? []),
+    ...(openseaFootResults?.manas ?? []),
+    ...(openseaHandResults?.manas ?? []),
+    ...(openseaNeckResults?.manas ?? []),
+    ...(openseaRingResults?.manas ?? [])
+  ];
+
+  const { data: openSeaManaData } = useOpenseaManaData(
+    [...openseaResults].map((mana) => String(mana.id)) ?? []
+  );
+
+  const claimedData = {
+    manas: [...(queryByAddressResults?.manas ?? []), ...(openseaResults ?? [])]
+  };
+
+  const mapOpenseaManaPricing = (mana) => {
+    return {
+      ...mana,
+      price: isNFTX(mana)
+        ? nftxFloorPrice
+        : openSeaManaData?.queryManas?.manas?.find(
+            (item) => item.id == mana?.id
+          )?.price || undefined,
+      rarity: itemRarity(mana.itemName)
+    };
+  };
+
+  const manas = (claimedData?.manas ?? []).map(mapOpenseaManaPricing);
+
+  return {
+    manas,
+    loading:
+      isClaimedManaLoading ||
+      isOSClaimedWeaponManaLoading ||
+      isOSClaimedChestManaLoading ||
+      isOSClaimedHeadManaLoading ||
+      isOSClaimedWaistManaLoading ||
+      isOSClaimedFootManaLoading ||
+      isOSClaimedHandManaLoading ||
+      isOSClaimedNeckManaLoading ||
+      isOSClaimedRingManaLoading
+  };
+}
+
+function useUnClaimedManaWithPricing({ address, orderId, wallets }) {
+  const isAllQuery = GM_ALL_ADDRESS === address;
+
+  const queryBags: any = {
+    manasUnclaimed_not: "0"
+  };
+  if (!isAllQuery) {
+    queryBags.currentOwner = address?.toLowerCase();
+  } else {
+    queryBags.currentOwner_not_in = [
+      ...DAO_ADDRESSES,
+      ...(wallets ? wallets.map((wallet) => wallet?.toLowerCase()) : [])
+    ];
+  }
+
+  const { data: weaponBagData, loading: isWeaponBagDataLoading } =
+    useManaBagsRawQuery(
+      { ...queryBags, weaponSuffixId: parseInt(orderId) },
+      !orderId
+    );
+
+  const { data: chestBagData, loading: isChestBagDataLoading } =
+    useManaBagsRawQuery(
+      { ...queryBags, chestSuffixId: parseInt(orderId) },
+      !orderId
+    );
+  const { data: headBagData, loading: isHeadBagDataLoading } =
+    useManaBagsRawQuery(
+      { ...queryBags, headSuffixId: parseInt(orderId) },
+      !orderId
+    );
+  const { data: waistBagData, loading: isWaistBagDataLoading } =
+    useManaBagsRawQuery(
+      { ...queryBags, waistSuffixId: parseInt(orderId) },
+      !orderId
+    );
+  const { data: footBagData, loading: isFootBagDataLoading } =
+    useManaBagsRawQuery(
+      { ...queryBags, footSuffixId: parseInt(orderId) },
+      !orderId
+    );
+  const { data: handBagData, loading: isHandBagDataLoading } =
+    useManaBagsRawQuery(
+      { ...queryBags, handSuffixId: parseInt(orderId) },
+      !orderId
+    );
+  const { data: neckBagData, loading: isNeckBagDataLoading } =
+    useManaBagsRawQuery(
+      { ...queryBags, neckSuffixId: parseInt(orderId) },
+      !orderId
+    );
+  const { data: ringBagData, loading: isRingDataBagLoading } =
+    useManaBagsRawQuery(
+      { ...queryBags, ringSuffixId: parseInt(orderId) },
+      !orderId
+    );
+
+  const bagResults = [
+    ...(weaponBagData?.bags ?? []),
+    ...(chestBagData?.bags ?? []),
+    ...(headBagData?.bags ?? []),
+    ...(waistBagData?.bags ?? []),
+    ...(footBagData?.bags ?? []),
+    ...(handBagData?.bags ?? []),
+    ...(neckBagData?.bags ?? []),
+    ...(ringBagData?.bags ?? [])
+  ];
+
+  const { data: openseaBagData, loading: isOSUnclaimedBagDataLoading } =
+    useOpenseaBagsData(_.uniq(bagResults?.map((bag) => String(bag.id)) ?? []));
+
+  const mapOpenseaBagPricing = (mana) => {
+    return {
+      ...mana,
+      price:
+        openseaBagData?.queryBags?.bags?.find(
+          (bag) => bag.id == mana?.lootTokenId?.id
+        )?.price || undefined,
+      rarity: itemRarity(mana.itemName)
+    };
+  };
+  return {
+    manas: (bagResults ?? [])
+      .map(transformUnclaimedMana)
+      .flat()
+      .map(mapOpenseaBagPricing),
+    loading:
+      isWeaponBagDataLoading ||
+      isChestBagDataLoading ||
+      isHeadBagDataLoading ||
+      isWaistBagDataLoading ||
+      isFootBagDataLoading ||
+      isHandBagDataLoading ||
+      isNeckBagDataLoading ||
+      isRingDataBagLoading ||
+      isOSUnclaimedBagDataLoading
+  };
+}
+
+function useManaWithPricing({ address, orderId, wallets }) {
   const isAllQuery = GM_ALL_ADDRESS === address;
   const bagsQuery: any = {
     manasUnclaimed_not: "0",
@@ -464,70 +682,13 @@ function useManaWithPricing({ address, orderId, wallets }) {
       ...(wallets ? wallets.map((wallet) => wallet?.toLowerCase()) : [])
     ];
   }
-  const { data: bagData, loading: isUnclaimedBagsLoading } =
-    useManaBagsRawQuery(bagsQuery);
-  const { data: openSeaBagData, loading: isOSUnclaimedBagsLoading } =
-    useOpenseaBagsData(bagData?.bags?.map((bag) => String(bag.id)) ?? []);
 
-  const walletQuery: any = {
-    suffixId: orderId,
-    currentOwner: isAllQuery ? NFTX_ADDRESS : address?.toLowerCase()
-  };
+  const { manas: unclaimedManas, loading: isUnclaimedLoadiing } =
+    useUnClaimedManaWithPricing({ address, orderId, wallets });
 
-  const openseaQuery: any = {
-    suffixId: orderId,
-    currentOwner_not_in: [
-      ...DAO_ADDRESSES,
-      ...(wallets ? wallets.map((wallet) => wallet?.toLowerCase()) : [])
-    ]
-  };
+  const { manas: claimedManas, loading: isClaimedManaLoading } =
+    useClaimedManaWithPricing({ address, orderId, wallets });
 
-  const { data: walletResults, loading: isClaimedManaLoading } =
-    useClaimedManaRawQuery(walletQuery);
-
-  // Currently there's a limit of 100 items per subgraph call. Query items individually
-  // till we're able to include pricing data.
-  const { data: openseaWeaponResults, loading: isOSClaimedWeaponManaLoading } =
-    useClaimedManaRawQuery({ ...openseaQuery, inventoryId: 0 }, !isAllQuery);
-
-  const { data: openseaChestResults, loading: isOSClaimedChestManaLoading } =
-    useClaimedManaRawQuery({ ...openseaQuery, inventoryId: 1 }, !isAllQuery);
-
-  const { data: openseaHeadResults, loading: isOSClaimedHeadManaLoading } =
-    useClaimedManaRawQuery({ ...openseaQuery, inventoryId: 2 }, !isAllQuery);
-
-  const { data: openseaWaistResults, loading: isOSClaimedWaistManaLoading } =
-    useClaimedManaRawQuery({ ...openseaQuery, inventoryId: 3 }, !isAllQuery);
-
-  const { data: openseaFootResults, loading: isOSClaimedFootManaLoading } =
-    useClaimedManaRawQuery({ ...openseaQuery, inventoryId: 4 }, !isAllQuery);
-
-  const { data: openseaHandResults, loading: isOSClaimedHandManaLoading } =
-    useClaimedManaRawQuery({ ...openseaQuery, inventoryId: 5 }, !isAllQuery);
-
-  const { data: openseaNeckResults, loading: isOSClaimedNeckManaLoading } =
-    useClaimedManaRawQuery({ ...openseaQuery, inventoryId: 6 }, !isAllQuery);
-
-  const { data: openseaRingResults, loading: isOSClaimedRingManaLoading } =
-    useClaimedManaRawQuery({ ...openseaQuery, inventoryId: 7 }, !isAllQuery);
-
-  const openseaResults = [
-    ...(openseaWeaponResults?.manas ?? []),
-    ...(openseaChestResults?.manas ?? []),
-    ...(openseaHeadResults?.manas ?? []),
-    ...(openseaWaistResults?.manas ?? []),
-    ...(openseaFootResults?.manas ?? []),
-    ...(openseaHandResults?.manas ?? []),
-    ...(openseaNeckResults?.manas ?? []),
-    ...(openseaRingResults?.manas ?? [])
-  ];
-  const { data: openSeaManaData } = useOpenseaManaData(
-    [...openseaResults].map((mana) => String(mana.id)) ?? []
-  );
-
-  const claimedData = {
-    manas: [...(walletResults?.manas ?? []), ...(openseaResults ?? [])]
-  };
   const applyFilters = () => {
     const cache = {};
     return (mana) => {
@@ -544,53 +705,13 @@ function useManaWithPricing({ address, orderId, wallets }) {
     };
   };
 
-  const mapOpenseaManaPricing = (mana) => {
-    return {
-      ...mana,
-      price: isNFTX(mana)
-        ? nftxFloorPrice
-        : openSeaManaData?.queryManas?.manas?.find(
-            (item) => item.id == mana?.id
-          )?.price || undefined,
-      rarity: itemRarity(mana.itemName)
-    };
-  };
-
-  const mapOpenseaBagPricing = (mana) => {
-    return {
-      ...mana,
-      price:
-        openSeaBagData?.queryBags?.bags?.find(
-          (bag) => bag.id == mana?.lootTokenId?.id
-        )?.price || undefined,
-      rarity: itemRarity(mana.itemName)
-    };
-  };
-
-  const manas = (claimedData?.manas ?? [])
-    .map(mapOpenseaManaPricing)
-    .concat(
-      (bagData?.bags ?? [])
-        .map(transformUnclaimedMana)
-        .flat()
-        .map(mapOpenseaBagPricing)
-    )
-    .filter(applyFilters());
+  const manas = [...(claimedManas ?? []), ...(unclaimedManas ?? [])].filter(
+    applyFilters()
+  );
 
   return {
     manas,
-    loading:
-      isUnclaimedBagsLoading ||
-      isOSUnclaimedBagsLoading ||
-      isClaimedManaLoading ||
-      isOSClaimedWeaponManaLoading ||
-      isOSClaimedChestManaLoading ||
-      isOSClaimedHeadManaLoading ||
-      isOSClaimedWaistManaLoading ||
-      isOSClaimedFootManaLoading ||
-      isOSClaimedHandManaLoading ||
-      isOSClaimedNeckManaLoading ||
-      isOSClaimedRingManaLoading
+    loading: isUnclaimedLoadiing || isClaimedManaLoading
   };
 }
 
@@ -630,12 +751,12 @@ function GenesisManaCardsByInventory({
     }
   }, [manas?.length, state.selectedOrder?.value, isManaLoading]);
 
-  const [collapsed, setCollapsed] = useState([...falsy]);
+  const [collapsed, setCollapsed] = useState([...truthy]);
   const onCollapseAll = () => setCollapsed([...truthy]);
   const onExpandAll = () => setCollapsed([...falsy]);
   const onToggleExpand = (selectedIdx) =>
     setCollapsed([
-      ...collapsed.map((val, idx) => (idx === selectedIdx ? !val : val))
+      ...collapsed.map((val, idx) => (idx === selectedIdx ? !val : true))
     ]);
 
   const onSelect = (mana: Mana) =>
