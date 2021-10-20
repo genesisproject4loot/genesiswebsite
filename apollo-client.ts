@@ -1,26 +1,34 @@
-import { ApolloClient, ApolloLink, HttpLink, InMemoryCache } from "@apollo/client";
-import { RestLink } from 'apollo-link-rest';
-import { RetryLink } from '@apollo/client/link/retry';
+import { ApolloClient, HttpLink, InMemoryCache } from "@apollo/client";
+import { RestLink } from "apollo-link-rest";
+import { RetryLink } from "@apollo/client/link/retry";
 
-const theGraphLink = new HttpLink({uri:"https://api.thegraph.com/subgraphs/name/treppers/genesisproject"});
+const theGraphLink = new HttpLink({
+  uri:
+    process.env.NEXT_PUBLIC_SUBGRAPH_URL ??
+    "https://api.thegraph.com/subgraphs/name/treppers/genesisproject"
+});
 const apiLink = new RestLink({
-  uri:'/api',
-  responseTransformer: response => response.json()
+  uri: "/api",
+  responseTransformer: (response) => response.json()
 });
 
-const theNFTxLink = new HttpLink({uri:"https://api.thegraph.com/subgraphs/name/nftx-project/nftx-v2"});
-const theSushiSwapLink = new HttpLink({uri:"https://api.thegraph.com/subgraphs/name/zippoxer/sushiswap-subgraph-fork"});
+const theNFTxLink = new HttpLink({
+  uri: "https://api.thegraph.com/subgraphs/name/nftx-project/nftx-v2"
+});
+const theSushiSwapLink = new HttpLink({
+  uri: "https://api.thegraph.com/subgraphs/name/zippoxer/sushiswap-subgraph-fork"
+});
 
 const dispatcherLink = new RetryLink().split(
-  (operation) =>  operation.getContext()?.restful,
+  (operation) => operation.getContext()?.restful,
   apiLink,
   new RetryLink().split(
-    (operation) =>  operation.getContext()?.nftx,
+    (operation) => operation.getContext()?.nftx,
     theNFTxLink,
     new RetryLink().split(
-      (operation) =>  operation.getContext()?.sushiswap,
+      (operation) => operation.getContext()?.sushiswap,
       theSushiSwapLink,
-      theGraphLink,
+      theGraphLink
     )
   )
 );
@@ -31,4 +39,3 @@ const client = new ApolloClient({
 });
 
 export default client;
-
