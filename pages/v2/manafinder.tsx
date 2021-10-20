@@ -18,7 +18,8 @@ import {
   INVENTORY,
   NFTX_ADDRESS,
   GM_SORT_OPTIONS,
-  GM_VIEW_OPTIONS
+  GM_VIEW_OPTIONS,
+  OS_ADVENTURER_URL
 } from "utils/constants";
 import { useWalletContext } from "hooks/useWalletContext";
 import { Modal } from "components/Modal";
@@ -53,11 +54,13 @@ interface ManaFinderState {
   selectedSort: SelectSortOption;
   selectedManaBuild: Mana[];
   manaResults: Mana[];
+  reclaimedMana: Mana[];
   isManaLoading: boolean;
   wallets: string[];
   isAddWalletModalOpen: boolean;
-  isGenesisAdventurerMintModalOpen: boolean;
+  isGenesisAdventurerResurrectModalOpen: boolean;
   selectedTabIdx: number;
+  refreshCount: number;
 }
 const defaultManaFinderState: ManaFinderState = {
   selectedOrder: null,
@@ -65,11 +68,13 @@ const defaultManaFinderState: ManaFinderState = {
   selectedSort: GM_SORT_OPTIONS[0],
   selectedManaBuild: [],
   manaResults: [],
+  reclaimedMana: [],
   isManaLoading: false,
   wallets: [],
   isAddWalletModalOpen: false,
-  isGenesisAdventurerMintModalOpen: false,
-  selectedTabIdx: 0
+  isGenesisAdventurerResurrectModalOpen: false,
+  selectedTabIdx: 0,
+  refreshCount: 0
 };
 
 type ManaFinderAction =
@@ -81,11 +86,12 @@ type ManaFinderAction =
   | { type: "setIsManaLoading"; payload: boolean }
   | { type: "setWallets"; payload: string[] }
   | { type: "setIsAddWalletModalOpen"; payload: boolean }
-  | { type: "setIsGenesisAdventurerMintModalOpen"; payload: boolean }
+  | { type: "setIsGenesisAdventurerResurrectModalOpen"; payload: boolean }
   | { type: "setSelectedTabIdx"; payload: number }
   | { type: "onSelectMana"; payload: Mana }
   | { type: "onAddWallet"; payload: string }
-  | { type: "onRemoveWallet"; payload: string };
+  | { type: "onRemoveWallet"; payload: string }
+  | { type: "onReclaimMana"; payload: Mana[] };
 
 const ManaFinderContext = createContext<{
   state: ManaFinderState;
@@ -102,7 +108,7 @@ function ManaFinderReducer(state: ManaFinderState, action: ManaFinderAction) {
         ...state,
         selectedOrder: action.payload,
         selectedManaBuild: [],
-        isGenesisAdventurerMintModalOpen: false,
+        isGenesisAdventurerResurrectModalOpen: false,
         isManaLoading: true
       };
     case "setSelectedView":
@@ -142,13 +148,23 @@ function ManaFinderReducer(state: ManaFinderState, action: ManaFinderAction) {
       return { ...state, wallets: [...action.payload] };
     case "setIsAddWalletModalOpen":
       return { ...state, isAddWalletModalOpen: action.payload };
-    case "setIsGenesisAdventurerMintModalOpen":
-      return { ...state, isGenesisAdventurerMintModalOpen: action.payload };
+    case "setIsGenesisAdventurerResurrectModalOpen":
+      return {
+        ...state,
+        isGenesisAdventurerResurrectModalOpen: action.payload
+      };
     case "setSelectedTabIdx":
       if (action.payload >= state.wallets.length) {
         return state;
       }
       return { ...state, selectedTabIdx: action.payload };
+    case "onReclaimMana":
+      return {
+        ...state,
+        refreshCount: state.refreshCount + 1,
+        selectedManaBuild: [],
+        reclaimedMana: [...state.reclaimedMana, ...action.payload]
+      };
     case "onSelectMana":
       const foundIdx = state.selectedManaBuild.findIndex(
         (selected) => selected.inventoryId === action.payload.inventoryId
@@ -186,6 +202,7 @@ function ManaFinderReducer(state: ManaFinderState, action: ManaFinderAction) {
           isAddWalletModalOpen: false
         };
       }
+
     default:
       return state;
   }
@@ -232,20 +249,23 @@ export default function Manafinder_V2(): ReactElement {
                     address={state.wallets[state.selectedTabIdx] as string}
                   />
                   {state.isManaLoading && (
-                    <div className="absolute w-full h-full top-32 left-0 bg-black bg-opacity-10 flex justify-center z-50">
+                    <div className="absolute w-full h-full top-0 left-0 bg-black bg-opacity-10 flex justify-center z-50">
                       <LoadingIcon className="mt-40 w-28 h-28" />{" "}
                     </div>
                   )}
                 </div>
               </div>
               <GenesisAdventurerCard
+                key={
+                  state.selectedOrder?.value + state.selectedManaBuild?.length
+                }
                 className={styles.ga}
                 style={{ top: genesisAdventurerCardTopPostion }}
                 orderId={state.selectedOrder?.value}
                 selectedManas={state.selectedManaBuild}
                 onMint={() => {
                   dispatch({
-                    type: "setIsGenesisAdventurerMintModalOpen",
+                    type: "setIsGenesisAdventurerResurrectModalOpen",
                     payload: true
                   });
                 }}
@@ -266,13 +286,13 @@ export default function Manafinder_V2(): ReactElement {
               });
             }}
           />
-          {state.isGenesisAdventurerMintModalOpen && (
-            <GenesisAdventurerMintInstructionsModal
+          {state.isGenesisAdventurerResurrectModalOpen && (
+            <GenesisAdventurerResurrectModal
               key={new Date().getTime() + "-ga-modal"}
-              isOpen={state.isGenesisAdventurerMintModalOpen}
+              isOpen={state.isGenesisAdventurerResurrectModalOpen}
               onClose={() => {
                 dispatch({
-                  type: "setIsGenesisAdventurerMintModalOpen",
+                  type: "setIsGenesisAdventurerResurrectModalOpen",
                   payload: false
                 });
               }}
@@ -465,8 +485,11 @@ function useClaimedManaWithPricing({ address, orderId, wallets }) {
     ]
   };
 
-  const { data: queryByAddressResults, loading: isClaimedManaLoading } =
-    useClaimedManaRawQuery(queryByAddress, !orderId);
+  const {
+    data: queryByAddressResults,
+    loading: isClaimedManaLoading,
+    refetch: refetchWallet
+  } = useClaimedManaRawQuery(queryByAddress, !orderId);
 
   // Currently there's a limit of 100 items per subgraph call. Query items individually
   // till we're able to include pricing data.
@@ -562,7 +585,10 @@ function useClaimedManaWithPricing({ address, orderId, wallets }) {
       isOSClaimedFootManaLoading ||
       isOSClaimedHandManaLoading ||
       isOSClaimedNeckManaLoading ||
-      isOSClaimedRingManaLoading
+      isOSClaimedRingManaLoading,
+    refetch: () => {
+      return refetchWallet();
+    }
   };
 }
 
@@ -666,6 +692,8 @@ function useUnClaimedManaWithPricing({ address, orderId, wallets }) {
 }
 
 function useManaWithPricing({ address, orderId, wallets }) {
+  const { state } = useContext(ManaFinderContext);
+
   const isAllQuery = GM_ALL_ADDRESS === address;
   const bagsQuery: any = {
     manasUnclaimed_not: "0",
@@ -686,13 +714,19 @@ function useManaWithPricing({ address, orderId, wallets }) {
   const { manas: unclaimedManas, loading: isUnclaimedLoadiing } =
     useUnClaimedManaWithPricing({ address, orderId, wallets });
 
-  const { manas: claimedManas, loading: isClaimedManaLoading } =
-    useClaimedManaWithPricing({ address, orderId, wallets });
+  const {
+    manas: claimedManas,
+    loading: isClaimedManaLoading,
+    refetch: refetchClaimedMana
+  } = useClaimedManaWithPricing({ address, orderId, wallets });
 
   const applyFilters = () => {
     const cache = {};
     return (mana) => {
       if (!orderId) {
+        return false;
+      }
+      if (state?.reclaimedMana?.find((reclaimed) => reclaimed.id === mana.id)) {
         return false;
       }
       const key =
@@ -711,7 +745,10 @@ function useManaWithPricing({ address, orderId, wallets }) {
 
   return {
     manas,
-    loading: isUnclaimedLoadiing || isClaimedManaLoading
+    loading: isUnclaimedLoadiing || isClaimedManaLoading,
+    refetch: () => {
+      return refetchClaimedMana();
+    }
   };
 }
 
@@ -723,12 +760,15 @@ function GenesisManaCardsByInventory({
 }: GenesisManaCardsByInventoryProps): ReactElement {
   const { state, dispatch } = useContext(ManaFinderContext);
 
-  const { manas: manasWithPricing, loading: isManaLoading } =
-    useManaWithPricing({
-      address,
-      orderId: state.selectedOrder?.value,
-      wallets: state.wallets
-    });
+  const {
+    manas: manasWithPricing,
+    loading: isManaLoading,
+    refetch: refetchMana
+  } = useManaWithPricing({
+    address,
+    orderId: state.selectedOrder?.value,
+    wallets: state.wallets
+  });
   const {
     items: manas,
     setSortConfig,
@@ -742,14 +782,23 @@ function GenesisManaCardsByInventory({
     setSortConfig({ ...state.selectedSort });
   }, [state.selectedSort?.value]);
 
-  const truthy = [true, true, true, true, true, true, true, true];
-  const falsy = [false, false, false, false, false, false, false, false];
-
   useEffect(() => {
     if (!isManaLoading) {
       dispatch({ type: "setManaResults", payload: manas });
     }
   }, [manas?.length, state.selectedOrder?.value, isManaLoading]);
+
+  useEffect(() => {
+    if (state.refreshCount === 0) {
+      return;
+    }
+    refetchMana().then(() => {
+      dispatch({ type: "setManaResults", payload: manas });
+    });
+  }, [state.refreshCount]);
+
+  const truthy = [true, true, true, true, true, true, true, true];
+  const falsy = [false, false, false, false, false, false, false, false];
 
   const [collapsed, setCollapsed] = useState([...truthy]);
   const onCollapseAll = () => setCollapsed([...truthy]);
@@ -1094,7 +1143,7 @@ function GenesisAdventurerCard({
   let manas = INVENTORY.map((item) =>
     selectedManas.find((mana) => mana.inventoryId === parseInt(item.value))
   );
-  //GDC
+
   const canMint =
     manas.filter(
       (mana) => mana?.currentOwner?.id?.toLowerCase() === account?.toLowerCase()
@@ -1135,41 +1184,44 @@ function GenesisAdventurerCard({
   }
   return (
     <div {...props}>
-      <ul className={styles.card}>
-        {manas.map((mana, idx) => (
-          <li className={styles.item} key={idx}>
-            {mana?.itemName ? (
-              <>
-                <span className="flex-1">
-                  <span>{idx + 1}.</span> {mana.itemName}
-                </span>{" "}
-                <span>
-                  <AccessoryItem mana={mana} />
-                </span>
-              </>
-            ) : (
-              <>
-                <span>{idx + 1}.</span>
-                <span className={styles.line}></span>
-              </>
-            )}
+      <div className="flex flex-col">
+        <ul className={styles.card}>
+          {manas.map((mana, idx) => (
+            <li className={styles.item} key={idx}>
+              {mana?.itemName ? (
+                <>
+                  <span className="flex-1">
+                    <span>{idx + 1}.</span> {mana.itemName}
+                  </span>{" "}
+                  <span>
+                    <AccessoryItem mana={mana} />
+                  </span>
+                </>
+              ) : (
+                <>
+                  <span>{idx + 1}.</span>
+                  <span className={styles.line}></span>
+                </>
+              )}
+            </li>
+          ))}
+          <li className={[styles.footer, `bg-gm-${orderId}`].join(" ")}>
+            Genesis Adventurer of{" "}
+            {SUFFICES.find((order) => order.value === orderId)?.label}
           </li>
-        ))}
-        <li className={[styles.footer, `bg-gm-${orderId}`].join(" ")}>
-          Genesis Adventurer of{" "}
-          {SUFFICES.find((order) => order.value === orderId)?.label}
-        </li>
-      </ul>
-      <div className="text-blue-400 px-4 pb-4 font-extrabold">
-        {canMint && (
-          <button
-            onClick={() => {
-              onMint(selectedManas);
-            }}
-          >
-            Congrats, instructions to mint!
-          </button>
-        )}
+        </ul>
+        <div className="pb-4 mx-4">
+          {canMint && (
+            <button
+              className="bg-blue-400 text-white px-4 py-2 font-extrabold rounded-md text-center w-full"
+              onClick={() => {
+                onMint(selectedManas);
+              }}
+            >
+              Congrats, mint your Adventurer!
+            </button>
+          )}
+        </div>
       </div>
     </div>
   );
@@ -1217,18 +1269,51 @@ function AddWalletModal({ isOpen, onClose, onAdd }: AddWalletModalProps) {
   );
 }
 
-interface GenesisAdventurerMintInstructionsModalProps {
+interface GenesisAdventurerResurrectModalProps {
   isOpen: boolean;
   onClose: () => void;
   selectedManas: Mana[];
 }
-function GenesisAdventurerMintInstructionsModal({
+function GenesisAdventurerResurrectModal({
   isOpen,
   onClose,
   selectedManas
-}: GenesisAdventurerMintInstructionsModalProps) {
+}: GenesisAdventurerResurrectModalProps) {
+  const { dispatch } = useContext(ManaFinderContext);
+
   const { getPublicPrice, adventurerContract } = useAdventurerContract();
+  const {
+    isAppoved,
+    isAppoving,
+    isResurrecting,
+    isUnAppoved,
+    approveContract,
+    resurrectGA
+  } = useAdventurerContract();
   const [price, setPrice] = useState(0);
+  const [completedTokenId, setCompletedTokenId] = useState(0);
+
+  async function onApproveClick() {
+    if (!isUnAppoved) {
+      alert("already approved or in progress");
+      return;
+    }
+    await approveContract();
+  }
+
+  async function onResurrectClick() {
+    if (!isAppoved || completedTokenId) {
+      alert("not approved or in progress");
+      return;
+    }
+    const tokenId = await resurrectGA(selectedManas);
+    if (tokenId) {
+      setCompletedTokenId(Number(tokenId));
+    } else {
+      setCompletedTokenId(0);
+      alert("There was an error resurrecting your GA. Please try again.");
+    }
+  }
 
   useEffect(() => {
     if (!adventurerContract) return;
@@ -1244,10 +1329,19 @@ function GenesisAdventurerMintInstructionsModal({
   return (
     <Modal
       isOpen={isOpen}
-      onClose={onClose}
-      title="Genesis Adventurer Mint Instructions"
+      onClose={() => {
+        // Can't close while interacting with contract
+        if (isResurrecting || isAppoving) {
+          return;
+        }
+        if (completedTokenId > 0) {
+          dispatch({ type: "onReclaimMana", payload: selectedManas });
+        }
+        onClose();
+      }}
+      title="Genesis Adventurer Resurrect"
     >
-      <div className="pt-12 pb-8">
+      <div className="pt-12 pb-8 text-xs">
         <ul>
           <li className="flex pb-4">
             <span className="flex-1"></span>
@@ -1265,13 +1359,33 @@ function GenesisAdventurerMintInstructionsModal({
           </li>
           <li className="flex items-center border-t border-gray-200 py-1">
             <span className="flex-1">operator:</span>
-            <span className="text-xs">
-              0x8db687aceb92c66f013e1d614137238cc698fedb
-            </span>
+            <span>0x8db687aceb92c66f013e1d614137238cc698fedb</span>
           </li>
-          <li className="flex mb-4 border-t border-gray-200 py-1">
+
+          <li className="flex py-4 border-t border-gray-200">
             <span className="flex-1">approved (bool):</span>
             <span>true</span>
+          </li>
+          <li className="flex flex-col py-4 border-t border-gray-200">
+            {(isAppoved || isResurrecting) && (
+              <div className="flex justify-center items-center gap-2 font-bold">
+                <span className="text-green-200">Contract Approved </span>
+                <CheckIcon className="text-green-200" />
+              </div>
+            )}
+            {isUnAppoved && (
+              <button
+                onClick={onApproveClick}
+                className="bg-blue-400 text-white px-4 py-2 font-extrabold rounded-md text-center w-full"
+              >
+                Approve Adventurer Contract
+              </button>
+            )}
+            {isAppoving && (
+              <div className="flex justify-center items-center">
+                <LoadingIcon />
+              </div>
+            )}
           </li>
           <li className="flex pb-4">
             <span className="flex-1"></span>
@@ -1303,6 +1417,34 @@ function GenesisAdventurerMintInstructionsModal({
               </span>
             </li>
           ))}
+          <li className="flex flex-col py-4 border-t border-gray-200 text-base">
+            {completedTokenId > 0 && (
+              <div className="flex justify-center items-center gap-2">
+                Your Genesis Adventurer has been resurrected:
+                <a
+                  className="underline text-right text-green-200 ml-2 flex justify-center items-center"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  href={`https://opensea.io/assets/${OS_ADVENTURER_URL}/${completedTokenId}`}
+                >
+                  OpenSea <CheckIcon className="text-green-200" />
+                </a>
+              </div>
+            )}
+            {!isResurrecting && isAppoved && completedTokenId <= 0 && (
+              <button
+                onClick={onResurrectClick}
+                className="bg-blue-400 text-white px-4 py-2 font-extrabold rounded-md text-center w-full"
+              >
+                Resurrect Your Genesis Adventurer
+              </button>
+            )}
+            {isResurrecting && (
+              <div className="flex justify-center items-center">
+                <LoadingIcon />
+              </div>
+            )}
+          </li>
         </ul>
       </div>
     </Modal>

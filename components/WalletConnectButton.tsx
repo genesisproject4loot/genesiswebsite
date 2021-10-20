@@ -34,11 +34,16 @@ function ATime() {
   const [menuOpen, setMenuOpen] = useState(false);
   const { atimeContract } = useAtimeContract();
   const [atimeBalance, setAtimeBalance] = useState(0);
-  atimeContract?.balanceOf(wallet.account).then((value) => {
-    setAtimeBalance(
-      parseFloat(parseFloat(ethers.utils.formatUnits(value)).toFixed(4))
-    );
-  });
+  atimeContract
+    ?.balanceOf(wallet.account)
+    .then((value) => {
+      setAtimeBalance(
+        parseFloat(parseFloat(ethers.utils.formatUnits(value)).toFixed(4))
+      );
+    })
+    .catch((e) => {
+      console.log(e);
+    });
   const menuRef = useRef(null);
 
   useOnClickOutside(menuRef, () => setMenuOpen(false));
