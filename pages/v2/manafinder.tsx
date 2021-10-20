@@ -249,7 +249,7 @@ export default function Manafinder_V2(): ReactElement {
                     address={state.wallets[state.selectedTabIdx] as string}
                   />
                   {state.isManaLoading && (
-                    <div className="absolute w-full h-full top-32 left-0 bg-black bg-opacity-10 flex justify-center z-50">
+                    <div className="absolute w-full h-full top-0 left-0 bg-black bg-opacity-10 flex justify-center z-50">
                       <LoadingIcon className="mt-40 w-28 h-28" />{" "}
                     </div>
                   )}
@@ -1143,7 +1143,7 @@ function GenesisAdventurerCard({
   let manas = INVENTORY.map((item) =>
     selectedManas.find((mana) => mana.inventoryId === parseInt(item.value))
   );
-  //GDC
+
   const canMint =
     manas.filter(
       (mana) => mana?.currentOwner?.id?.toLowerCase() === account?.toLowerCase()

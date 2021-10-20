@@ -124,10 +124,15 @@ export function useAdventurerContract() {
   async function approveContract() {
     try {
       setContractState(AdventurerContractState.APPROVING);
-      await manaContract.setApprovalForAll(GA_CONTRACT_ADDRESS, true);
+      const tx = await manaContract.setApprovalForAll(
+        GA_CONTRACT_ADDRESS,
+        true
+      );
+      await tx?.wait();
       setContractState(AdventurerContractState.APPROVED);
       return true;
     } catch (e) {
+      setContractState(AdventurerContractState.UNAPPROVED);
       console.log(e);
       return false;
     }
