@@ -9,7 +9,7 @@
     margin: 15px 0px 0px 0px;
   }
   p {
-    color: #8e8e8e;
+    @apply text-gray-700;
     font-size: 22px;
     margin: 0px;
   }
@@ -32,8 +32,9 @@
       margin: 0 10px;
 
       a {
-        color: white;
+        color: black;
         font-size: 22px;
+        text-decoration: underline;
 
         &:hover {
           text-decoration: underline;
@@ -156,7 +157,8 @@
   }
 
   p {
-    color: #8e8e8e;
+    @apply text-gray-700;
+
     font-size: 22px;
     margin: 0px;
     hr {
@@ -165,8 +167,9 @@
     }
   }
   a {
-    color: white;
+    @apply text-gray-700;
     font-size: 22px;
+    text-decoration: underline;
 
     &:hover {
       text-decoration: underline;
@@ -182,6 +185,7 @@
   .cta {
     margin: 0 auto;
     .btn {
+      @apply rounded-md;
       width: 220px;
     }
   }
@@ -201,6 +205,7 @@
     }
 
     li {
+      @apply text-gray-700;
       margin: 0 10px 0;
 
       a {
@@ -332,6 +337,7 @@
 }
 
 .btn {
+  @apply rounded-md;
   border: 3px solid #fff;
   background: hsl(0deg 0% 10%);
   font-size: 22px;
@@ -348,6 +354,7 @@
 
 
 .btn_sm {
+  @apply rounded-md;
   display: inline-block;
   border: 1px solid #fff;
   background: hsl(0deg 0% 10%);
@@ -415,6 +422,7 @@
 
 @media screen and (max-width: 600px) {
   .home__bag_attributes {
+    @apply rounded-md;
     background-color: black;
     width: 300px;
     height: 300px;

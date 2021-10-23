@@ -3,7 +3,7 @@ import { Mana } from "./manaFinderTypes";
 
 export function shortenAddress(address) {
   if (!address) return "";
-  return address.slice(0, 3) + "..." + address.slice(-3);
+  return address.slice(0, 6) + "..." + address.slice(-4);
 }
 
 export function formatOpenseaUrl(mana: Mana) {

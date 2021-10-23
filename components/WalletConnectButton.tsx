@@ -10,7 +10,7 @@ export default function WalletConnectButton() {
     <div className="flex items-center bg-gray-0  text-sm md:text-base">
       {wallet.isConnected && (
         <span className="flex gap-2 md:gap-4">
-          <ATime />
+          {/* <ATime /> */}
           {wallet.displayName}{" "}
           <a className="cursor-pointer" onClick={wallet.disconnectWallet}>
             [ disconnect ]

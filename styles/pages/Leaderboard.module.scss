@@ -1,0 +1,28 @@
+.leaderboard__app {
+  .main {
+    @apply m-8 mx-10;
+
+  }
+
+  .hdr {
+    @apply py-10 bg-gray-0 text-white md:w-full;
+
+    > h1 {
+      @apply text-center text-3xl;
+    }
+
+    .chart {
+      @apply max-w-screen-lg m-auto md:w-full ;
+    }
+  }
+
+}
+
+// Responsive
+@media screen and (max-width: 850px) {
+  .leaderboard__app {
+    .main {
+      @apply m-4;
+    }
+  }
+}

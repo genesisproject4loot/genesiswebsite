@@ -1,18 +1,114 @@
 [
-  { "value": "1", "label": "Power" },
-  { "value": "2", "label": "Giants" },
-  { "value": "3", "label": "Titans" },
-  { "value": "4", "label": "Skill" },
-  { "value": "5", "label": "Perfection" },
-  { "value": "6", "label": "Brilliance" },
-  { "value": "7", "label": "Enlightenment" },
-  { "value": "8", "label": "Protection" },
-  { "value": "9", "label": "Anger" },
-  { "value": "10", "label": "Rage" },
-  { "value": "11", "label": "Fury" },
-  { "value": "12", "label": "Vitriol" },
-  { "value": "13", "label": "the Fox" },
-  { "value": "14", "label": "Detection" },
-  { "value": "15", "label": "Reflection" },
-  { "value": "16", "label": "the Twins" }
+  {
+    "value": "1",
+    "label": "Power",
+    "color": "#191D7E",
+    "manaTotal": 1328,
+    "adventurerTotal": 166
+  },
+  {
+    "value": "2",
+    "label": "Giants",
+    "color": "#DAC931",
+    "manaTotal": 1384,
+    "adventurerTotal": 173
+  },
+  {
+    "value": "3",
+    "label": "Titans",
+    "color": "#B45FBB",
+    "manaTotal": 1304,
+    "adventurerTotal": 163
+  },
+  {
+    "value": "4",
+    "label": "Skill",
+    "color": "#1FAD94",
+    "manaTotal": 1256,
+    "adventurerTotal": 157
+  },
+  {
+    "value": "5",
+    "label": "Perfection",
+    "color": "#2C1A72",
+    "manaTotal": 1280,
+    "adventurerTotal": 160
+  },
+  {
+    "value": "6",
+    "label": "Brilliance",
+    "color": "#36662A",
+    "manaTotal": 1216,
+    "adventurerTotal": 152
+  },
+  {
+    "value": "7",
+    "label": "Enlightenment",
+    "color": "#78365E",
+    "manaTotal": 1208,
+    "adventurerTotal": 151
+  },
+  {
+    "value": "8",
+    "label": "Protection",
+    "color": "#4F4B4B",
+    "manaTotal": 1296,
+    "adventurerTotal": 162
+  },
+  {
+    "value": "9",
+    "label": "Anger",
+    "color": "#9B1414",
+    "manaTotal": 1280,
+    "adventurerTotal": 160
+  },
+  {
+    "value": "10",
+    "label": "Rage",
+    "color": "#77CE58",
+    "manaTotal": 1192,
+    "adventurerTotal": 149
+  },
+  {
+    "value": "11",
+    "label": "Fury",
+    "color": "#C07A28",
+    "manaTotal": 1320,
+    "adventurerTotal": 165
+  },
+  {
+    "value": "12",
+    "label": "Vitriol",
+    "color": "#511D71",
+    "manaTotal": 1296,
+    "adventurerTotal": 162
+  },
+  {
+    "value": "13",
+    "label": "the Fox",
+    "color": "#949494",
+    "manaTotal": 1280,
+    "adventurerTotal": 160
+  },
+  {
+    "value": "14",
+    "label": "Detection",
+    "color": "#DB8F8B",
+    "manaTotal": 1248,
+    "adventurerTotal": 156
+  },
+  {
+    "value": "15",
+    "label": "Reflection",
+    "color": "#318C9F",
+    "manaTotal": 1232,
+    "adventurerTotal": 154
+  },
+  {
+    "value": "16",
+    "label": "the Twins",
+    "color": "#00AE3B",
+    "manaTotal": 1200,
+    "adventurerTotal": 150
+  }
 ]
