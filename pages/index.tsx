@@ -1,5 +1,5 @@
 // Imports
-import Layout from "@components/Layout"; // Layout wrapper
+import Layout_V2 from "@components/Layout_V2";
 import styles from "@styles/pages/Home.module.scss"; // Styles
 import Link from "next/link";
 import Numeral from "numeral";
@@ -24,12 +24,12 @@ export default function Home(): ReactElement {
     },
     {
       name: "Discord",
-      url: "https://discord.gg/YUYyPSuwfU"
+      url: "https://discord.gg/QzvW2WJqed"
     }
   ];
 
   return (
-    <Layout>
+    <Layout_V2>
       <div>
         <div className={styles.home__cta}>
           {/* CTA title */}
@@ -49,7 +49,7 @@ export default function Home(): ReactElement {
 
           <h2 className="text-3xl pb-6">
             <a
-              href="https://genesisproject.notion.site/The-Genesis-Project-6144d1b50af34803be5cc791dd5b5970"
+              href="https://genesisproject.super.site/"
               target="_blank"
               rel="noopener noreferrer"
             >
@@ -107,19 +107,13 @@ export default function Home(): ReactElement {
                     Instructions
                   </a>
                 </div>
-                <div className={[styles.extrainfo].join(" ")}>
-                  <Link href="/chapter1">
-                    <span className={styles.btn_sm}>Mint</span>
-                  </Link>
-                  <Link href="/v2/manafinder">
-                    <span className={styles.btn_sm}>Find</span>
-                  </Link>
+                <div className={[styles.moreinfo].join(" ")}>
                   <a
-                    href="https://nftx.io/vault/0x2d77f5b3efa51821ad6483adaf38ea4cb1824cc5/buy"
+                    href="https://nftx.io/vault/0x2d77f5b3efa51821ad6483adaf38ea4cb1824cc5/buy/"
                     target="_blank"
-                    rel="noreferrer"
+                    rel="noopener noreferrer"
                   >
-                    <span className={styles.btn_sm}>Trade</span>
+                    NFTx
                   </a>
                 </div>
               </li>
@@ -151,6 +145,22 @@ export default function Home(): ReactElement {
                     rel="noopener noreferrer"
                   >
                     Instructions
+                  </a>
+                </div>
+                <div className={[styles.moreinfo].join(" ")}>
+                  <a
+                    href="https://www.loot.exchange/collections/genesisadventurer"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    Loot Exchange
+                  </a>
+                  <a
+                    href="https://lootswag.io/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    Loot Swag
                   </a>
                 </div>
               </li>
@@ -326,10 +336,11 @@ export default function Home(): ReactElement {
           <Chapter1ProgressBars type="progress" />
           <div className={[styles.cta].join(" ")}>
             <div className={[styles.btn, styles.cta].join(" ")}>
-              <Link href="/chapter1">Distill Genesis Mana</Link>
+              <Link href="/claim">
+                <span className="text-white">Distill Genesis Mana</span>
+              </Link>
             </div>
             <div className={[styles.moreinfo].join(" ")}>
-              <Link href="/v2/manafinder">Find Mana</Link>
               <a
                 href="https://opensea.io/collection/genesis-mana"
                 target="_blank"
@@ -412,8 +423,10 @@ export default function Home(): ReactElement {
           <br />
           <div className={[styles.cta].join(" ")}>
             <div className={[styles.btn, styles.cta].join(" ")}>
-              <Link href="https://etherscan.io/token/0x8db687aceb92c66f013e1d614137238cc698fedb#writeProxyContract">
-                Resurrect a Genesis Adventurer
+              <Link href="/claim">
+                <span className="text-white">
+                  Resurrect a Genesis Adventurer
+                </span>
               </Link>
             </div>
             <div className={[styles.moreinfo].join(" ")}>
@@ -481,13 +494,13 @@ export default function Home(): ReactElement {
                 target="_blank"
                 rel="noopener noreferrer"
               >
-                Retrieve $ATIME
+                <span className="text-white">Retrieve $ATIME</span>
               </a>
             </div>
           </div>
         </div>
       </div>
-    </Layout>
+    </Layout_V2>
   );
 }
 

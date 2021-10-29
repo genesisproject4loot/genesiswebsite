@@ -1,4 +1,4 @@
-.manafinder__app {
+.claim__app {
   .main {
     @apply m-8 mx-10;
 
@@ -131,16 +131,16 @@
   
 }
 
-.manafinder__app_input_text {
+.claim__app_input_text {
   @apply shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight;
 }
-.manafinder__app_btn {
+.claim__app_btn {
   @apply inline-flex justify-center px-4 py-2 text-sm font-medium text-blue-900 bg-blue-100 border border-transparent rounded-md;
 }
 
 // Responsive
 @media screen and (max-width: 850px) {
-  .manafinder__app {
+  .claim__app {
     .main {
       @apply m-4;
       .builder {

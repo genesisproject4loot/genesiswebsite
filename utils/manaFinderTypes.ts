@@ -46,7 +46,8 @@ export interface TokenListProps {
 
 export interface Order {
   id: number;
-  manasHeld: number;
+  manasHeld?: number;
+  adventurersHeld?: number;
 }
 
 export interface ManaByOrdersData {

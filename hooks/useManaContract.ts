@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo } from "react";
 import { ethers } from "ethers";
 import manaABI from "data/genesismana-abi.json";
 import { useWalletContext } from "./useWalletContext";
+import { Mana } from "@utils/manaFinderTypes";
 
 export const GM_CONTRACT_ADDRESS =
   process.env.NEXT_PUBLIC_GM_CONTRACT_ADDRESS ??
@@ -81,17 +82,24 @@ export function useManaFromWallet() {
   };
 }
 
-export function useManaContractMinter() {
+export type ManaContractMinter = {
+  mintMana: (mana: Mana) => void;
+  isManaMintSuccessful: (mana: Mana) => boolean;
+  isManaMintInProgress: (mana: Mana) => boolean;
+  getTokenId: (mana: Mana) => number;
+};
+
+export function useManaContractMinter(): ManaContractMinter {
   const { mintMana } = useManaContract();
   const [mintsInProgress, setMintsInProgress] = useState<any[]>([]);
-  const [successFulMints, setSuccessFulMints] = useState<any[]>([]);
+  const [successFulMints, setSuccessFulMints] = useState<any>({});
 
   function isManaMintInProgress(mana) {
     return mintsInProgress.includes(getManaMintKey(mana));
   }
 
   function isManaMintSuccessful(mana) {
-    return successFulMints.includes(getManaMintKey(mana));
+    return !!successFulMints[getManaMintKey(mana)];
   }
   function getManaMintKey(mana) {
     return [mana.lootTokenId?.id, mana.inventoryId].join("-");
@@ -108,14 +116,18 @@ export function useManaContractMinter() {
         mana.inventoryId + 1
       );
       const done = await transaction.wait();
-      console.log(done);
+      const tokenId = done?.events[0]?.topics[3];
       setTimeout(async () => {
-        setSuccessFulMints([...successFulMints, getManaMintKey(mana)]);
+        setSuccessFulMints({
+          ...successFulMints,
+          [getManaMintKey(mana)]: Number(tokenId)
+        });
         setMintsInProgress(
           mintsInProgress.filter((id) => id !== getManaMintKey(mana))
         );
         //TODO add success callback
       }, 1000);
+      return tokenId;
     } catch (e) {
       e = e?.error ?? e;
       setMintsInProgress(
@@ -126,9 +138,14 @@ export function useManaContractMinter() {
     }
   }
 
+  function getTokenId(mana: Mana) {
+    return successFulMints[getManaMintKey(mana)] ?? mana?.id;
+  }
+
   return {
     mintMana: onMintMana,
     isManaMintSuccessful,
-    isManaMintInProgress
+    isManaMintInProgress,
+    getTokenId
   };
 }
