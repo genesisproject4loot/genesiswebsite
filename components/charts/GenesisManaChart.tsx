@@ -24,7 +24,7 @@ export default function GenesisManaChart(): ReactElement {
         item.label,
         orderLookup[item.value],
         item.color,
-        item.manaTotal,
+        item.manaTotal - orderLookup[item.value],
         "silver"
       ])
     ];
