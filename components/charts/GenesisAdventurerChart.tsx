@@ -30,7 +30,7 @@ export default function GenesisAdventurerChart(): ReactElement {
           item.label,
           orderLookup[item.value],
           item.color,
-          item.adventurerTotal,
+          item.adventurerTotal - orderLookup[item.value],
           "silver"
         ];
       }).sort((a, b) => b[1] - a[1])
