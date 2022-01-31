@@ -28,6 +28,37 @@ export default function Home(): ReactElement {
     }
   ];
 
+  const addATIMEToken = async function() {
+    const tokenAddress = '0x810f86eb43ccaacd401ef50dfab87945a514f9cf';
+    const tokenSymbol = 'ATIME';
+    const tokenDecimals = 18;
+    const tokenImage = '';
+
+    try {
+      // wasAdded is a boolean. Like any RPC method, an error may be thrown.
+      const wasAdded = await window.ethereum.request({
+        method: 'wallet_watchAsset',
+        params: {
+          type: 'ERC20', // Initially only supports ERC20, but eventually more!
+          options: {
+            address: tokenAddress, // The address that the token is at.
+            symbol: tokenSymbol, // A ticker symbol or shorthand, up to 5 chars.
+            decimals: tokenDecimals, // The number of decimals in the token
+            image: tokenImage, // A string url of the token logo
+          },
+        },
+      });
+
+      if (wasAdded) {
+        console.log('Thanks for your interest!');
+      } else {
+        console.log('Your loss!');
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
   return (
     <Layout_V2>
       <div>
@@ -174,14 +205,12 @@ export default function Home(): ReactElement {
                 <div className={[styles.moreinfo].join(" ")}>
                   <a
                     href="#"
-                    style={{ color: "#888", cursor: "default" }}
                     onClick={(e) => {
                       e.preventDefault();
+                      addATIMEToken();
                     }}
-                    target="_blank"
-                    rel="noopener noreferrer"
                   >
-                    OpenSea
+                    Add&nbsp;ATIME
                   </a>
                   <a
                     href="https://etherscan.io/token/0x810f86eb43ccaacd401ef50dfab87945a514f9cf#writeContract"
@@ -494,8 +523,17 @@ export default function Home(): ReactElement {
                 target="_blank"
                 rel="noopener noreferrer"
               >
-                <span className="text-white">Retrieve $ATIME</span>
+                <span className="text-white">Retrieve $ATIME</span>=
               </a>
+            </div>
+            <div className={[styles.moreinfo].join(" ")}>
+                <a href="#" onClick={(e) => {
+                      e.preventDefault();
+                      addATIMEToken();
+                    }}
+                >
+                  Add ATIME to MetaMask
+                </a>
             </div>
           </div>
         </div>
