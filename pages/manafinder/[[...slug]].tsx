@@ -15,6 +15,7 @@ import type { ReactElement } from "react";
 import type { TokenListProps } from "@utils/manaFinderTypes";
 import { useOpenseaBagsData, useOpenseaManaData } from "hooks/useOpensea";
 import { useNFTXFloorPrice } from "hooks/useNTFX";
+import { NFTX_MANA_ADDRESS } from "@utils/constants";
 
 export default function Home(props): ReactElement {
   const router = useRouter();
@@ -100,7 +101,7 @@ function ClaimedMana(props: { suffixId: number; inventoryId: number }) {
   const { data: openseaData } = useOpenseaManaData(
     (data?.manas ?? []).map((mana) => mana.id.toString())
   );
-  const { floorPrice: nftxFloorPrice } = useNFTXFloorPrice();
+  const { floorPrice: nftxFloorPrice } = useNFTXFloorPrice(NFTX_MANA_ADDRESS);
 
   const tableData = (data?.manas ?? []).map((item) => ({
     id: Number(item.id),

@@ -1,4 +1,9 @@
-import { NFTX_ADDRESS, OS_LOOT_URL, OS_MANA_URL } from "./constants";
+import {
+  NFTX_MANA_ADDRESS,
+  NFTX_LOOT_ADDRESS,
+  OS_LOOT_URL,
+  OS_MANA_URL
+} from "./constants";
 import { Mana } from "./manaFinderTypes";
 
 export function shortenAddress(address) {
@@ -14,7 +19,11 @@ export function formatOpenseaUrl(mana: Mana) {
 }
 
 export function formatNFTXUrl(mana: Mana) {
-  return mana.currentOwner?.id?.toLowerCase() === NFTX_ADDRESS
-    ? `https://nftx.io/vault/0x2d77f5b3efa51821ad6483adaf38ea4cb1824cc5/${mana.id}`
-    : "";
+  const owner = mana.currentOwner?.id?.toLowerCase();
+  if (owner === NFTX_MANA_ADDRESS) {
+    return `https://nftx.io/vault/${owner}/${mana.id}`;
+  } else if (owner === NFTX_LOOT_ADDRESS) {
+    return `https://nftx.io/vault/${owner}/${mana?.lootTokenId?.id}`;
+  }
+  return "";
 }
