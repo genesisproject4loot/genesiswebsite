@@ -16,7 +16,8 @@ import {
   GM_ALL_ADDRESS,
   SUFFICES,
   INVENTORY,
-  NFTX_ADDRESS,
+  NFTX_MANA_ADDRESS,
+  NFTX_LOOT_ADDRESS,
   GM_SORT_OPTIONS,
   GM_VIEW_OPTIONS,
   OS_ADVENTURER_URL
@@ -35,7 +36,7 @@ import {
 import { useDebounce } from "usehooks-ts";
 import { CheckIcon } from "@components/icons";
 import { useNFTXFloorPrice } from "hooks/useNTFX";
-import { useOpenseaBagsData, useOpenseaManaData } from "hooks/useOpensea";
+import { useCollectionPricing } from "hooks/useReservoir";
 import styles from "@styles/pages/Claim.module.scss"; // Styles
 import {
   ManaContractMinter,
@@ -488,11 +489,11 @@ function QueryTabs() {
 }
 
 function useClaimedManaWithPricing({ address, orderId, wallets }) {
-  const { floorPrice: nftxFloorPrice } = useNFTXFloorPrice();
+  const { floorPrice: nftxFloorPrice } = useNFTXFloorPrice(NFTX_MANA_ADDRESS);
   const isAllQuery = GM_ALL_ADDRESS === address;
 
   const queryByAddress: any = {
-    currentOwner: isAllQuery ? NFTX_ADDRESS : address?.toLowerCase()
+    currentOwner: isAllQuery ? NFTX_MANA_ADDRESS : address?.toLowerCase()
   };
 
   const openseaQuery: any = {
@@ -539,6 +540,9 @@ function useClaimedManaWithPricing({ address, orderId, wallets }) {
   const { data: openseaRingResults, loading: isOSClaimedRingManaLoading } =
     useClaimedManaRawQuery({ ...openseaQuery, inventoryId: 7 }, !isAllQuery);
 
+  const { priceByTokenId: manaPricingByTokenId } =
+    useCollectionPricing("genesis-mana");
+
   const openseaResults = [
     ...(openseaWeaponResults?.manas ?? []),
     ...(openseaChestResults?.manas ?? []),
@@ -550,10 +554,6 @@ function useClaimedManaWithPricing({ address, orderId, wallets }) {
     ...(openseaRingResults?.manas ?? [])
   ];
 
-  const { data: openSeaManaData } = useOpenseaManaData(
-    [...openseaResults].map((mana) => String(mana.id)) ?? []
-  );
-
   const claimedData = {
     manas: [...(queryByAddressResults?.manas ?? []), ...(openseaResults ?? [])]
   };
@@ -563,9 +563,7 @@ function useClaimedManaWithPricing({ address, orderId, wallets }) {
       ...mana,
       price: isNFTX(mana)
         ? nftxFloorPrice
-        : openSeaManaData?.queryManas?.manas?.find(
-            (item) => item.id == mana?.id
-          )?.price || undefined,
+        : manaPricingByTokenId[mana?.id] || undefined,
       rarity: itemRarity(mana.itemName)
     };
   };
@@ -591,6 +589,8 @@ function useClaimedManaWithPricing({ address, orderId, wallets }) {
 }
 
 function useUnClaimedManaWithPricing({ address, orderId, wallets }) {
+  const { floorPrice: nftxFloorPrice } = useNFTXFloorPrice(NFTX_LOOT_ADDRESS);
+
   const isAllQuery = GM_ALL_ADDRESS === address;
 
   const queryBags: any = {
@@ -604,6 +604,15 @@ function useUnClaimedManaWithPricing({ address, orderId, wallets }) {
       ...(wallets ? wallets.map((wallet) => wallet?.toLowerCase()) : [])
     ];
   }
+
+  const nftxQuery: any = { currentOwner: NFTX_LOOT_ADDRESS };
+  if (orderId) {
+    nftxQuery.suffixId = orderId;
+  }
+  const { data: nftxResults, loading: isNFTxLoading } = useManaBagsRawQuery(
+    nftxQuery,
+    !isAllQuery
+  );
 
   function bagQueryWithItem(item) {
     const query = {
@@ -632,7 +641,11 @@ function useUnClaimedManaWithPricing({ address, orderId, wallets }) {
   const { data: ringBagData, loading: isRingDataBagLoading } =
     useManaBagsRawQuery(bagQueryWithItem("ring"));
 
+  const { priceByTokenId: lootPricingByTokenId } =
+    useCollectionPricing("lootproject");
+
   const bagResults = [
+    ...(nftxResults?.bags ?? []),
     ...(weaponBagData?.bags ?? []),
     ...(chestBagData?.bags ?? []),
     ...(headBagData?.bags ?? []),
@@ -643,16 +656,12 @@ function useUnClaimedManaWithPricing({ address, orderId, wallets }) {
     ...(ringBagData?.bags ?? [])
   ];
 
-  const { data: openseaBagData, loading: isOSUnclaimedBagDataLoading } =
-    useOpenseaBagsData(_.uniq(bagResults?.map((bag) => String(bag.id)) ?? []));
-
   const mapOpenseaBagPricing = (mana) => {
     return {
       ...mana,
-      price:
-        openseaBagData?.queryBags?.bags?.find(
-          (bag) => bag.id == mana?.lootTokenId?.id
-        )?.price || undefined,
+      price: isNFTX(mana)
+        ? nftxFloorPrice
+        : lootPricingByTokenId[mana?.lootTokenId?.id] || undefined,
       rarity: itemRarity(mana.itemName)
     };
   };
@@ -670,7 +679,7 @@ function useUnClaimedManaWithPricing({ address, orderId, wallets }) {
       isHandBagDataLoading ||
       isNeckBagDataLoading ||
       isRingDataBagLoading ||
-      isOSUnclaimedBagDataLoading
+      isNFTxLoading
   };
 }
 
@@ -925,7 +934,7 @@ function ManaOwnerLink({ mana }) {
       className="underline text-right"
       href={
         isNFTX(mana)
-          ? "https://nftx.io/vault/0x2d77f5b3efa51821ad6483adaf38ea4cb1824cc5/buy/"
+          ? `https://nftx.io/vault/${address?.toLowerCase()}/buy/`
           : `https://opensea.io/${address}`
       }
       target="_blank"
@@ -935,8 +944,12 @@ function ManaOwnerLink({ mana }) {
     </a>
   );
 }
+
 function isNFTX(mana: Mana) {
-  return mana?.currentOwner?.id?.toLowerCase() === NFTX_ADDRESS;
+  return (
+    mana?.currentOwner?.id?.toLowerCase() === NFTX_MANA_ADDRESS ||
+    mana?.currentOwner?.id?.toLowerCase() === NFTX_LOOT_ADDRESS
+  );
 }
 
 function ExternalManaLink({ mana, text }: { mana: Mana; text: String }) {

@@ -2,11 +2,13 @@ import { useQuery, gql } from "@apollo/client";
 import { useMemo, useState } from "react";
 import { useSushiSwap } from "./useSushiSwap";
 
-export function useNFTXFloorPrice() {
+const PRICE_POLLING_INTERVAL = 60000;
+
+export function useNFTXFloorPrice(contract) {
   const [floorPrice, setFloorPrice] = useState(0);
   const GET_NFTX_DATA = gql`
     query GetNFTxData {
-      vaults(where: { vaultId: 209 }) {
+      vaults(where: { id: "${contract}" }) {
         fees {
           targetRedeemFee
         }
@@ -18,10 +20,10 @@ export function useNFTXFloorPrice() {
     context: {
       nftx: true
     },
-    pollInterval: 10000
+    pollInterval: PRICE_POLLING_INTERVAL
   });
 
-  const { data: sushiSwapData } = useSushiSwap();
+  const { data: sushiSwapData } = useSushiSwap(contract);
 
   useMemo(() => {
     if (!nftxData || !sushiSwapData) {

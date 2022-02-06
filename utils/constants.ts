@@ -4,7 +4,8 @@ import INVENTORY from "data/inventory.json";
 export const OS_MANA_URL = "0xf4b6040a4b1b30f1d1691699a8f3bf957b03e463";
 export const OS_ADVENTURER_URL = "0x8db687aceb92c66f013e1d614137238cc698fedb";
 export const OS_LOOT_URL = "0xff9c1b15b16263c61d017ee9f65c50e4ae0113d7";
-export const NFTX_ADDRESS = "0x2d77f5b3efa51821ad6483adaf38ea4cb1824cc5";
+export const NFTX_MANA_ADDRESS = "0x2d77f5b3efa51821ad6483adaf38ea4cb1824cc5";
+export const NFTX_LOOT_ADDRESS = "0xa66734d48d564e4e1c016c8d2ea2e9131b41c1ad";
 export const GM_ALL_ADDRESS = "All";
 export const DAO_ADDRESSES = [
   "0x1884d71487bfd7f595061221801e783efcd0bf6a",
