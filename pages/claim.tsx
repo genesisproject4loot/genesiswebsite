@@ -18,6 +18,7 @@ import {
   INVENTORY,
   ITEM_CLASS,
   ITEM_GREATNESS,
+  ITEM_RANK,
   NFTX_MANA_ADDRESS,
   NFTX_LOOT_ADDRESS,
   GM_SORT_OPTIONS,
@@ -58,6 +59,7 @@ interface ManaFinderState {
   selectedOrder: SelectOption;
   selectedClass: SelectOption;
   selectedMinGreatness: SelectOption;
+  selectedRank: SelectOption;
   selectedView: SelectOption;
   selectedSort: SelectSortOption;
   selectedManaBuild: Mana[];
@@ -73,8 +75,9 @@ interface ManaFinderState {
 const defaultManaFinderState: ManaFinderState = {
   selectedOrder: null,
   selectedClass: null,
+  selectedRank: null,
   selectedMinGreatness: null,
-  selectedView: GM_VIEW_OPTIONS[0],
+  selectedView: GM_VIEW_OPTIONS[1],
   selectedSort: GM_SORT_OPTIONS[0],
   selectedManaBuild: [],
   manaResults: [],
@@ -91,6 +94,7 @@ type ManaFinderAction =
   | { type: "setSelectedOrder"; payload: SelectOption }
   | { type: "setSelectedClass"; payload: SelectOption }
   | { type: "setSelectedMinGreatness"; payload: SelectOption }
+  | { type: "setSelectedRank"; payload: SelectOption }
   | { type: "setSelectedView"; payload: SelectOption }
   | { type: "setSelectedSort"; payload: SelectSortOption }
   | { type: "setSelectedManaBuild"; payload: Mana[] }
@@ -129,6 +133,8 @@ function ManaFinderReducer(state: ManaFinderState, action: ManaFinderAction) {
       return { ...state, selectedClass: action.payload };
     case "setSelectedMinGreatness":
       return { ...state, selectedMinGreatness: action.payload };
+    case "setSelectedRank":
+      return { ...state, selectedRank: action.payload };
     case "setSelectedView":
       return { ...state, selectedView: action.payload };
     case "setSelectedSort":
@@ -376,48 +382,64 @@ function GenesisManaFilters() {
     dispatch({ type: "setSelectedClass", payload: val });
   const onMinGreatnessChange = (val) =>
     dispatch({ type: "setSelectedMinGreatness", payload: val });
+  const onRankChange = (val) =>
+    dispatch({ type: "setSelectedRank", payload: val });
   const onSortChange = (val) =>
     dispatch({ type: "setSelectedSort", payload: val });
 
   return (
-    <div className={styles.filters}>
-      <div>
-        <label>Select an Order: </label>
-        <Select
-          instanceId="mana-filters"
-          placeholder="Choose an Order"
-          value={state.selectedOrder}
-          isClearable={true}
-          onChange={onOrderChange}
-          className="w-40 md:w-52"
-          options={[...SUFFICES]}
-        />
-      </div>
-      <div>
-        <label>Class: </label>
-        <Select
-          instanceId="mana-filters"
-          placeholder="Choose a Class"
-          value={state.selectedClass}
-          isClearable={true}
-          onChange={onClassChange}
-          className="w-40 md:w-52"
-          options={[...ITEM_CLASS]}
-        />
-      </div>
-      <div>
-        <label>Greatness: </label>
-        <Select
-          instanceId="mana-filters"
-          placeholder="Min Greatness"
-          value={state.selectedMinGreatness}
-          isClearable={true}
-          onChange={onMinGreatnessChange}
-          className="w-40 md:w-52"
-          options={[...ITEM_GREATNESS]}
-        />
-      </div>
-      <div>
+    <div>
+      <div className={styles.filters}>
+        <div>
+          <label>Select an Order: </label>
+          <Select
+            instanceId="mana-filters"
+            placeholder="Choose an Order"
+            value={state.selectedOrder}
+            isClearable={true}
+            onChange={onOrderChange}
+            className="w-40 md:w-52"
+            options={[...SUFFICES]}
+          />
+        </div>
+        <div>
+          <label>Class: </label>
+          <Select
+            instanceId="mana-filters"
+            placeholder="Choose a Class"
+            value={state.selectedClass}
+            isClearable={true}
+            onChange={onClassChange}
+            className="w-40 md:w-52"
+            options={[...ITEM_CLASS]}
+          />
+        </div>
+        <div>
+          <label>Rank: </label>
+          <Select
+            instanceId="mana-filters"
+            placeholder="Choose Rank"
+            value={state.selectedRank}
+            isClearable={true}
+            onChange={onRankChange}
+            className="w-40 md:w-52"
+            options={[...ITEM_RANK]}
+          />
+        </div>
+        <div>
+          <label>Greatness: </label>
+          <Select
+            instanceId="mana-filters"
+            placeholder="Min Greatness"
+            value={state.selectedMinGreatness}
+            isClearable={true}
+            onChange={onMinGreatnessChange}
+            className="w-40 md:w-52"
+            options={[...ITEM_GREATNESS]}
+          />
+        </div>
+      </div>{" "}
+      {/* <div>
         <label>Sort</label>
         <Select
           instanceId="mana-sort"
@@ -426,7 +448,7 @@ function GenesisManaFilters() {
           className="w-40 md:w-52"
           options={GM_SORT_OPTIONS}
         />
-      </div>
+      </div> */}
     </div>
   );
 }
@@ -502,23 +524,23 @@ function QueryTabs() {
         <div className="border border-gray-300 rounded-md flex items-center p-2 gap-2">
           <button
             onClick={() =>
-              dispatch({ type: "setSelectedView", payload: GM_VIEW_OPTIONS[0] })
-            }
-          >
-            <GridIcon
-              className={
-                state.selectedView.value === "grid" ? "" : "text-gray-300"
-              }
-            />
-          </button>
-          <button
-            onClick={() =>
               dispatch({ type: "setSelectedView", payload: GM_VIEW_OPTIONS[1] })
             }
           >
             <ListIcon
               className={
                 state.selectedView.value === "list" ? "" : "text-gray-300"
+              }
+            />
+          </button>
+          <button
+            onClick={() =>
+              dispatch({ type: "setSelectedView", payload: GM_VIEW_OPTIONS[0] })
+            }
+          >
+            <GridIcon
+              className={
+                state.selectedView.value === "grid" ? "" : "text-gray-300"
               }
             />
           </button>
@@ -564,6 +586,11 @@ function useClaimedManaWithPricing({ address }) {
     openseaQuery.itemGreatness_gte = parseInt(
       state.selectedMinGreatness?.value
     );
+  }
+
+  if (state.selectedRank?.value) {
+    queryByAddress.itemRank = parseInt(state.selectedRank?.value);
+    openseaQuery.itemRank = parseInt(state.selectedRank?.value);
   }
 
   const {
@@ -682,6 +709,11 @@ function useUnClaimedManaWithPricing({ address }) {
   if (state.selectedMinGreatness?.value) {
     nftxQuery.itemGreatness_gte = parseInt(state.selectedMinGreatness?.value);
     queryBags.itemGreatness_gte = parseInt(state.selectedMinGreatness?.value);
+  }
+
+  if (state.selectedRank?.value) {
+    nftxQuery.itemRank = parseInt(state.selectedRank?.value);
+    queryBags.itemRank = parseInt(state.selectedRank?.value);
   }
 
   const { data: nftxResults, loading: isNFTxLoading } = useUnclaimedManaRaw(
@@ -846,12 +878,12 @@ function GenesisManaCardsByInventory({
   const truthy = [true, true, true, true, true, true, true, true];
   const falsy = [false, false, false, false, false, false, false, false];
 
-  const [collapsed, setCollapsed] = useState([...truthy]);
+  const [collapsed, setCollapsed] = useState([...falsy]);
   const onCollapseAll = () => setCollapsed([...truthy]);
   const onExpandAll = () => setCollapsed([...falsy]);
   const onToggleExpand = (selectedIdx) =>
     setCollapsed([
-      ...collapsed.map((val, idx) => (idx === selectedIdx ? !val : true))
+      ...collapsed.map((val, idx) => (idx === selectedIdx ? !val : val))
     ]);
 
   const onSelect = (mana: Mana) =>
