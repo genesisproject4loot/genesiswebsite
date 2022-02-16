@@ -10,12 +10,14 @@ import React, {
 } from "react";
 import GenesisManaChart from "@components/charts/GenesisManaChart";
 import Layout_V2 from "@components/Layout_V2";
-import { useClaimedManaRawQuery, useManaBagsRawQuery } from "hooks/useMana";
+import { useClaimedManaRawQuery, useUnclaimedManaRaw } from "hooks/useMana";
 import {
   DAO_ADDRESSES,
   GM_ALL_ADDRESS,
   SUFFICES,
   INVENTORY,
+  ITEM_CLASS,
+  ITEM_GREATNESS,
   NFTX_MANA_ADDRESS,
   NFTX_LOOT_ADDRESS,
   GM_SORT_OPTIONS,
@@ -26,7 +28,7 @@ import { useWalletContext } from "hooks/useWalletContext";
 import { Modal } from "components/Modal";
 import Select from "react-select";
 import PlusIcon from "components/icons/PlusIcon";
-import { Mana, Wallet } from "@utils/manaFinderTypes";
+import { Mana } from "@utils/manaFinderTypes";
 import { rarityColor, rarityDescription, itemRarity } from "loot-rarity";
 import {
   formatNFTXUrl,
@@ -54,6 +56,8 @@ type SelectSortOption = SelectOption & { direction: string; key: string };
 
 interface ManaFinderState {
   selectedOrder: SelectOption;
+  selectedClass: SelectOption;
+  selectedMinGreatness: SelectOption;
   selectedView: SelectOption;
   selectedSort: SelectSortOption;
   selectedManaBuild: Mana[];
@@ -68,6 +72,8 @@ interface ManaFinderState {
 }
 const defaultManaFinderState: ManaFinderState = {
   selectedOrder: null,
+  selectedClass: null,
+  selectedMinGreatness: null,
   selectedView: GM_VIEW_OPTIONS[0],
   selectedSort: GM_SORT_OPTIONS[0],
   selectedManaBuild: [],
@@ -83,6 +89,8 @@ const defaultManaFinderState: ManaFinderState = {
 
 type ManaFinderAction =
   | { type: "setSelectedOrder"; payload: SelectOption }
+  | { type: "setSelectedClass"; payload: SelectOption }
+  | { type: "setSelectedMinGreatness"; payload: SelectOption }
   | { type: "setSelectedView"; payload: SelectOption }
   | { type: "setSelectedSort"; payload: SelectSortOption }
   | { type: "setSelectedManaBuild"; payload: Mana[] }
@@ -117,6 +125,10 @@ function ManaFinderReducer(state: ManaFinderState, action: ManaFinderAction) {
         isGenesisAdventurerResurrectModalOpen: false,
         isManaLoading: true
       };
+    case "setSelectedClass":
+      return { ...state, selectedClass: action.payload };
+    case "setSelectedMinGreatness":
+      return { ...state, selectedMinGreatness: action.payload };
     case "setSelectedView":
       return { ...state, selectedView: action.payload };
     case "setSelectedSort":
@@ -189,7 +201,7 @@ function ManaFinderReducer(state: ManaFinderState, action: ManaFinderAction) {
         };
         if (!state.selectedOrder) {
           newState.selectedOrder = SUFFICES.find(
-            (item) => item.value === String(action.payload?.suffixId?.id)
+            (item) => item.value === String(action.payload?.orderId)
           );
         }
         return newState;
@@ -360,6 +372,10 @@ function GenesisManaFilters() {
   const { state, dispatch } = useContext(ManaFinderContext);
   const onOrderChange = (val) =>
     dispatch({ type: "setSelectedOrder", payload: val });
+  const onClassChange = (val) =>
+    dispatch({ type: "setSelectedClass", payload: val });
+  const onMinGreatnessChange = (val) =>
+    dispatch({ type: "setSelectedMinGreatness", payload: val });
   const onSortChange = (val) =>
     dispatch({ type: "setSelectedSort", payload: val });
 
@@ -375,6 +391,30 @@ function GenesisManaFilters() {
           onChange={onOrderChange}
           className="w-40 md:w-52"
           options={[...SUFFICES]}
+        />
+      </div>
+      <div>
+        <label>Class: </label>
+        <Select
+          instanceId="mana-filters"
+          placeholder="Choose a Class"
+          value={state.selectedClass}
+          isClearable={true}
+          onChange={onClassChange}
+          className="w-40 md:w-52"
+          options={[...ITEM_CLASS]}
+        />
+      </div>
+      <div>
+        <label>Greatness: </label>
+        <Select
+          instanceId="mana-filters"
+          placeholder="Min Greatness"
+          value={state.selectedMinGreatness}
+          isClearable={true}
+          onChange={onMinGreatnessChange}
+          className="w-40 md:w-52"
+          options={[...ITEM_GREATNESS]}
         />
       </div>
       <div>
@@ -488,7 +528,9 @@ function QueryTabs() {
   );
 }
 
-function useClaimedManaWithPricing({ address, orderId, wallets }) {
+function useClaimedManaWithPricing({ address }) {
+  const { state } = useContext(ManaFinderContext);
+
   const { floorPrice: nftxFloorPrice } = useNFTXFloorPrice(NFTX_MANA_ADDRESS);
   const isAllQuery = GM_ALL_ADDRESS === address;
 
@@ -499,13 +541,29 @@ function useClaimedManaWithPricing({ address, orderId, wallets }) {
   const openseaQuery: any = {
     currentOwner_not_in: [
       ...DAO_ADDRESSES,
-      ...(wallets ? wallets.map((wallet) => wallet?.toLowerCase()) : [])
+      ...(state.wallets
+        ? state.wallets.map((wallet) => wallet?.toLowerCase())
+        : [])
     ]
   };
 
-  if (orderId) {
-    queryByAddress.suffixId = orderId;
-    openseaQuery.suffixId = orderId;
+  if (state.selectedOrder?.value) {
+    queryByAddress.suffixId = state.selectedOrder?.value;
+    openseaQuery.suffixId = state.selectedOrder?.value;
+  }
+
+  if (state.selectedClass?.value) {
+    queryByAddress.itemClass = state.selectedClass?.value;
+    openseaQuery.itemClass = state.selectedClass?.value;
+  }
+
+  if (state.selectedMinGreatness?.value) {
+    queryByAddress.itemGreatness_gte = parseInt(
+      state.selectedMinGreatness?.value
+    );
+    openseaQuery.itemGreatness_gte = parseInt(
+      state.selectedMinGreatness?.value
+    );
   }
 
   const {
@@ -561,6 +619,7 @@ function useClaimedManaWithPricing({ address, orderId, wallets }) {
   const mapOpenseaManaPricing = (mana) => {
     return {
       ...mana,
+      lootTokenId: mana.lootBag?.id,
       price: isNFTX(mana)
         ? nftxFloorPrice
         : manaPricingByTokenId[mana?.id] || undefined,
@@ -588,72 +647,86 @@ function useClaimedManaWithPricing({ address, orderId, wallets }) {
   };
 }
 
-function useUnClaimedManaWithPricing({ address, orderId, wallets }) {
+function useUnClaimedManaWithPricing({ address }) {
+  const { state } = useContext(ManaFinderContext);
+
   const { floorPrice: nftxFloorPrice } = useNFTXFloorPrice(NFTX_LOOT_ADDRESS);
 
   const isAllQuery = GM_ALL_ADDRESS === address;
 
   const queryBags: any = {
-    manasUnclaimed_not: "0"
+    isClaimed: 0
   };
   if (!isAllQuery) {
     queryBags.currentOwner = address?.toLowerCase();
   } else {
     queryBags.currentOwner_not_in = [
       ...DAO_ADDRESSES,
-      ...(wallets ? wallets.map((wallet) => wallet?.toLowerCase()) : [])
+      ...(state.wallets
+        ? state.wallets.map((wallet) => wallet?.toLowerCase())
+        : [])
     ];
   }
 
   const nftxQuery: any = { currentOwner: NFTX_LOOT_ADDRESS };
-  if (orderId) {
-    nftxQuery.suffixId = orderId;
+  if (state.selectedOrder?.value) {
+    nftxQuery.orderId = state.selectedOrder?.value;
+    queryBags.orderId = state.selectedOrder?.value;
   }
-  const { data: nftxResults, loading: isNFTxLoading } = useManaBagsRawQuery(
+
+  if (state.selectedClass?.value) {
+    nftxQuery.itemClass = state.selectedClass?.value;
+    queryBags.itemClass = state.selectedClass?.value;
+  }
+
+  if (state.selectedMinGreatness?.value) {
+    nftxQuery.itemGreatness_gte = parseInt(state.selectedMinGreatness?.value);
+    queryBags.itemGreatness_gte = parseInt(state.selectedMinGreatness?.value);
+  }
+
+  const { data: nftxResults, loading: isNFTxLoading } = useUnclaimedManaRaw(
     nftxQuery,
     !isAllQuery
   );
 
-  function bagQueryWithItem(item) {
+  function bagQueryWithInventoryId(inventoryId) {
     const query = {
-      ...queryBags
+      ...queryBags,
+      inventoryId: inventoryId
     };
-    query[item + "SuffixId" + (orderId ? "" : "_gt")] = orderId
-      ? parseInt(orderId)
-      : 0;
     return query;
   }
 
   const { data: weaponBagData, loading: isWeaponBagDataLoading } =
-    useManaBagsRawQuery(bagQueryWithItem("weapon"));
+    useUnclaimedManaRaw(bagQueryWithInventoryId(0));
   const { data: chestBagData, loading: isChestBagDataLoading } =
-    useManaBagsRawQuery(bagQueryWithItem("chest"));
+    useUnclaimedManaRaw(bagQueryWithInventoryId(1));
   const { data: headBagData, loading: isHeadBagDataLoading } =
-    useManaBagsRawQuery(bagQueryWithItem("head"));
+    useUnclaimedManaRaw(bagQueryWithInventoryId(2));
   const { data: waistBagData, loading: isWaistBagDataLoading } =
-    useManaBagsRawQuery(bagQueryWithItem("waist"));
+    useUnclaimedManaRaw(bagQueryWithInventoryId(3));
   const { data: footBagData, loading: isFootBagDataLoading } =
-    useManaBagsRawQuery(bagQueryWithItem("foot"));
+    useUnclaimedManaRaw(bagQueryWithInventoryId(4));
   const { data: handBagData, loading: isHandBagDataLoading } =
-    useManaBagsRawQuery(bagQueryWithItem("hand"));
+    useUnclaimedManaRaw(bagQueryWithInventoryId(5));
   const { data: neckBagData, loading: isNeckBagDataLoading } =
-    useManaBagsRawQuery(bagQueryWithItem("neck"));
+    useUnclaimedManaRaw(bagQueryWithInventoryId(6));
   const { data: ringBagData, loading: isRingDataBagLoading } =
-    useManaBagsRawQuery(bagQueryWithItem("ring"));
+    useUnclaimedManaRaw(bagQueryWithInventoryId(7));
 
   const { priceByTokenId: lootPricingByTokenId } =
     useCollectionPricing("lootproject");
 
   const bagResults = [
-    ...(nftxResults?.bags ?? []),
-    ...(weaponBagData?.bags ?? []),
-    ...(chestBagData?.bags ?? []),
-    ...(headBagData?.bags ?? []),
-    ...(waistBagData?.bags ?? []),
-    ...(footBagData?.bags ?? []),
-    ...(handBagData?.bags ?? []),
-    ...(neckBagData?.bags ?? []),
-    ...(ringBagData?.bags ?? [])
+    ...(nftxResults?.manas ?? []),
+    ...(weaponBagData?.manas ?? []),
+    ...(chestBagData?.manas ?? []),
+    ...(headBagData?.manas ?? []),
+    ...(waistBagData?.manas ?? []),
+    ...(footBagData?.manas ?? []),
+    ...(handBagData?.manas ?? []),
+    ...(neckBagData?.manas ?? []),
+    ...(ringBagData?.manas ?? [])
   ];
 
   const mapOpenseaBagPricing = (mana) => {
@@ -661,15 +734,15 @@ function useUnClaimedManaWithPricing({ address, orderId, wallets }) {
       ...mana,
       price: isNFTX(mana)
         ? nftxFloorPrice
-        : lootPricingByTokenId[mana?.lootTokenId?.id] || undefined,
+        : lootPricingByTokenId[parseInt(mana.lootTokenId)] || undefined,
       rarity: itemRarity(mana.itemName)
     };
   };
+
+  const manas = bagResults.map(mapOpenseaBagPricing);
+
   return {
-    manas: (bagResults ?? [])
-      .map(transformUnclaimedMana)
-      .flat()
-      .map(mapOpenseaBagPricing),
+    manas,
     loading:
       isWeaponBagDataLoading ||
       isChestBagDataLoading ||
@@ -683,51 +756,34 @@ function useUnClaimedManaWithPricing({ address, orderId, wallets }) {
   };
 }
 
-function useManaWithPricing({ address, orderId, wallets }) {
+function useManaWithPricing({ address }) {
   const { state } = useContext(ManaFinderContext);
 
-  const isAllQuery = GM_ALL_ADDRESS === address;
-  const bagsQuery: any = {
-    manasUnclaimed_not: "0",
-    ...INVENTORY.reduce((ctx, item) => {
-      ctx[`${item.label.toLowerCase()}SuffixId_in`] = [0, parseInt(orderId)];
-      return ctx;
-    }, {})
-  };
-  if (!isAllQuery) {
-    bagsQuery.currentOwner = address?.toLowerCase();
-  } else {
-    bagsQuery.currentOwner_not_in = [
-      ...DAO_ADDRESSES,
-      ...(wallets ? wallets.map((wallet) => wallet?.toLowerCase()) : [])
-    ];
-  }
-
   const { manas: unclaimedManas, loading: isUnclaimedLoadiing } =
-    useUnClaimedManaWithPricing({ address, orderId, wallets });
+    useUnClaimedManaWithPricing({ address });
 
   const {
     manas: claimedManas,
     loading: isClaimedManaLoading,
     refetch: refetchClaimedMana
-  } = useClaimedManaWithPricing({ address, orderId, wallets });
+  } = useClaimedManaWithPricing({ address });
 
   const applyFilters = () => {
     const cache = {};
     return (mana) => {
-      // if (!orderId) {
-      //   return false;
-      // }
       if (state?.reclaimedMana?.find((reclaimed) => reclaimed.id === mana.id)) {
         return false;
       }
       const key =
-        mana?.suffixId?.id + mana.itemName + (mana?.lootTokenId?.id ?? mana.id);
+        mana?.orderId + mana.itemName + (mana?.lootBag?.id ?? mana.id);
       if (cache[key]) {
         return false;
       }
       cache[key] = true;
-      return !orderId || mana?.suffixId?.id == orderId;
+      return (
+        !state.selectedOrder?.value ||
+        mana?.orderId == state.selectedOrder?.value
+      );
     };
   };
 
@@ -757,9 +813,7 @@ function GenesisManaCardsByInventory({
     loading: isManaLoading,
     refetch: refetchMana
   } = useManaWithPricing({
-    address,
-    orderId: state.selectedOrder?.value,
-    wallets: state.wallets
+    address
   });
   const {
     items: manas,
@@ -859,9 +913,9 @@ function GenesisManaCardRow({ manas, idx, onSelect, selectedMana }) {
           isSelected={
             mana.id > 0
               ? mana.id === selectedMana?.id
-              : mana.lootTokenId?.id === selectedMana?.lootTokenId?.id
+              : mana.lootTokenId === selectedMana?.lootTokenId
           }
-          key={`${idx}-${mana.id}-${mana.lootTokenId?.id}}`}
+          key={`${idx}-${mana.id}-${mana.lootTokenId}}`}
           mana={mana}
         />
       ))}
@@ -876,11 +930,11 @@ function GenesisManaListRow({ manas, onSelect, selectedMana }) {
   const isManaSelected = (mana) =>
     mana.id > 0
       ? mana.id === selectedMana?.id
-      : mana.lootTokenId?.id === selectedMana?.lootTokenId?.id;
+      : mana.lootTokenId === selectedMana?.lootTokenId;
   return (
     <div>
       {manas.map((mana) => (
-        <div key={mana.id + mana?.lootTokenId?.id} className="flex">
+        <div key={mana.id + mana?.lootTokenId} className="flex">
           <span
             title="Add"
             className="w-1/5 cursor-pointer"
@@ -890,22 +944,27 @@ function GenesisManaListRow({ manas, onSelect, selectedMana }) {
               {isManaSelected(mana) ? "(x) " : ""}
             </span>
             <span className="underline">
-              {mana.id ? `${mana.id}` : `${mana?.lootTokenId?.id} (loot)`}
+              {!mana?.lootTokenId || mana.lootBag
+                ? `${mana.id}`
+                : `${mana?.lootTokenId} (loot)`}
             </span>
           </span>
           <span
             title="Add"
             onClick={() => onSelect(mana)}
-            className="w-2/5 cursor-pointer flex items-center"
+            className="w-2/5 cursor-pointer flex flex-col justify-center"
           >
-            <span className="underline mr-4">{mana.itemName}</span> [
+            <span className="underline mr-4">{mana.itemName}</span>
             <span
               className="text-xs"
               style={{ color: rarityColor(mana.itemName) }}
             >
               {rarityDescription(mana.itemName)}
-            </span>
-            ]
+              &nbsp;
+              {mana.itemClass}
+              &nbsp;
+              {mana.itemGreatness}
+            </span>{" "}
           </span>
           <span className="w-1/5 text-right" title="Owner">
             <ManaOwnerLink mana={mana} />
@@ -993,7 +1052,7 @@ function GenesisManaCard({
     account?.toLowerCase() === mana.currentOwner?.id?.toLowerCase();
   const showMint = doesOwnMana && !isMinted;
   const order = SUFFICES.find(
-    (suffix) => suffix.value === String(mana.suffixId.id)
+    (suffix) => suffix.value === String(mana.orderId)
   ).label;
 
   const openseaUrl = formatOpenseaUrl(mana);
@@ -1003,11 +1062,11 @@ function GenesisManaCard({
       <div
         className={[
           styles.card,
-          isSelected ? "bg-white" : `bg-gm-${mana.suffixId.id}`,
+          isSelected ? "bg-white" : `bg-gm-${mana.orderId}`,
           "cursor-pointer",
           "border-4",
-          isSelected ? `text-gm-${mana.suffixId.id}` : "text-white",
-          `border-gm-${mana.suffixId.id}`
+          isSelected ? `text-gm-${mana.orderId}` : "text-white",
+          `border-gm-${mana.orderId}`
         ].join(" ")}
         onClick={onClick}
       >
@@ -1018,14 +1077,14 @@ function GenesisManaCard({
           </div>
         </div>
         <div
-          className={`flex-1 flex text-base justify-center items-center text-gm-${mana.suffixId.id}`}
+          className={`flex-1 flex text-base justify-center items-center text-gm-${mana.orderId}`}
         >
           {isSelected ? "Selected" : "Add"}
         </div>
         <div>
           <div>
-            {mana?.lootTokenId?.id
-              ? `Distilled from Loot Bag #${mana?.lootTokenId?.id}`
+            {mana?.lootTokenId
+              ? `Distilled from Loot Bag #${mana?.lootTokenId}`
               : "Distilled from"}
           </div>
           <div>{mana.itemName}</div>
@@ -1052,10 +1111,11 @@ function GenesisManaCard({
           <span className="text-right">
             {isMinted ? `#${manaMinter.getTokenId(mana)}` : "Unclaimed"}
           </span>
-          <label>Rarity</label>
+          <label>Type</label>
           <span className="flex items-center justify-end gap-2">
             <span className="text-right">
-              {rarityDescription(mana.itemName)}
+              {rarityDescription(mana.itemName)} {mana.itemClass}{" "}
+              {mana.itemGreatness}
             </span>
             <span className={styles.rarity_indicator}>
               <span style={{ backgroundColor: rarityColor(mana.itemName) }} />
@@ -1096,27 +1156,6 @@ function GenesisManaCard({
       </div>
     </div>
   );
-}
-
-function transformUnclaimedMana(bag) {
-  const unclaimedInventory = INVENTORY.filter(
-    (item) =>
-      bag[`${item.label.toLowerCase()}SuffixId`] > 0 &&
-      !bag.manas.find((mana) => mana.inventoryId == parseInt(item.value))
-  );
-  const inventoryToMana = (item) =>
-    ({
-      id: 0,
-      itemName: bag[item.label.toLowerCase()] as string,
-      inventoryId: parseInt(item.value) as number,
-      suffixId: {
-        id: bag[item.label.toLowerCase() + "SuffixId"] as string
-      },
-      lootTokenId: { id: bag.id },
-      currentOwner: bag.currentOwner as Wallet
-    } as any);
-
-  return unclaimedInventory.map(inventoryToMana);
 }
 
 interface GenesisAdventurerCardProps

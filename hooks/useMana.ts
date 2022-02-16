@@ -33,7 +33,7 @@ currentOwner_not_in: [
   "0xb1dea25cb8b997913f86076b372aa75f06c53c99"
 ]`;
 
-export function useUnclaimedMana(suffixId, inventoryId) {
+export function useUnclaimedMana_Legacy(suffixId, inventoryId) {
   const inventoryName =
     inventoryId >= 0 ? inventory[inventoryId].label.toLowerCase() : "weapon";
   const inventoryNameSuffix = inventoryName + "SuffixId";
@@ -55,6 +55,38 @@ export function useUnclaimedMana(suffixId, inventoryId) {
   });
 }
 
+export function useUnclaimedManaRaw(variables, skip?: boolean) {
+  const GET_UNCLAIMED_MANA = gql`
+    query UnclaimedMana(${Object.keys(variables)
+      .map((key) => `$${key}: ${getTypeForKey(variables, key)}`)
+      .join(", ")}) {
+      manas: unclaimedManas(
+        where: {  ${Object.keys(variables)
+          .map((key) => `${key}: $${key}`)
+          .join(", ")} }
+      ) {
+        id
+        lootTokenId
+        inventoryId
+        itemName
+        itemGreatness
+        itemClass
+        itemRank
+        orderId
+        currentOwner {
+          id
+        }
+        tokenURI
+      }
+    }
+    `;
+
+  return useQuery<ManaData, any>(GET_UNCLAIMED_MANA, {
+    variables,
+    skip: !!skip
+  });
+}
+
 export function useClaimedManaByOwner(owner: String) {
   const GET_CLAIMED_MANA = gql`
     query GetClaimedMana($currentOwner: String!) {
@@ -65,7 +97,7 @@ export function useClaimedManaByOwner(owner: String) {
         }
         itemName
         inventoryId
-        lootTokenId {
+        lootBag: lootTokenId {
           id
         }
       }
@@ -88,7 +120,7 @@ export function useClaimedMana(suffixId, inventoryId) {
         }
         itemName
         inventoryId
-        lootTokenId {
+        lootBag: lootTokenId {
           id
         }
       }
@@ -120,12 +152,13 @@ export function useClaimedManaRawQuery(variables, skip?: boolean) {
           .join(", ")} }
       ) {
         id
-        suffixId {
-          id
-        }
         itemName
+        itemGreatness
+        itemClass
+        itemRank
+        orderId
         inventoryId
-        lootTokenId {
+        lootBag: lootTokenId {
           id
         }
         currentOwner {
@@ -161,7 +194,7 @@ export function useManaBagsRawQuery(variables, skip?: boolean) {
           }
           itemName
           inventoryId
-          lootTokenId {
+          lootBag: lootTokenId {
             id
           }
         }
@@ -195,7 +228,7 @@ export function useManaBagsByOwner(currentOwner: String, skip?: boolean) {
           }
           itemName
           inventoryId
-          lootTokenId {
+          lootBag: lootTokenId {
             id
           }
         }
