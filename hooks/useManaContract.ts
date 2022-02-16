@@ -102,17 +102,17 @@ export function useManaContractMinter(): ManaContractMinter {
     return !!successFulMints[getManaMintKey(mana)];
   }
   function getManaMintKey(mana) {
-    return [mana.lootTokenId?.id, mana.inventoryId].join("-");
+    return [mana.lootTokenId, mana.inventoryId].join("-");
   }
 
-  async function onMintMana(mana) {
+  async function onMintMana(mana): Promise<any> {
     if (isManaMintInProgress(getManaMintKey(mana))) {
       return;
     }
     setMintsInProgress([...mintsInProgress, getManaMintKey(mana)]);
     try {
       const transaction = await mintMana(
-        mana.lootTokenId?.id,
+        mana.lootTokenId,
         mana.inventoryId + 1
       );
       const done = await transaction.wait();
