@@ -979,12 +979,20 @@ function GenesisManaCardRow({ manas, idx, onSelect, selectedMana }) {
 
 function GenesisManaListRow({ manas, onSelect, selectedMana }) {
   const { account } = useWalletContext();
+  const { manaMinter } = useContext(ManaFinderContext);
+
   const isCurrentOwner = (mana) =>
     mana?.currentOwner?.id.toLowerCase() === account?.toLowerCase();
   const isManaSelected = (mana) =>
     mana.id > 0
       ? mana.id === selectedMana?.id
       : mana.lootTokenId === selectedMana?.lootTokenId;
+
+  const isMinted = (mana) =>
+    mana.id > 0 || manaMinter.isManaMintSuccessful(mana);
+  const isInProgress = (mana) => manaMinter.isManaMintInProgress(mana);
+  const showMint = (mana) => isCurrentOwner(mana) && !isMinted(mana);
+
   return (
     <div>
       {manas.map((mana) => (
@@ -998,10 +1006,24 @@ function GenesisManaListRow({ manas, onSelect, selectedMana }) {
               {isManaSelected(mana) ? "(x) " : ""}
             </span>
             <span className="underline">
-              {!mana?.lootTokenId || mana.lootBag
-                ? `${mana.id}`
+              {!mana?.lootTokenId || mana.lootBag || isMinted(mana)
+                ? `${manaMinter.getTokenId(mana)}`
                 : `${mana?.lootTokenId} (loot)`}
             </span>
+            &nbsp;
+            {isInProgress(mana) && (
+              <span className="inline-block">... minting</span>
+            )}
+            {!isInProgress(mana) && showMint(mana) && (
+              <button
+                onClick={() => {
+                  manaMinter.mintMana(mana);
+                }}
+                className="text-blue-400"
+              >
+                mint
+              </button>
+            )}
           </span>
           <span
             title="Add"
@@ -1231,22 +1253,25 @@ function GenesisAdventurerCard({
     selectedManas.find((mana) => mana.inventoryId === parseInt(item.value))
   );
 
+  const isMinted = (mana) =>
+    mana.id > 0 || manaMinter.isManaMintSuccessful(mana);
+  const isInProgress = (mana) => manaMinter.isManaMintInProgress(mana);
+  const doesOwnMana = (mana) =>
+    account?.toLowerCase() === mana.currentOwner?.id?.toLowerCase();
+
   const canMint =
     manas.filter(
-      (mana) => mana?.currentOwner?.id?.toLowerCase() === account?.toLowerCase()
+      (mana) =>
+        mana?.currentOwner?.id?.toLowerCase() === account?.toLowerCase() &&
+        (mana.lootBag || isMinted(mana))
     ).length === 8;
 
   function AccessoryItem({ mana }: { mana: Mana }) {
-    const isMinted = mana.id > 0 || manaMinter.isManaMintSuccessful(mana);
-    const isInProgress = manaMinter.isManaMintInProgress(mana);
-    const doesOwnMana =
-      account?.toLowerCase() === mana.currentOwner?.id?.toLowerCase();
-
     //Owned By Current Wallet
-    if (doesOwnMana) {
-      if (isMinted) {
+    if (doesOwnMana(mana)) {
+      if (isMinted(mana)) {
         return <CheckIcon className="text-green-200" />;
-      } else if (isInProgress) {
+      } else if (isInProgress(mana)) {
         return <LoadingIcon className="text-white" />;
       } else {
         return (
