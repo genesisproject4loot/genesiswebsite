@@ -18,7 +18,7 @@ import {
   INVENTORY,
   ITEM_CLASS,
   ITEM_GREATNESS,
-  ITEM_RANK,
+  ITEM_POWER,
   NFTX_MANA_ADDRESS,
   NFTX_LOOT_ADDRESS,
   GM_SORT_OPTIONS,
@@ -59,7 +59,7 @@ interface ManaFinderState {
   selectedOrder: SelectOption;
   selectedClass: SelectOption;
   selectedMinGreatness: SelectOption;
-  selectedRank: SelectOption;
+  selectedPower: SelectOption;
   selectedView: SelectOption;
   selectedSort: SelectSortOption;
   selectedManaBuild: Mana[];
@@ -75,7 +75,7 @@ interface ManaFinderState {
 const defaultManaFinderState: ManaFinderState = {
   selectedOrder: null,
   selectedClass: null,
-  selectedRank: null,
+  selectedPower: null,
   selectedMinGreatness: null,
   selectedView: GM_VIEW_OPTIONS[1],
   selectedSort: GM_SORT_OPTIONS[0],
@@ -94,7 +94,7 @@ type ManaFinderAction =
   | { type: "setSelectedOrder"; payload: SelectOption }
   | { type: "setSelectedClass"; payload: SelectOption }
   | { type: "setSelectedMinGreatness"; payload: SelectOption }
-  | { type: "setSelectedRank"; payload: SelectOption }
+  | { type: "setSelectedPower"; payload: SelectOption }
   | { type: "setSelectedView"; payload: SelectOption }
   | { type: "setSelectedSort"; payload: SelectSortOption }
   | { type: "setSelectedManaBuild"; payload: Mana[] }
@@ -133,8 +133,8 @@ function ManaFinderReducer(state: ManaFinderState, action: ManaFinderAction) {
       return { ...state, selectedClass: action.payload };
     case "setSelectedMinGreatness":
       return { ...state, selectedMinGreatness: action.payload };
-    case "setSelectedRank":
-      return { ...state, selectedRank: action.payload };
+    case "setSelectedPower":
+      return { ...state, selectedPower: action.payload };
     case "setSelectedView":
       return { ...state, selectedView: action.payload };
     case "setSelectedSort":
@@ -383,7 +383,7 @@ function GenesisManaFilters() {
   const onMinGreatnessChange = (val) =>
     dispatch({ type: "setSelectedMinGreatness", payload: val });
   const onRankChange = (val) =>
-    dispatch({ type: "setSelectedRank", payload: val });
+    dispatch({ type: "setSelectedPower", payload: val });
   const onSortChange = (val) =>
     dispatch({ type: "setSelectedSort", payload: val });
 
@@ -419,11 +419,11 @@ function GenesisManaFilters() {
           <Select
             instanceId="mana-filters"
             placeholder="Minimum Power"
-            value={state.selectedRank}
+            value={state.selectedPower}
             isClearable={true}
             onChange={onRankChange}
             className="w-52"
-            options={[...ITEM_RANK]}
+            options={[...ITEM_POWER]}
           />
         </div>
         <div>
@@ -575,8 +575,8 @@ function useClaimedManaWithPricing({ address }) {
   }
 
   if (state.selectedClass?.value) {
-    queryByAddress.itemClass = state.selectedClass?.value;
-    openseaQuery.itemClass = state.selectedClass?.value;
+    queryByAddress.itemClass_in = [state.selectedClass?.value, ""];
+    openseaQuery.itemClass_in = [state.selectedClass?.value, ""];
   }
 
   if (state.selectedMinGreatness?.value) {
@@ -588,18 +588,10 @@ function useClaimedManaWithPricing({ address }) {
     );
   }
 
-  // TODO: replace with power
-  let jewelryQuery: any = {};
-  if (state.selectedRank?.value) {
-    const rank = parseInt(state.selectedRank?.value);
-    queryByAddress.itemRank_lte = rank;
-    openseaQuery.itemRank_lte = rank;
-
-    if (rank < 3) {
-      jewelryQuery.itemRank_lte = -1;
-    } else {
-      jewelryQuery.itemRank_lte = rank - 2;
-    }
+  if (state.selectedPower?.value) {
+    const power = parseInt(state.selectedPower?.value);
+    queryByAddress.itemPower_gte = power;
+    openseaQuery.itemPower_gte = power;
   }
 
   const {
@@ -629,16 +621,10 @@ function useClaimedManaWithPricing({ address }) {
     useClaimedManaRawQuery({ ...openseaQuery, inventoryId: 5 }, !isAllQuery);
 
   const { data: openseaNeckResults, loading: isOSClaimedNeckManaLoading } =
-    useClaimedManaRawQuery(
-      { ...openseaQuery, inventoryId: 6, ...jewelryQuery },
-      !isAllQuery
-    );
+    useClaimedManaRawQuery({ ...openseaQuery, inventoryId: 6 }, !isAllQuery);
 
   const { data: openseaRingResults, loading: isOSClaimedRingManaLoading } =
-    useClaimedManaRawQuery(
-      { ...openseaQuery, inventoryId: 7, ...jewelryQuery },
-      !isAllQuery
-    );
+    useClaimedManaRawQuery({ ...openseaQuery, inventoryId: 7 }, !isAllQuery);
 
   const { priceByTokenId: manaPricingByTokenId } =
     useCollectionPricing("genesis-mana");
@@ -717,8 +703,8 @@ function useUnClaimedManaWithPricing({ address }) {
   }
 
   if (state.selectedClass?.value) {
-    nftxQuery.itemClass = state.selectedClass?.value;
-    queryBags.itemClass = state.selectedClass?.value;
+    nftxQuery.itemClass_in = [state.selectedClass?.value, ""];
+    queryBags.itemClass_in = [state.selectedClass?.value, ""];
   }
 
   if (state.selectedMinGreatness?.value) {
@@ -726,16 +712,10 @@ function useUnClaimedManaWithPricing({ address }) {
     queryBags.itemGreatness_gte = parseInt(state.selectedMinGreatness?.value);
   }
 
-  let jewelryQuery: any = {};
-  if (state.selectedRank?.value) {
-    const rank = parseInt(state.selectedRank?.value);
-    nftxQuery.itemRank_lte = rank;
-    queryBags.itemRank_lte = rank;
-    if (rank < 3) {
-      jewelryQuery.itemRank_lte = -1;
-    } else {
-      jewelryQuery.itemRank_lte = rank - 2;
-    }
+  if (state.selectedPower?.value) {
+    const power = parseInt(state.selectedPower?.value);
+    nftxQuery.itemPower_gte = power;
+    queryBags.itemPower_gte = power;
   }
 
   const { data: nftxResults, loading: isNFTxLoading } = useUnclaimedManaRaw(
@@ -764,9 +744,9 @@ function useUnClaimedManaWithPricing({ address }) {
   const { data: handBagData, loading: isHandBagDataLoading } =
     useUnclaimedManaRaw(bagQueryWithInventoryId(5));
   const { data: neckBagData, loading: isNeckBagDataLoading } =
-    useUnclaimedManaRaw({ ...bagQueryWithInventoryId(6), ...jewelryQuery });
+    useUnclaimedManaRaw({ ...bagQueryWithInventoryId(6) });
   const { data: ringBagData, loading: isRingDataBagLoading } =
-    useUnclaimedManaRaw({ ...bagQueryWithInventoryId(7), ...jewelryQuery });
+    useUnclaimedManaRaw({ ...bagQueryWithInventoryId(7) });
 
   const { priceByTokenId: lootPricingByTokenId } =
     useCollectionPricing("lootproject");
