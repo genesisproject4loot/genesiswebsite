@@ -105,13 +105,14 @@ export const ITEM_GREATNESS = [
   }
 ];
 
+// TODO: Update when power is added to subgraph
 export const ITEM_RANK = [
   {
-    value: "1",
+    value: "5",
     label: "1"
   },
   {
-    value: "2",
+    value: "4",
     label: "2"
   },
   {
@@ -119,11 +120,11 @@ export const ITEM_RANK = [
     label: "3"
   },
   {
-    value: "4",
+    value: "2",
     label: "4"
   },
   {
-    value: "5",
+    value: "1",
     label: "5"
   }
 ];

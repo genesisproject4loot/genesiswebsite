@@ -398,7 +398,7 @@ function GenesisManaFilters() {
             value={state.selectedOrder}
             isClearable={true}
             onChange={onOrderChange}
-            className="w-40 md:w-52"
+            className="w-52"
             options={[...SUFFICES]}
           />
         </div>
@@ -410,19 +410,19 @@ function GenesisManaFilters() {
             value={state.selectedClass}
             isClearable={true}
             onChange={onClassChange}
-            className="w-40 md:w-52"
+            className="w-52"
             options={[...ITEM_CLASS]}
           />
         </div>
         <div>
-          <label>Rank: </label>
+          <label>Power: </label>
           <Select
             instanceId="mana-filters"
-            placeholder="Choose Rank"
+            placeholder="Minimum Power"
             value={state.selectedRank}
             isClearable={true}
             onChange={onRankChange}
-            className="w-40 md:w-52"
+            className="w-52"
             options={[...ITEM_RANK]}
           />
         </div>
@@ -430,11 +430,11 @@ function GenesisManaFilters() {
           <label>Greatness: </label>
           <Select
             instanceId="mana-filters"
-            placeholder="Min Greatness"
+            placeholder="Minimum Greatness"
             value={state.selectedMinGreatness}
             isClearable={true}
             onChange={onMinGreatnessChange}
-            className="w-40 md:w-52"
+            className="w-52"
             options={[...ITEM_GREATNESS]}
           />
         </div>
@@ -588,9 +588,18 @@ function useClaimedManaWithPricing({ address }) {
     );
   }
 
+  // TODO: replace with power
+  let jewelryQuery: any = {};
   if (state.selectedRank?.value) {
-    queryByAddress.itemRank = parseInt(state.selectedRank?.value);
-    openseaQuery.itemRank = parseInt(state.selectedRank?.value);
+    const rank = parseInt(state.selectedRank?.value);
+    queryByAddress.itemRank_lte = rank;
+    openseaQuery.itemRank_lte = rank;
+
+    if (rank < 3) {
+      jewelryQuery.itemRank_lte = -1;
+    } else {
+      jewelryQuery.itemRank_lte = rank - 2;
+    }
   }
 
   const {
@@ -620,10 +629,16 @@ function useClaimedManaWithPricing({ address }) {
     useClaimedManaRawQuery({ ...openseaQuery, inventoryId: 5 }, !isAllQuery);
 
   const { data: openseaNeckResults, loading: isOSClaimedNeckManaLoading } =
-    useClaimedManaRawQuery({ ...openseaQuery, inventoryId: 6 }, !isAllQuery);
+    useClaimedManaRawQuery(
+      { ...openseaQuery, inventoryId: 6, ...jewelryQuery },
+      !isAllQuery
+    );
 
   const { data: openseaRingResults, loading: isOSClaimedRingManaLoading } =
-    useClaimedManaRawQuery({ ...openseaQuery, inventoryId: 7 }, !isAllQuery);
+    useClaimedManaRawQuery(
+      { ...openseaQuery, inventoryId: 7, ...jewelryQuery },
+      !isAllQuery
+    );
 
   const { priceByTokenId: manaPricingByTokenId } =
     useCollectionPricing("genesis-mana");
@@ -711,9 +726,16 @@ function useUnClaimedManaWithPricing({ address }) {
     queryBags.itemGreatness_gte = parseInt(state.selectedMinGreatness?.value);
   }
 
+  let jewelryQuery: any = {};
   if (state.selectedRank?.value) {
-    nftxQuery.itemRank = parseInt(state.selectedRank?.value);
-    queryBags.itemRank = parseInt(state.selectedRank?.value);
+    const rank = parseInt(state.selectedRank?.value);
+    nftxQuery.itemRank_lte = rank;
+    queryBags.itemRank_lte = rank;
+    if (rank < 3) {
+      jewelryQuery.itemRank_lte = -1;
+    } else {
+      jewelryQuery.itemRank_lte = rank - 2;
+    }
   }
 
   const { data: nftxResults, loading: isNFTxLoading } = useUnclaimedManaRaw(
@@ -742,9 +764,9 @@ function useUnClaimedManaWithPricing({ address }) {
   const { data: handBagData, loading: isHandBagDataLoading } =
     useUnclaimedManaRaw(bagQueryWithInventoryId(5));
   const { data: neckBagData, loading: isNeckBagDataLoading } =
-    useUnclaimedManaRaw(bagQueryWithInventoryId(6));
+    useUnclaimedManaRaw({ ...bagQueryWithInventoryId(6), ...jewelryQuery });
   const { data: ringBagData, loading: isRingDataBagLoading } =
-    useUnclaimedManaRaw(bagQueryWithInventoryId(7));
+    useUnclaimedManaRaw({ ...bagQueryWithInventoryId(7), ...jewelryQuery });
 
   const { priceByTokenId: lootPricingByTokenId } =
     useCollectionPricing("lootproject");
