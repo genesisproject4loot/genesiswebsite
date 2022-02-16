@@ -39,6 +39,12 @@ export const GM_SORT_OPTIONS = [
     label: "Price: High to Low"
   },
   {
+    value: "greatness_asc",
+    key: "itemGreatness",
+    direction: "descending",
+    label: "Greatness: High to Low"
+  },
+  {
     value: "rarity_desc",
     key: "rarity",
     direction: "descending",
@@ -54,6 +60,48 @@ export const GM_VIEW_OPTIONS = [
   {
     value: "list",
     label: "List"
+  }
+];
+
+export const ITEM_CLASS = [
+  {
+    value: "Warrior",
+    label: "Warrior"
+  },
+  {
+    value: "Hunter",
+    label: "Hunter"
+  },
+  {
+    value: "Mage",
+    label: "Mage"
+  }
+];
+
+export const ITEM_GREATNESS = [
+  {
+    value: "15",
+    label: "15"
+  },
+  {
+    value: "16",
+    label: "16"
+  },
+  {
+    value: "17",
+    label: "17"
+  },
+  {
+    value: "18",
+    label: "18"
+  },
+  {
+    value: "19",
+    label: "19"
+  },
+  {
+    value: "20",
+    label: "20"
   }
 ];
 

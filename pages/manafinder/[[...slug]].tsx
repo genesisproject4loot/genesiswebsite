@@ -6,7 +6,7 @@ import { useState, useMemo } from "react";
 import Select from "react-select";
 import suffices from "@data/suffices.json";
 import inventory from "@data/inventory.json";
-import { useUnclaimedMana, useClaimedMana } from "hooks/useMana";
+import { useUnclaimedMana_Legacy, useClaimedMana } from "hooks/useMana";
 import { shortenAddress } from "@utils/formatters";
 import { OpenseaLink } from "@components/common/OpenseaLink";
 
@@ -131,7 +131,10 @@ function ClaimedMana(props: { suffixId: number; inventoryId: number }) {
 }
 
 function UnClaimedMana(props: { suffixId: number; inventoryId: number }) {
-  const { loading, data } = useUnclaimedMana(props.suffixId, props.inventoryId);
+  const { loading, data } = useUnclaimedMana_Legacy(
+    props.suffixId,
+    props.inventoryId
+  );
   const { data: openseaData } = useOpenseaBagsData(
     (data?.bags ?? []).map((bag) => bag.id.toString())
   );

@@ -1,9 +1,13 @@
 export interface Mana {
   id: number;
   itemName: string;
+  itemClass: string;
+  itemRank: number;
+  itemGreatness: number;
   inventoryId: number;
-  suffixId: Order;
-  lootTokenId: Bag;
+  orderId: string;
+  lootBag?: Bag;
+  lootTokenId?: string;
   currentOwner: Wallet;
   price?: number;
   rarity?: number;

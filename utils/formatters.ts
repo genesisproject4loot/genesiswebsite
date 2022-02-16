@@ -15,7 +15,7 @@ export function formatOpenseaUrl(mana: Mana) {
   const isMinted = mana.id > 0;
   return isMinted
     ? `https://opensea.io/assets/${OS_MANA_URL}/${mana.id}`
-    : `https://opensea.io/assets/${OS_LOOT_URL}/${mana.lootTokenId?.id}`;
+    : `https://opensea.io/assets/${OS_LOOT_URL}/${mana.lootTokenId}`;
 }
 
 export function formatNFTXUrl(mana: Mana) {
@@ -23,7 +23,7 @@ export function formatNFTXUrl(mana: Mana) {
   if (owner === NFTX_MANA_ADDRESS) {
     return `https://nftx.io/vault/${owner}/${mana.id}`;
   } else if (owner === NFTX_LOOT_ADDRESS) {
-    return `https://nftx.io/vault/${owner}/${mana?.lootTokenId?.id}`;
+    return `https://nftx.io/vault/${owner}/${mana?.lootTokenId}`;
   }
   return "";
 }
