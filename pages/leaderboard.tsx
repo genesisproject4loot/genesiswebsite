@@ -208,7 +208,12 @@ function GenesisAdventurersGrid() {
       )}
       <div className="flex content-evenly gap-8 flex-wrap">
         {data?.adventurers?.map((adventurer) => {
-          return <GenesisAdventurerCard adventurer={adventurer} />;
+          return (
+            <GenesisAdventurerCard
+              key={adventurer.id}
+              adventurer={adventurer}
+            />
+          );
         })}
       </div>
     </>
