@@ -696,7 +696,7 @@ function useUnClaimedManaWithPricing({ address }) {
     ];
   }
 
-  const nftxQuery: any = { currentOwner: NFTX_LOOT_ADDRESS };
+  const nftxQuery: any = { currentOwner: NFTX_LOOT_ADDRESS, isClaimed: 0 };
   if (state.selectedOrder?.value) {
     nftxQuery.orderId = state.selectedOrder?.value;
     queryBags.orderId = state.selectedOrder?.value;
