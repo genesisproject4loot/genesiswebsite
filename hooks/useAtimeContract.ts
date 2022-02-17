@@ -52,7 +52,7 @@ export function useAtimeContract() {
   }
 
   async function getAtimePerToken() {
-    if (!atimeContract) return;
+    if (!atimeContract) return 0;
 
     const amount = await atimeContract.adventureTimePerTokenId();
     return parseFloat(parseFloat(ethers.utils.formatUnits(amount)).toFixed(4));
