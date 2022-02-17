@@ -31,6 +31,7 @@ export function useAtimeContract() {
   }
   async function claimAllForOwner() {
     const transaction = await atimeContract.claimAllForOwner();
+    await transaction.wait();
     updateLastUpdated();
     return transaction;
   }
@@ -39,6 +40,7 @@ export function useAtimeContract() {
     if (!atimeContract) return;
 
     const transaction = await atimeContract.claimById(tokenId);
+    await transaction.wait();
     updateLastUpdated();
     return transaction;
   }
