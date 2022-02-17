@@ -1,5 +1,4 @@
-import { ethers } from "ethers";
-import { useAtimeContract } from "hooks/useAtimeContract";
+import { useAtime } from "hooks/useAtimeContract";
 import { useWalletContext } from "hooks/useWalletContext";
 import { useRef, useState } from "react";
 import { useOnClickOutside } from "usehooks-ts";
@@ -10,7 +9,7 @@ export default function WalletConnectButton() {
     <div className="flex items-center bg-gray-0  text-sm md:text-base">
       {wallet.isConnected && (
         <span className="flex gap-2 md:gap-4">
-          {/* <ATime /> */}
+          <ATime />
           {wallet.displayName}{" "}
           <a className="cursor-pointer" onClick={wallet.disconnectWallet}>
             [ disconnect ]
@@ -30,20 +29,9 @@ export default function WalletConnectButton() {
 }
 
 function ATime() {
-  const wallet = useWalletContext();
   const [menuOpen, setMenuOpen] = useState(false);
-  const { atimeContract } = useAtimeContract();
-  const [atimeBalance, setAtimeBalance] = useState(0);
-  atimeContract
-    ?.balanceOf(wallet.account)
-    .then((value) => {
-      setAtimeBalance(
-        parseFloat(parseFloat(ethers.utils.formatUnits(value)).toFixed(4))
-      );
-    })
-    .catch((e) => {
-      console.log(e);
-    });
+  const { claimAllForOwner, balance } = useAtime();
+
   const menuRef = useRef(null);
 
   useOnClickOutside(menuRef, () => setMenuOpen(false));
@@ -51,17 +39,18 @@ function ATime() {
   return (
     <div className="relative cursor-pointer">
       <button onClick={() => setMenuOpen(!menuOpen)}>
-        {atimeBalance} $ATIME{" "}
+        {balance.toLocaleString()} $ATIME{" "}
       </button>
-      {/* {menuOpen && (
+      {menuOpen && (
         <ul
           ref={menuRef}
           className="absolute bg-white rounded-md text-black w-40 z-50"
         >
-          <li className="px-4 py-2">Claim All</li>
-          <li className="px-4 py-2">Claim By Realm</li>
+          <li className="px-4 py-2" onClick={claimAllForOwner}>
+            Claim All
+          </li>
         </ul>
-      )} */}
+      )}
     </div>
   );
 }

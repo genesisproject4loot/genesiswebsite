@@ -1,6 +1,7 @@
 import React, { ReactElement, useState } from "react";
 import Layout_V2 from "@components/Layout_V2";
 import GenesisAdventurerChart from "@components/charts/GenesisAdventurerChart";
+import { useAtimeSeasonClaimed } from "hooks/useAtimeContract";
 
 import styles from "@styles/pages/Leaderboard.module.scss"; // Styles
 
@@ -190,17 +191,13 @@ function GenesisAdventurerLeaderboardRow({ wallet, showOverlay, maxValue }) {
 
 function GenesisAdventurersGrid() {
   const { account, isConnected } = useWalletContext();
+
   const { data } = useAdventurerRawQuery(
     {
       currentOwner: account?.toLowerCase()
     },
     !account
   );
-
-  const adventurerImage = (adventurer) => {
-    const data = JSON.parse(atob(adventurer.tokenURI.split(",")[1]));
-    return data.image;
-  };
 
   return (
     <>
@@ -211,51 +208,63 @@ function GenesisAdventurersGrid() {
       )}
       <div className="flex content-evenly gap-8 flex-wrap">
         {data?.adventurers?.map((adventurer) => {
-          return (
-            <div
-              key={adventurer.id}
-              className="rounded-md border border-gray-300 shadow-md p-6 flex flex-col"
-            >
-              <img
-                className="rounded-md"
-                width="292px"
-                height="292px"
-                src={adventurerImage(adventurer)}
-              />
-              <label className="font-bold text-base pt-5 pb-4">
-                Genesis Adventurer # {adventurer.id}
-              </label>
-              <div className="flex flex-col text-blue-400 text-sm items-end pr-2">
-                <a
-                  href={`https://www.loot.exchange/collections/genesisadventurer/${adventurer.id}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  loot.exchange
-                </a>
-                <a
-                  href={`https://opensea.io/assets/0x8db687aceb92c66f013e1d614137238cc698fedb/${adventurer.id}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  opensea
-                </a>
-              </div>
-              {/* <button
-              onClick={() => alert("to be implemented")}
-              className="m-auto text-center rounded-md border-gray-200 shadow-sm w-full border py-2 mb-6"
-            >
-              Claim $ATIME
-            </button>
-
-            <div className="flex pt-4 border-t border-gray-200">
-              <span className="flex-1 text-gray-600">AVAILABLE $ATIME</span>
-              <span>20,320</span>
-            </div> */}
-            </div>
-          );
+          return <GenesisAdventurerCard adventurer={adventurer} />;
         })}
       </div>
     </>
+  );
+}
+
+function GenesisAdventurerCard({ adventurer }) {
+  const { isClaimed, claimById, amountPerToken } = useAtimeSeasonClaimed(
+    adventurer.id
+  );
+
+  const adventurerImage = (adventurer) => {
+    const data = JSON.parse(atob(adventurer.tokenURI.split(",")[1]));
+    return data.image;
+  };
+
+  return (
+    <div
+      key={adventurer.id}
+      className="rounded-md border border-gray-300 shadow-md p-6 flex flex-col"
+    >
+      <img
+        className="rounded-md"
+        width="292px"
+        height="292px"
+        src={adventurerImage(adventurer)}
+      />
+      <label className="font-bold text-base pt-5 pb-4">
+        Genesis Adventurer # {adventurer.id}
+      </label>
+      <div className="flex flex-col text-blue-400 text-sm items-end pr-2">
+        <a
+          href={`https://www.loot.exchange/collections/genesisadventurer/${adventurer.id}`}
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          loot.exchange
+        </a>
+        <a
+          href={`https://opensea.io/assets/0x8db687aceb92c66f013e1d614137238cc698fedb/${adventurer.id}`}
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          opensea
+        </a>
+      </div>
+      {!isClaimed && (
+        <button
+          onClick={() => {
+            claimById(adventurer.id);
+          }}
+          className="m-auto text-center rounded-md border-gray-200 shadow-sm w-full border py-2 my-2"
+        >
+          Claim <b>{amountPerToken.toLocaleString()}</b> $ATIME
+        </button>
+      )}
+    </div>
   );
 }
