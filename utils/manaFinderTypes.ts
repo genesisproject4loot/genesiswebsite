@@ -3,6 +3,7 @@ export interface Mana {
   itemName: string;
   itemClass: string;
   itemRank: number;
+  itemPower: number;
   itemGreatness: number;
   inventoryId: number;
   orderId: string;

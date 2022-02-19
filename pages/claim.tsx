@@ -415,10 +415,10 @@ function GenesisManaFilters() {
           />
         </div>
         <div>
-          <label>Power: </label>
+          <label>Level: </label>
           <Select
             instanceId="mana-filters"
-            placeholder="Minimum Power"
+            placeholder="Minimum Level"
             value={state.selectedPower}
             isClearable={true}
             onChange={onRankChange}
@@ -590,8 +590,9 @@ function useClaimedManaWithPricing({ address }) {
 
   if (state.selectedPower?.value) {
     const power = parseInt(state.selectedPower?.value);
-    queryByAddress.itemPower_gte = power;
-    openseaQuery.itemPower_gte = power;
+    const values = [1, 2, 3, 4, 5].filter((val) => val >= power).concat(0);
+    queryByAddress.itemPower_in = values;
+    openseaQuery.itemPower_in = values;
   }
 
   const {
@@ -714,8 +715,9 @@ function useUnClaimedManaWithPricing({ address }) {
 
   if (state.selectedPower?.value) {
     const power = parseInt(state.selectedPower?.value);
-    nftxQuery.itemPower_gte = power;
-    queryBags.itemPower_gte = power;
+    const values = [1, 2, 3, 4, 5].filter((val) => val >= power).concat(0);
+    nftxQuery.itemPower_in = values;
+    queryBags.itemPower_in = values;
   }
 
   const { data: nftxResults, loading: isNFTxLoading } = useUnclaimedManaRaw(
