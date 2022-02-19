@@ -69,7 +69,6 @@ export function useUnclaimedManaRaw(variables, skip?: boolean) {
         lootTokenId
         inventoryId
         itemName
-        itemPower
         itemGreatness
         itemClass
         itemRank
