@@ -561,12 +561,7 @@ function useClaimedManaWithPricing({ address }) {
   };
 
   const openseaQuery: any = {
-    currentOwner_not_in: [
-      ...DAO_ADDRESSES,
-      ...(state.wallets
-        ? state.wallets.map((wallet) => wallet?.toLowerCase())
-        : [])
-    ]
+    currentOwner_not_in: [...DAO_ADDRESSES]
   };
 
   if (state.selectedOrder?.value) {
@@ -689,12 +684,7 @@ function useUnClaimedManaWithPricing({ address }) {
   if (!isAllQuery) {
     queryBags.currentOwner = address?.toLowerCase();
   } else {
-    queryBags.currentOwner_not_in = [
-      ...DAO_ADDRESSES,
-      ...(state.wallets
-        ? state.wallets.map((wallet) => wallet?.toLowerCase())
-        : [])
-    ];
+    queryBags.currentOwner_not_in = [...DAO_ADDRESSES];
   }
 
   const nftxQuery: any = { currentOwner: NFTX_LOOT_ADDRESS, isClaimed: 0 };
