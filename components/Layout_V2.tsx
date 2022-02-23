@@ -29,7 +29,7 @@ function Header() {
     <div className="h-16 flex w-full justify-center items-center px-10 border-b border-white-15 bg-gray-0 text-white fixed top-0 z-50">
       {/* Main logo */}
       <div className="ont-bold text-xs md:text-lg mr-4">
-        <Link href="/" passHref={true}>
+        <Link href="https://genesisproject.xyz" passHref={true}>
           <span className="flex items-center gap-3 cursor-pointer whitespace-nowrap">
             <GenesisLogo />{" "}
             <span className="hidden md:block">Genesis Project (for Loot)</span>
@@ -38,7 +38,7 @@ function Header() {
       </div>
       <div className="flex-1 flex gap-4 text-xs md:text-lg whitespace-nowrap justify-end md:justify-center">
         <a
-          href="https://genesisproject.super.site/"
+          href="https://genesisproject.xyz"
           target="_blank"
           rel="noopener noreferrer"
         >
