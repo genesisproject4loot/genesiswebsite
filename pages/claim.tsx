@@ -18,7 +18,7 @@ import {
   INVENTORY,
   ITEM_CLASS,
   ITEM_GREATNESS,
-  ITEM_POWER,
+  ITEM_LEVEL,
   NFTX_MANA_ADDRESS,
   NFTX_LOOT_ADDRESS,
   GM_SORT_OPTIONS,
@@ -59,7 +59,7 @@ interface ManaFinderState {
   selectedOrder: SelectOption;
   selectedClass: SelectOption;
   selectedMinGreatness: SelectOption;
-  selectedPower: SelectOption;
+  selectedLevel: SelectOption;
   selectedView: SelectOption;
   selectedSort: SelectSortOption;
   selectedManaBuild: Mana[];
@@ -75,7 +75,7 @@ interface ManaFinderState {
 const defaultManaFinderState: ManaFinderState = {
   selectedOrder: null,
   selectedClass: null,
-  selectedPower: null,
+  selectedLevel: null,
   selectedMinGreatness: null,
   selectedView: GM_VIEW_OPTIONS[1],
   selectedSort: GM_SORT_OPTIONS[0],
@@ -94,7 +94,7 @@ type ManaFinderAction =
   | { type: "setSelectedOrder"; payload: SelectOption }
   | { type: "setSelectedClass"; payload: SelectOption }
   | { type: "setSelectedMinGreatness"; payload: SelectOption }
-  | { type: "setSelectedPower"; payload: SelectOption }
+  | { type: "setSelectedLevel"; payload: SelectOption }
   | { type: "setSelectedView"; payload: SelectOption }
   | { type: "setSelectedSort"; payload: SelectSortOption }
   | { type: "setSelectedManaBuild"; payload: Mana[] }
@@ -133,8 +133,8 @@ function ManaFinderReducer(state: ManaFinderState, action: ManaFinderAction) {
       return { ...state, selectedClass: action.payload };
     case "setSelectedMinGreatness":
       return { ...state, selectedMinGreatness: action.payload };
-    case "setSelectedPower":
-      return { ...state, selectedPower: action.payload };
+    case "setSelectedLevel":
+      return { ...state, selectedLevel: action.payload };
     case "setSelectedView":
       return { ...state, selectedView: action.payload };
     case "setSelectedSort":
@@ -383,7 +383,7 @@ function GenesisManaFilters() {
   const onMinGreatnessChange = (val) =>
     dispatch({ type: "setSelectedMinGreatness", payload: val });
   const onRankChange = (val) =>
-    dispatch({ type: "setSelectedPower", payload: val });
+    dispatch({ type: "setSelectedLevel", payload: val });
   const onSortChange = (val) =>
     dispatch({ type: "setSelectedSort", payload: val });
 
@@ -419,11 +419,11 @@ function GenesisManaFilters() {
           <Select
             instanceId="mana-filters"
             placeholder="Minimum Level"
-            value={state.selectedPower}
+            value={state.selectedLevel}
             isClearable={true}
             onChange={onRankChange}
             className="w-52"
-            options={[...ITEM_POWER]}
+            options={[...ITEM_LEVEL]}
           />
         </div>
         <div>
@@ -583,11 +583,11 @@ function useClaimedManaWithPricing({ address }) {
     );
   }
 
-  if (state.selectedPower?.value) {
-    const power = parseInt(state.selectedPower?.value);
-    const values = [1, 2, 3, 4, 5].filter((val) => val >= power).concat(0);
-    queryByAddress.itemPower_in = values;
-    openseaQuery.itemPower_in = values;
+  if (state.selectedLevel?.value) {
+    const level = parseInt(state.selectedLevel?.value);
+    const values = [1, 2, 3, 4, 5].filter((val) => val >= level).concat(0);
+    queryByAddress.itemLevel_in = values;
+    openseaQuery.itemLevel_in = values;
   }
 
   const {
@@ -703,11 +703,11 @@ function useUnClaimedManaWithPricing({ address }) {
     queryBags.itemGreatness_gte = parseInt(state.selectedMinGreatness?.value);
   }
 
-  if (state.selectedPower?.value) {
-    const power = parseInt(state.selectedPower?.value);
-    const values = [1, 2, 3, 4, 5].filter((val) => val >= power).concat(0);
-    nftxQuery.itemPower_in = values;
-    queryBags.itemPower_in = values;
+  if (state.selectedLevel?.value) {
+    const level = parseInt(state.selectedLevel?.value);
+    const values = [1, 2, 3, 4, 5].filter((val) => val >= level).concat(0);
+    nftxQuery.itemLevel_in = values;
+    queryBags.itemLevel_in = values;
   }
 
   const { data: nftxResults, loading: isNFTxLoading } = useUnclaimedManaRaw(
@@ -1003,15 +1003,14 @@ function GenesisManaListRow({ manas, onSelect, selectedMana }) {
             className="w-2/5 cursor-pointer flex flex-col justify-center"
           >
             <span className="underline mr-4">{mana.itemName}</span>
-            <span
-              className="text-xs"
-              style={{ color: rarityColor(mana.itemName) }}
-            >
-              {rarityDescription(mana.itemName)}
-              &nbsp;
-              {mana.itemClass}
-              &nbsp;
-              {mana.itemGreatness}
+            <span className="text-xs">
+              <span style={{ color: rarityColor(mana.itemName) }}>
+                {rarityDescription(mana.itemName)}
+                &nbsp;
+                {mana.itemClass}
+              </span>
+              : &nbsp; Greatness: {mana.itemGreatness}, Level: {mana.itemLevel},
+              Rating: {mana.itemRating}
             </span>{" "}
           </span>
           <span className="w-1/5 text-right" title="Owner">
@@ -1238,6 +1237,24 @@ function GenesisAdventurerCard({
         (mana.lootBag || isMinted(mana))
     ).length === 8;
 
+  const getGreatness = () => {
+    return manas
+      .filter(Boolean)
+      .reduce((total, mana) => total + mana.itemGreatness, 0);
+  };
+
+  const getLevel = () => {
+    return manas
+      .filter(Boolean)
+      .reduce((total, mana) => total + mana.itemLevel, 0);
+  };
+
+  const getRating = () => {
+    return manas
+      .filter(Boolean)
+      .reduce((total, mana) => total + mana.itemRating, 0);
+  };
+
   function AccessoryItem({ mana }: { mana: Mana }) {
     //Owned By Current Wallet
     if (doesOwnMana(mana)) {
@@ -1294,6 +1311,10 @@ function GenesisAdventurerCard({
             {SUFFICES.find((order) => order.value === orderId)?.label}
           </li>
         </ul>
+        <div className="px-4 pb-4 font-semibold text-right">
+          Greatness: {getGreatness()}, Level: {getLevel()}, Rating:{" "}
+          {getRating()}
+        </div>
         <div className="pb-4 mx-4">
           {canMint && (
             <button
