@@ -105,8 +105,7 @@ export const ITEM_GREATNESS = [
   }
 ];
 
-// TODO: Update when power is added to subgraph
-export const ITEM_POWER = [
+export const ITEM_LEVEL = [
   {
     value: "1",
     label: "1"

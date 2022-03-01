@@ -72,7 +72,8 @@ export function useUnclaimedManaRaw(variables, skip?: boolean) {
         itemGreatness
         itemClass
         itemRank
-        itemPower
+        itemLevel
+        itemRating
         orderId
         currentOwner {
           id
@@ -157,7 +158,8 @@ export function useClaimedManaRawQuery(variables, skip?: boolean) {
         itemGreatness
         itemClass
         itemRank
-        itemPower
+        itemLevel
+        itemRating
         orderId
         inventoryId
         lootBag: lootTokenId {

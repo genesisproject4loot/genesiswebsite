@@ -3,8 +3,9 @@ export interface Mana {
   itemName: string;
   itemClass: string;
   itemRank: number;
-  itemPower: number;
+  itemLevel: number;
   itemGreatness: number;
+  itemRating: number;
   inventoryId: number;
   orderId: string;
   lootBag?: Bag;
