@@ -1364,8 +1364,9 @@ function GenesisAdventurerResurrectModal({
   selectedManas
 }: GenesisAdventurerResurrectModalProps) {
   const { dispatch, manaMinter } = useContext(ManaFinderContext);
-  const { getPublicPrice, adventurerContract } = useAdventurerContract();
   const {
+    getPublicPrice,
+    adventurerContract,
     isAppoved,
     isAppoving,
     isResurrecting,
@@ -1373,6 +1374,7 @@ function GenesisAdventurerResurrectModal({
     approveContract,
     resurrectGA
   } = useAdventurerContract();
+
   const [price, setPrice] = useState(0);
   const [completedTokenId, setCompletedTokenId] = useState(0);
 

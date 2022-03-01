@@ -3,6 +3,8 @@ import { ethers } from "ethers";
 
 import { useWalletContext } from "./useWalletContext";
 import { useManaContract } from "./useManaContract";
+import { useAtimeContract } from "./useAtimeContract";
+
 import { Mana } from "@utils/manaFinderTypes";
 import { INVENTORY } from "utils/constants";
 export const GA_CONTRACT_ADDRESS =
@@ -70,6 +72,36 @@ const gaABI = [
     outputs: [],
     stateMutability: "payable",
     type: "function"
+  },
+  {
+    inputs: [
+      {
+        internalType: "uint256",
+        name: "tokenId",
+        type: "uint256"
+      },
+      {
+        components: [
+          {
+            internalType: "uint256",
+            name: "lootTokenId",
+            type: "uint256"
+          },
+          {
+            internalType: "uint8",
+            name: "inventoryId",
+            type: "uint8"
+          }
+        ],
+        internalType: "struct GenesisAdventurerV2.Item[]",
+        name: "itemsToName",
+        type: "tuple[]"
+      }
+    ],
+    name: "nameLostMana",
+    outputs: [],
+    stateMutability: "payable",
+    type: "function"
   }
 ];
 
@@ -77,18 +109,30 @@ export enum AdventurerContractState {
   UNAPPROVED,
   APPROVED,
   APPROVING,
-  RESURRECTING
+  RESURRECTING,
+  NAMING
+}
+
+export enum AdventurerContractATimeState {
+  UNAPPROVED,
+  APPROVED,
+  APPROVING
 }
 
 export function useAdventurerContract() {
   const wallet = useWalletContext();
   const { manaContract } = useManaContract();
+  const { atimeContract } = useAtimeContract();
   const [contractState, setContractState] = useState(
     AdventurerContractState.UNAPPROVED
+  );
+  const [aTimeContractState, setATimeContractState] = useState(
+    AdventurerContractATimeState.UNAPPROVED
   );
 
   const [adventurerContract, setAdventurerContract] =
     useState<ethers.Contract>();
+
   useEffect(() => {
     const contract = new ethers.Contract(
       GA_CONTRACT_ADDRESS,
@@ -99,7 +143,7 @@ export function useAdventurerContract() {
   }, [wallet?.signer]);
 
   useEffect(() => {
-    if (!manaContract) {
+    if (!manaContract || !wallet?.account) {
       return;
     }
     manaContract
@@ -111,7 +155,20 @@ export function useAdventurerContract() {
             : AdventurerContractState.UNAPPROVED
         );
       });
-  }, [manaContract]);
+  }, [wallet, wallet.account, manaContract]);
+
+  useEffect(() => {
+    if (!atimeContract || !wallet?.account) {
+      return;
+    }
+    atimeContract.allowance(wallet.account, GA_CONTRACT_ADDRESS).then((res) => {
+      if (parseInt(ethers.utils.formatUnits(res)) < 100) {
+        setATimeContractState(AdventurerContractATimeState.UNAPPROVED);
+      } else {
+        setATimeContractState(AdventurerContractATimeState.APPROVED);
+      }
+    });
+  }, [wallet, wallet.account, manaContract]);
 
   async function getPublicPrice() {
     if (!adventurerContract) {
@@ -133,6 +190,23 @@ export function useAdventurerContract() {
       return true;
     } catch (e) {
       setContractState(AdventurerContractState.UNAPPROVED);
+      console.log(e);
+      return false;
+    }
+  }
+
+  async function approveATimeContract() {
+    try {
+      setATimeContractState(AdventurerContractATimeState.APPROVING);
+      const tx = await atimeContract.approve(
+        GA_CONTRACT_ADDRESS,
+        ethers.utils.parseEther(String(Number.MAX_SAFE_INTEGER))
+      );
+      await tx?.wait();
+      setATimeContractState(AdventurerContractATimeState.APPROVED);
+      return true;
+    } catch (e) {
+      setATimeContractState(AdventurerContractATimeState.UNAPPROVED);
       console.log(e);
       return false;
     }
@@ -170,6 +244,24 @@ export function useAdventurerContract() {
     }
   }
 
+  async function nameLostMana(tokenId: number, itemsToName: any[]) {
+    const previousState = contractState;
+    setContractState(AdventurerContractState.NAMING);
+    try {
+      const result = await adventurerContract.nameLostMana(
+        tokenId,
+        itemsToName
+      );
+      await result.wait();
+      setContractState(previousState);
+      return true;
+    } catch (e) {
+      console.log(e);
+      setContractState(previousState);
+      return false;
+    }
+  }
+
   return {
     adventurerContract,
     getPublicPrice,
@@ -177,7 +269,16 @@ export function useAdventurerContract() {
     isAppoving: contractState === AdventurerContractState.APPROVING,
     isResurrecting: contractState === AdventurerContractState.RESURRECTING,
     isUnAppoved: contractState === AdventurerContractState.UNAPPROVED,
+    isNaming: contractState === AdventurerContractState.NAMING,
+    isAtimeAppoved:
+      aTimeContractState === AdventurerContractATimeState.APPROVED,
+    isAtimeAppoving:
+      aTimeContractState === AdventurerContractATimeState.APPROVING,
+    isAtimeUnAppoved:
+      aTimeContractState === AdventurerContractATimeState.UNAPPROVED,
     approveContract,
-    resurrectGA
+    approveATimeContract,
+    resurrectGA,
+    nameLostMana
   };
 }
