@@ -250,7 +250,7 @@ function GenesisAdventurersGrid() {
   const { account, isConnected } = useWalletContext();
   const { state, dispatch } = useContext(GenesisAdventurerPageContext);
   const [selectedTab, setSelectedTab] = useState(0);
-  const tabs = ["All", "Wallet"];
+  const tabs = ["All", "My"];
   const { data, refetch } = useAdventurerRawQuery(
     selectedTab === 0
       ? { currentOwner_not: "" }
@@ -309,6 +309,7 @@ function GenesisAdventurersGrid() {
 function GenesisAdventurerCard({ adventurer }) {
   const { dispatch } = useContext(GenesisAdventurerPageContext);
   const { address: ensName } = useEnsLookup(adventurer?.currentOwner?.id);
+  const { account, isConnected } = useWalletContext();
 
   const { isClaimed, claimById, amountPerToken } = useAtimeSeasonClaimed(
     adventurer.id
@@ -320,13 +321,28 @@ function GenesisAdventurerCard({ adventurer }) {
   };
 
   const hasLostMana = (adventurer) =>
+    adventurer.currentOwner?.id?.toLowerCase() === account?.toLowerCase() &&
     adventurer.lootTokenIds.filter((tokenId) => tokenId === 0).length > 0;
 
   return (
     <div key={adventurer.id} className="flex-col flex ">
       <div>
-        <label className="font-bold text-base">
+        <label className="font-bold text-base flex">
           Genesis Adventurer # {adventurer.id}
+          {hasLostMana(adventurer) && (
+            <button
+              onClick={() => {
+                dispatch({
+                  type: "setSelectedAdventurer",
+                  payload: adventurer
+                });
+                // claimById(adventurer.id);
+              }}
+              className="text-blue-400 text-sm flex ml-2"
+            >
+              [upgrade]
+            </button>
+          )}
         </label>
         <img
           className="rounded-md"
@@ -489,6 +505,7 @@ function LostManaNamingModal() {
       <Select
         isClearable={true}
         options={lostManaNames}
+        maxMenuHeight={80}
         onChange={(val) => {
           onSelectName(val, inventoryId);
         }}
