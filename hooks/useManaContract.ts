@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect } from "react";
 import { ethers } from "ethers";
 import manaABI from "data/genesismana-abi.json";
 import { useWalletContext } from "./useWalletContext";
@@ -11,6 +11,9 @@ export function useManaContract() {
   const wallet = useWalletContext();
   const [manaContract, setManaContract] = useState<ethers.Contract>();
   useEffect(() => {
+    if (!wallet?.signer) {
+      return;
+    }
     const contract = new ethers.Contract(
       GM_CONTRACT_ADDRESS,
       manaABI,

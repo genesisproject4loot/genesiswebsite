@@ -47,10 +47,27 @@ export function useAdventurerRawQuery(variables, skip?: boolean) {
           adventurers(
         where: {  ${Object.keys(variables)
           .map((key) => `${key}: $${key}`)
-          .join(", ")} }
+          .join(", ")} },
+          orderBy:rating, orderDirection:desc
       ) {
         id
+        weapon
+        chest
+        head 
+        waist 
+        foot 
+        hand 
+        neck 
+        ring
+        orderId
+        greatness
+        level
+        rating
         tokenURI
+        lootTokenIds
+        currentOwner {
+          id
+        }
       }
     }
   `,
