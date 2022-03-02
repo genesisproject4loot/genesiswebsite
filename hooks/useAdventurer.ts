@@ -38,7 +38,8 @@ function getTypeForKey(obj, key) {
   return `${getType(obj[key])}!`;
 }
 
-export function useAdventurerRawQuery(variables, skip?: boolean) {
+export function useAdventurerRawQuery(variables, options) {
+  if (!options) options = {};
   return useQuery<any, any>(
     gql`
     query GetAdventurer(${Object.keys(variables)
@@ -48,7 +49,9 @@ export function useAdventurerRawQuery(variables, skip?: boolean) {
         where: {  ${Object.keys(variables)
           .map((key) => `${key}: $${key}`)
           .join(", ")} },
-          orderBy:rating, orderDirection:desc
+          orderBy:${options.sortBy || "rating"}, orderDirection:${
+      options.sortDirection || "desc"
+    }
       ) {
         id
         weapon
@@ -73,7 +76,7 @@ export function useAdventurerRawQuery(variables, skip?: boolean) {
   `,
     {
       variables,
-      skip: !!skip
+      skip: !!options.skip
     }
   );
 }

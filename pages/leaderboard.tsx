@@ -26,7 +26,7 @@ import { shortenAddress } from "@utils/formatters";
 import { SUFFICES } from "@utils/constants";
 import { useWalletContext } from "hooks/useWalletContext";
 import { Modal } from "@components/Modal";
-import { itemRarity } from "loot-rarity";
+// import { itemRarity } from "loot-rarity";
 
 interface GenesisAdventurerPageState {
   selectedAdventurer: any;
@@ -79,7 +79,9 @@ export default function GenesisAdventurerPage(): ReactElement {
             <GenesisAdventurersGrid />
           </div>
         </div>
-        <LostManaNamingModal />
+        {state.selectedAdventurer && (
+          <LostManaNamingModal key={state.selectedAdventurer?.id} />
+        )}
       </Layout_V2>
     </GenesisAdventurerPageContext.Provider>
   );
@@ -246,19 +248,44 @@ function GenesisAdventurerLeaderboardRow({ wallet, showOverlay, maxValue }) {
   );
 }
 
+function SortIndicator({ direction }) {
+  return (
+    <span>
+      {direction === "desc" && "↓"}
+      {direction === "asc" && "↑"}
+    </span>
+  );
+}
+
 function GenesisAdventurersGrid() {
-  const { account, isConnected } = useWalletContext();
-  const { state, dispatch } = useContext(GenesisAdventurerPageContext);
+  const { account } = useWalletContext();
+  const { state } = useContext(GenesisAdventurerPageContext);
   const [selectedTab, setSelectedTab] = useState(0);
+  const [sort, setSort] = useState({ sortBy: "rating", sortDirection: "desc" });
+
   const tabs = ["All", "My"];
-  const { data, refetch } = useAdventurerRawQuery(
+  const { data, loading, refetch } = useAdventurerRawQuery(
     selectedTab === 0
       ? { currentOwner_not: "" }
       : {
           currentOwner: account?.toLowerCase()
         },
-    selectedTab === 1 && !account
+    { skip: selectedTab === 1 && !account, ...sort }
   );
+
+  const isSortByGreatness = () => sort.sortBy == "greatness";
+  const isSortByLevel = () => sort.sortBy == "level";
+  const isSortByRating = () => sort.sortBy == "rating";
+  const handleSortClick = (sortBy) => () => {
+    if (sortBy === sort.sortBy) {
+      setSort({
+        sortBy,
+        sortDirection: sort.sortDirection == "desc" ? "asc" : "desc"
+      });
+    } else {
+      setSort({ sortBy, sortDirection: "desc" });
+    }
+  };
 
   useEffect(() => {
     if (!state.selectedAdventurer) {
@@ -292,21 +319,89 @@ function GenesisAdventurersGrid() {
           Connect your wallet to see your Adventurers.
         </h1>
       )} */}
-      <div className="flex content-evenly gap-8 flex-wrap">
-        {data?.adventurers?.map((adventurer) => {
-          return (
-            <GenesisAdventurerCard
-              key={adventurer.id}
-              adventurer={adventurer}
-            />
-          );
-        })}
-      </div>
+      <table className="w-full table-fixed">
+        <thead className="font-semibold">
+          <tr>
+            <td className="w-16">#</td>
+            <td className="w-52">Bag</td>
+            <td>Name</td>
+            <td>Order</td>
+            <td>Owner</td>
+            <td className="text-right pr-10 w-48">
+              <div
+                className="cursor-pointer"
+                onClick={handleSortClick("greatness")}
+              >
+                Greatness{" "}
+                {isSortByGreatness() && (
+                  <SortIndicator direction={sort.sortDirection} />
+                )}
+              </div>
+            </td>
+            <td className="text-right pr-10 w-48">
+              <div
+                className="cursor-pointer"
+                onClick={handleSortClick("level")}
+              >
+                Level{" "}
+                {isSortByLevel() && (
+                  <SortIndicator direction={sort.sortDirection} />
+                )}
+              </div>
+            </td>
+            <td className="text-right pr-10 w-48">
+              <div
+                className="cursor-pointer"
+                onClick={handleSortClick("rating")}
+              >
+                Rating{" "}
+                {isSortByRating() && (
+                  <SortIndicator direction={sort.sortDirection} />
+                )}
+              </div>
+            </td>
+          </tr>
+        </thead>
+        <tbody>
+          {data?.adventurers?.map((adventurer, idx) => {
+            return (
+              <GenesisAdventurerTableRow
+                key={adventurer.id}
+                adventurer={adventurer}
+                rank={idx + 1}
+              />
+            );
+          })}
+        </tbody>
+      </table>
     </>
   );
 }
 
-function GenesisAdventurerCard({ adventurer }) {
+function GLRProgressBar({ text, percentage }) {
+  return (
+    <div>
+      <div className="text-gray-400 text-sm text-right" style={{ width: 150 }}>
+        {text}
+      </div>
+
+      <div
+        className="rounded-lg h-4 relative"
+        style={{ width: 150, backgroundColor: " rgb(229, 232, 235)" }}
+      >
+        <span
+          className="rounded-lg h-4 block"
+          style={{
+            backgroundColor: "rgb(32, 129, 226)",
+            width: percentage * 150
+          }}
+        ></span>
+      </div>
+    </div>
+  );
+}
+
+function GenesisAdventurerTableRow({ adventurer, rank }) {
   const { dispatch } = useContext(GenesisAdventurerPageContext);
   const { address: ensName } = useEnsLookup(adventurer?.currentOwner?.id);
   const { account, isConnected } = useWalletContext();
@@ -320,15 +415,48 @@ function GenesisAdventurerCard({ adventurer }) {
     return data.image;
   };
 
+  const adventurerName = (adventurer) => {
+    const data = JSON.parse(atob(adventurer.tokenURI.split(",")[1]));
+    return data.name;
+  };
+
   const hasLostMana = (adventurer) =>
     adventurer.currentOwner?.id?.toLowerCase() === account?.toLowerCase() &&
     adventurer.lootTokenIds.filter((tokenId) => tokenId === 0).length > 0;
 
+  const canRenameGA = (adventurer) =>
+    adventurer.currentOwner?.id?.toLowerCase() === account?.toLowerCase();
+
   return (
-    <div key={adventurer.id} className="flex-col flex ">
-      <div>
-        <label className="font-bold text-base flex">
-          Genesis Adventurer # {adventurer.id}
+    <tr>
+      <td className="align-top pt-5">{rank}.</td>
+      <td className="align-top pt-5">
+        <a
+          href={`https://opensea.io/assets/0x8db687aceb92c66f013e1d614137238cc698fedb/${adventurer.id}`}
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          <img
+            className="rounded-md"
+            width="180px"
+            height="180px"
+            src={adventurerImage(adventurer)}
+          />
+        </a>
+      </td>
+      <td className="align-top pt-5">
+        {adventurerName(adventurer)}{" "}
+        <div className="flex flex-row gap-2">
+          {canRenameGA(adventurer) && (
+            <a
+              className="text-blue-400 text-sm flex"
+              href="https://etherscan.io/token/0x8db687aceb92c66f013e1d614137238cc698fedb#writeProxyContract"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              [rename]
+            </a>
+          )}
           {hasLostMana(adventurer) && (
             <button
               onClick={() => {
@@ -338,82 +466,100 @@ function GenesisAdventurerCard({ adventurer }) {
                 });
                 // claimById(adventurer.id);
               }}
-              className="text-blue-400 text-sm flex ml-2"
+              className="text-blue-400 text-sm flex"
             >
               [upgrade]
             </button>
           )}
-        </label>
-        <img
-          className="rounded-md"
-          width="292px"
-          height="292px"
-          src={adventurerImage(adventurer)}
-        />
-      </div>
-
-      {/* <div className="text-blue-400 text-sm flex gap-2 pl-2">
-        <a
-          href={`https://www.loot.exchange/collections/genesisadventurer/${adventurer.id}`}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          loot.exchange
-        </a>
+        </div>
+      </td>
+      <td className="align-top pt-5">
+        of{" "}
+        {
+          SUFFICES.find((suffix) => suffix.value === String(adventurer.orderId))
+            .label
+        }
+      </td>
+      <td className="align-top pt-5">
         <a
           href={`https://opensea.io/assets/0x8db687aceb92c66f013e1d614137238cc698fedb/${adventurer.id}`}
           target="_blank"
           rel="noopener noreferrer"
+          className="text-sm text-blue-400"
         >
-          opensea
+          {ensName || shortenAddress(adventurer?.currentOwner?.id)}
         </a>
-        {hasLostMana(adventurer) && (
-          <button
-            onClick={() => {
-              dispatch({ type: "setSelectedAdventurer", payload: adventurer });
-              // claimById(adventurer.id);
-            }}
-            className="text-blue-400 text-sm flex gap-2"
-          >
-            rename lost mana
-          </button>
-        )}
-      </div> */}
-      <ul className="px-2 font-semibold flex gap-2 flex flex-row-reverse">
-        <li>Rating: {adventurer.rating}</li>
-        <li>Level: {adventurer.level}</li>
-        <li>Greatness: {adventurer.greatness}</li>
-      </ul>
-      <a
-        href={`https://opensea.io/assets/0x8db687aceb92c66f013e1d614137238cc698fedb/${adventurer.id}`}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="text-sm text-blue-400 flex flex-row-reverse pr-2 pt-1"
-      >
-        {ensName || shortenAddress(adventurer?.currentOwner?.id)}
-      </a>
-      {/* {!isClaimed && (
-        <button
-          onClick={() => {
-            claimById(adventurer.id);
-          }}
-          className="m-auto text-center rounded-md border-gray-200 shadow-sm w-full border py-2 my-2"
-        >
-          Claim <b>{amountPerToken.toLocaleString()}</b> $ATIME
-        </button>
-      )} */}
-      {/* {hasLostMana(adventurer) && (
-        <button
-          onClick={() => {
-            dispatch({ type: "setSelectedAdventurer", payload: adventurer });
-            // claimById(adventurer.id);
-          }}
-          className="m-auto text-center rounded-md border-gray-200 shadow-sm w-full border py-2 my-2"
-        >
-          Name Lost Mana
-        </button>
-      )} */}
-    </div>
+      </td>
+      <td className="align-top pt-5">
+        <GLRProgressBar
+          text={`${adventurer.greatness}/160`}
+          percentage={adventurer.greatness / 160}
+        />
+      </td>
+      <td className="align-top pt-5">
+        <GLRProgressBar
+          text={`${adventurer.level}/36`}
+          percentage={adventurer.level / 36}
+        />
+      </td>
+      <td className="align-top pt-5">
+        <GLRProgressBar
+          text={`${adventurer.rating}/720`}
+          percentage={adventurer.rating / 720}
+        />
+      </td>
+    </tr>
+    // <div key={adventurer.id} className="flex-col flex ">
+    //   <div>
+    //     <label className="font-bold text-base flex">
+    //       Genesis Adventurer # {adventurer.id}
+    //       {hasLostMana(adventurer) && (
+    //         <button
+    //           onClick={() => {
+    //             dispatch({
+    //               type: "setSelectedAdventurer",
+    //               payload: adventurer
+    //             });
+    //             // claimById(adventurer.id);
+    //           }}
+    //           className="text-blue-400 text-sm flex ml-2"
+    //         >
+    //           [upgrade]
+    //         </button>
+    //       )}
+    //     </label>
+    //     <img
+    //       className="rounded-md"
+    //       width="292px"
+    //       height="292px"
+    //       src={adventurerImage(adventurer)}
+    //     />
+    //   </div>
+
+    //   <ul className="px-2 font-semibold flex gap-2 flex flex-row-reverse">
+    //     <li>Rating: {adventurer.rating}</li>
+    //     <li>Level: {adventurer.level}</li>
+    //     <li>Greatness: {adventurer.greatness}</li>
+    //   </ul>
+    //   <a
+    //     href={`https://opensea.io/assets/0x8db687aceb92c66f013e1d614137238cc698fedb/${adventurer.id}`}
+    //     target="_blank"
+    //     rel="noopener noreferrer"
+    //     className="text-sm text-blue-400 flex flex-row-reverse pr-2 pt-1"
+    //   >
+    //     {ensName || shortenAddress(adventurer?.currentOwner?.id)}
+    //   </a>
+    //   {/* {!isClaimed && (
+    //     <button
+    //       onClick={() => {
+    //         claimById(adventurer.id);
+    //       }}
+    //       className="m-auto text-center rounded-md border-gray-200 shadow-sm w-full border py-2 my-2"
+    //     >
+    //       Claim <b>{amountPerToken.toLocaleString()}</b> $ATIME
+    //     </button>
+    //   )} */}
+    // </div>
   );
 }
 
@@ -473,6 +619,7 @@ function LostManaNamingModal() {
       list.push(name);
     }
     setSelectedNames([...list]);
+    console.log(list);
   }
 
   function inventoryItemOrLostManaName(inventoryId) {

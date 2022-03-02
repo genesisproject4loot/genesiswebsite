@@ -1,7 +1,6 @@
 .leaderboard__app {
   .main {
     @apply m-8 mx-10;
-
   }
 
   .hdr {
@@ -12,10 +11,9 @@
     }
 
     .chart {
-      @apply max-w-screen-lg m-auto md:w-full ;
+      @apply max-w-screen-lg m-auto md:w-full;
     }
   }
-
 }
 
 // Responsive
