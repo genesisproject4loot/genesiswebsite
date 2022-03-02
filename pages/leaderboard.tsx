@@ -597,7 +597,8 @@ function LostManaNamingModal() {
   const { data, loading, refetch } = useLostManaNames(
     {
       orderId: state.selectedAdventurer?.orderId,
-      inventoryId_in: inventoryIds
+      inventoryId_in: inventoryIds,
+      available_gt: 0
     },
     !state.selectedAdventurer
   );
@@ -637,7 +638,7 @@ function LostManaNamingModal() {
           return {
             ...lostMana,
             value: idx,
-            label: `${lostMana.itemName}   (${lostMana.itemGreatness}, ${lostMana.itemLevel}, ${lostMana.itemRating}) - ${lostMana.available} Remaining`
+            label: `${lostMana.itemName}  - ${lostMana.itemClass} (${lostMana.itemGreatness}, ${lostMana.itemLevel}, ${lostMana.itemRating}) - ${lostMana.available} Remaining`
           };
         }) || [];
     if (lostManaNames.length === 0) {
