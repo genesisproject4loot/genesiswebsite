@@ -8,7 +8,9 @@ export function useLostManaNames(variables, skip?: boolean) {
         lostManaNames(
           where: {  ${Object.keys(variables)
             .map((key) => `${key}: $${key}`)
-            .join(", ")} }
+            .join(", ")} },
+            orderBy: itemRating,
+            orderDirection: desc
         ) {
           id
           total
