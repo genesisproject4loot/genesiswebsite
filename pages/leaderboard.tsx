@@ -26,20 +26,21 @@ import { shortenAddress } from "@utils/formatters";
 import { SUFFICES } from "@utils/constants";
 import { useWalletContext } from "hooks/useWalletContext";
 import { Modal } from "@components/Modal";
-// import { itemRarity } from "loot-rarity";
+// import { rarityDescription } from "loot-rarity";
 
 interface GenesisAdventurerPageState {
-  selectedAdventurer: any;
+  selectedLostManaAdventurer: any;
+  selectedNameAdventurer: any;
 }
 
 const defaultGenesisAdventurerPageState: GenesisAdventurerPageState = {
-  selectedAdventurer: null
+  selectedLostManaAdventurer: null,
+  selectedNameAdventurer: null
 };
 
-type GenesisAdventurerPageAction = {
-  type: "setSelectedAdventurer";
-  payload: any;
-};
+type GenesisAdventurerPageAction =
+  | { type: "setSelectedLostManaAdventurer"; payload: any }
+  | { type: "setSelectedNameAdventurer"; payload: any };
 
 const GenesisAdventurerPageContext = createContext<{
   state: GenesisAdventurerPageState;
@@ -54,10 +55,17 @@ function GenesisAdventurerPageReducer(
   action: GenesisAdventurerPageAction
 ) {
   switch (action.type) {
-    case "setSelectedAdventurer":
+    case "setSelectedLostManaAdventurer":
       return {
         ...state,
-        selectedAdventurer: action.payload
+        selectedNameAdventurer: null,
+        selectedLostManaAdventurer: action.payload
+      };
+    case "setSelectedNameAdventurer":
+      return {
+        ...state,
+        selectedLostManaAdventurer: null,
+        selectedNameAdventurer: action.payload
       };
     default:
       return state;
@@ -79,8 +87,11 @@ export default function GenesisAdventurerPage(): ReactElement {
             <GenesisAdventurersGrid />
           </div>
         </div>
-        {state.selectedAdventurer && (
-          <LostManaNamingModal key={state.selectedAdventurer?.id} />
+        {state.selectedLostManaAdventurer && (
+          <LostManaNamingModal key={state.selectedLostManaAdventurer} />
+        )}
+        {state.selectedNameAdventurer && (
+          <NameAdventurerModal key={state.selectedNameAdventurer} />
         )}
       </Layout_V2>
     </GenesisAdventurerPageContext.Provider>
@@ -288,10 +299,10 @@ function GenesisAdventurersGrid() {
   };
 
   useEffect(() => {
-    if (!state.selectedAdventurer) {
+    if (!state.selectedLostManaAdventurer || !state.selectedNameAdventurer) {
       setTimeout(refetch, 1000);
     }
-  }, [state.selectedAdventurer]);
+  }, [state.selectedLostManaAdventurer, state.selectedNameAdventurer]);
 
   return (
     <>
@@ -448,23 +459,25 @@ function GenesisAdventurerTableRow({ adventurer, rank }) {
         {adventurerName(adventurer)}{" "}
         <div className="flex flex-row gap-2">
           {canRenameGA(adventurer) && (
-            <a
+            <button
+              onClick={() => {
+                dispatch({
+                  type: "setSelectedNameAdventurer",
+                  payload: adventurer
+                });
+              }}
               className="text-blue-400 text-sm flex"
-              href="https://etherscan.io/token/0x8db687aceb92c66f013e1d614137238cc698fedb#writeProxyContract"
-              target="_blank"
-              rel="noopener noreferrer"
             >
               [rename]
-            </a>
+            </button>
           )}
           {hasLostMana(adventurer) && (
             <button
               onClick={() => {
                 dispatch({
-                  type: "setSelectedAdventurer",
+                  type: "setSelectedLostManaAdventurer",
                   payload: adventurer
                 });
-                // claimById(adventurer.id);
               }}
               className="text-blue-400 text-sm flex"
             >
@@ -509,57 +522,6 @@ function GenesisAdventurerTableRow({ adventurer, rank }) {
         />
       </td>
     </tr>
-    // <div key={adventurer.id} className="flex-col flex ">
-    //   <div>
-    //     <label className="font-bold text-base flex">
-    //       Genesis Adventurer # {adventurer.id}
-    //       {hasLostMana(adventurer) && (
-    //         <button
-    //           onClick={() => {
-    //             dispatch({
-    //               type: "setSelectedAdventurer",
-    //               payload: adventurer
-    //             });
-    //             // claimById(adventurer.id);
-    //           }}
-    //           className="text-blue-400 text-sm flex ml-2"
-    //         >
-    //           [upgrade]
-    //         </button>
-    //       )}
-    //     </label>
-    //     <img
-    //       className="rounded-md"
-    //       width="292px"
-    //       height="292px"
-    //       src={adventurerImage(adventurer)}
-    //     />
-    //   </div>
-
-    //   <ul className="px-2 font-semibold flex gap-2 flex flex-row-reverse">
-    //     <li>Rating: {adventurer.rating}</li>
-    //     <li>Level: {adventurer.level}</li>
-    //     <li>Greatness: {adventurer.greatness}</li>
-    //   </ul>
-    //   <a
-    //     href={`https://opensea.io/assets/0x8db687aceb92c66f013e1d614137238cc698fedb/${adventurer.id}`}
-    //     target="_blank"
-    //     rel="noopener noreferrer"
-    //     className="text-sm text-blue-400 flex flex-row-reverse pr-2 pt-1"
-    //   >
-    //     {ensName || shortenAddress(adventurer?.currentOwner?.id)}
-    //   </a>
-    //   {/* {!isClaimed && (
-    //     <button
-    //       onClick={() => {
-    //         claimById(adventurer.id);
-    //       }}
-    //       className="m-auto text-center rounded-md border-gray-200 shadow-sm w-full border py-2 my-2"
-    //     >
-    //       Claim <b>{amountPerToken.toLocaleString()}</b> $ATIME
-    //     </button>
-    //   )} */}
-    // </div>
   );
 }
 
@@ -571,17 +533,16 @@ function LostManaNamingModal() {
     level: getLevel(),
     rating: getRating()
   });
-  const {
-    nameLostMana,
-    approveATimeContract,
-    isAtimeAppoved,
-    isAtimeAppoving,
-    isAtimeUnAppoved
-  } = useAdventurerContract();
+  const { nameLostMana, approveATimeContract, isAtimeAppoved } =
+    useAdventurerContract();
 
   const inventoryIds = [];
-  for (let i = 0; i < state.selectedAdventurer?.lootTokenIds?.length; i++) {
-    if (state.selectedAdventurer.lootTokenIds[i] == 0) {
+  for (
+    let i = 0;
+    i < state.selectedLostManaAdventurer?.lootTokenIds?.length;
+    i++
+  ) {
+    if (state.selectedLostManaAdventurer.lootTokenIds[i] == 0) {
       inventoryIds.push(i);
     }
   }
@@ -592,15 +553,15 @@ function LostManaNamingModal() {
       level: getLevel(),
       rating: getRating()
     });
-  }, [state.selectedAdventurer, selectedNames]);
+  }, [state.selectedLostManaAdventurer, selectedNames]);
 
   const { data, loading, refetch } = useLostManaNames(
     {
-      orderId: state.selectedAdventurer?.orderId,
+      orderId: state.selectedLostManaAdventurer?.orderId,
       inventoryId_in: inventoryIds,
       available_gt: 0
     },
-    !state.selectedAdventurer
+    !state.selectedLostManaAdventurer
   );
   const defaultNames = [
     "weapon",
@@ -620,14 +581,13 @@ function LostManaNamingModal() {
       list.push(name);
     }
     setSelectedNames([...list]);
-    console.log(list);
   }
 
   function inventoryItemOrLostManaName(inventoryId) {
-    if (state.selectedAdventurer.lootTokenIds[inventoryId] !== 0) {
+    if (state.selectedLostManaAdventurer.lootTokenIds[inventoryId] !== 0) {
       return (
         <div className="px-2">
-          {state.selectedAdventurer[defaultNames[inventoryId]]}
+          {state.selectedLostManaAdventurer[defaultNames[inventoryId]]}
         </div>
       );
     }
@@ -638,13 +598,13 @@ function LostManaNamingModal() {
           return {
             ...lostMana,
             value: idx,
-            label: `${lostMana.itemName}  - ${lostMana.itemClass} (${lostMana.itemGreatness}, ${lostMana.itemLevel}, ${lostMana.itemRating}) - ${lostMana.available} Remaining`
+            label: `${lostMana.itemName} - ${lostMana.itemClass} (${lostMana.itemGreatness}, ${lostMana.itemLevel}, ${lostMana.itemRating}) - ${lostMana.available} Remaining`
           };
         }) || [];
     if (lostManaNames.length === 0) {
       return (
         <div className="px-2">
-          {state.selectedAdventurer[defaultNames[inventoryId]]}
+          {state.selectedLostManaAdventurer[defaultNames[inventoryId]]}
         </div>
       );
     }
@@ -653,20 +613,22 @@ function LostManaNamingModal() {
       <Select
         isClearable={true}
         options={lostManaNames}
-        maxMenuHeight={80}
+        maxMenuHeight={130}
         onChange={(val) => {
           onSelectName(val, inventoryId);
         }}
         value={
           selectedNames.filter((name) => name.iventoryId === inventoryId)[0]
         }
-        placeholder={state.selectedAdventurer[defaultNames[inventoryId]]}
+        placeholder={
+          state.selectedLostManaAdventurer[defaultNames[inventoryId]]
+        }
       />
     );
   }
 
   function getGreatness() {
-    let greatness = state.selectedAdventurer?.greatness ?? 0;
+    let greatness = state.selectedLostManaAdventurer?.greatness ?? 0;
     if (greatness === 0) {
       return 0;
     }
@@ -678,7 +640,7 @@ function LostManaNamingModal() {
   }
 
   function getLevel() {
-    let level = state.selectedAdventurer?.level ?? 0;
+    let level = state.selectedLostManaAdventurer?.level ?? 0;
     if (level === 0) {
       return 0;
     }
@@ -690,7 +652,7 @@ function LostManaNamingModal() {
   }
 
   function getRating() {
-    let rating = state.selectedAdventurer?.rating ?? 0;
+    let rating = state.selectedLostManaAdventurer?.rating ?? 0;
     if (rating === 0) {
       return 0;
     }
@@ -701,7 +663,7 @@ function LostManaNamingModal() {
     return rating;
   }
 
-  if (!state.selectedAdventurer) {
+  if (!state.selectedLostManaAdventurer) {
     return null;
   }
 
@@ -710,10 +672,10 @@ function LostManaNamingModal() {
   }
   return (
     <Modal
-      isOpen={!!state.selectedAdventurer}
+      isOpen={!!state.selectedLostManaAdventurer}
       title="Lost Mana Naming"
       onClose={() => {
-        dispatch({ type: "setSelectedAdventurer", payload: null });
+        dispatch({ type: "setSelectedLostManaAdventurer", payload: null });
       }}
     >
       {!isAtimeAppoved && (
@@ -732,7 +694,7 @@ function LostManaNamingModal() {
           Approve $ATIME
         </button>
       )}
-      <ul className="flex flex-col gap-2 text-xs mt-2">
+      <ul className="flex flex-col gap-2 text-sm mt-2">
         <li>{inventoryItemOrLostManaName(0)}</li>
         <li>{inventoryItemOrLostManaName(1)}</li>
         <li>{inventoryItemOrLostManaName(2)}</li>
@@ -742,7 +704,7 @@ function LostManaNamingModal() {
         <li>{inventoryItemOrLostManaName(6)}</li>
         <li>{inventoryItemOrLostManaName(7)}</li>
       </ul>
-      <ul className="flex text-sm font-semibold gap-2 p-2">
+      <ul className="flex text-sm font-semibold gap-2 p-2 mb-16 border-t border-gray-100 mt-4">
         <li>Greatness: {stats.greatness}</li>
         <li>Level: {stats.level}</li>
         <li>Rating: {stats.rating}</li>
@@ -760,7 +722,7 @@ function LostManaNamingModal() {
           }
           try {
             await nameLostMana(
-              parseInt(state.selectedAdventurer.id),
+              parseInt(state.selectedLostManaAdventurer.id),
               selectedNames.map((name) => {
                 return {
                   lootTokenId: parseInt(name.lootTokenId),
@@ -768,7 +730,95 @@ function LostManaNamingModal() {
                 };
               })
             );
-            dispatch({ type: "setSelectedAdventurer", payload: null });
+            dispatch({ type: "setSelectedLostManaAdventurer", payload: null });
+          } catch (e) {
+            console.log(e);
+          }
+        }}
+      >
+        Update Adventurer
+      </button>
+    </Modal>
+  );
+}
+
+function NameAdventurerModal() {
+  const { state, dispatch } = useContext(GenesisAdventurerPageContext);
+
+  const {
+    nameAdventurer,
+    approveATimeContract,
+    isAtimeAppoved,
+    isAtimeUnAppoved
+  } = useAdventurerContract();
+
+  const [name, setName] = useState("");
+
+  function canUpdate() {
+    return isAtimeAppoved && name.length > 0 && name.length <= 42;
+  }
+  const adventurerName = (adventurer) => {
+    const data = JSON.parse(atob(adventurer.tokenURI.split(",")[1]));
+    return data.name;
+  };
+
+  return (
+    <Modal
+      isOpen={!!state.selectedNameAdventurer}
+      title="Name Your Adventurer "
+      onClose={() => {
+        dispatch({ type: "setSelectedLostManaAdventurer", payload: null });
+      }}
+    >
+      {isAtimeUnAppoved && (
+        <button
+          className="my-2 mt-4 p-2 font-extrabold rounded-md text-center w-full"
+          style={{
+            backgroundColor: "rgb(96 165 250)",
+            color: "#fff"
+          }}
+          onClick={async () => {
+            if (!isAtimeAppoved) {
+              await approveATimeContract();
+            }
+          }}
+        >
+          Approve $ATIME
+        </button>
+      )}
+
+      <div className="my-4">
+        <input
+          className="appearance-none border-2 border-gray-200 rounded w-full py-2 px-4 text-gray-700 leading-tight focus:outline-none focus:bg-white focus:border-blue-500"
+          type="text"
+          placeholder={adventurerName(state.selectedNameAdventurer)}
+          maxLength={42}
+          onChange={(event) => {
+            setName(event.target.value);
+          }}
+        />
+        <div className="text-gray-400  text-sm text-right mb-16">
+          ({42 - name.length} chars left)
+        </div>
+      </div>
+      <button
+        disabled={!canUpdate()}
+        className="px-4 py-2 font-extrabold rounded-md text-center w-full"
+        style={{
+          backgroundColor: canUpdate() ? "rgb(96 165 250)" : "#ccc",
+          color: canUpdate() ? "#fff" : "#fff"
+        }}
+        onClick={async () => {
+          if (!canUpdate()) {
+            return;
+          }
+          try {
+            await nameAdventurer(
+              parseInt(state.selectedNameAdventurer.id),
+              name
+            );
+
+            dispatch({ type: "setSelectedNameAdventurer", payload: null });
           } catch (e) {
             console.log(e);
           }

@@ -102,6 +102,24 @@ const gaABI = [
     outputs: [],
     stateMutability: "payable",
     type: "function"
+  },
+  {
+    inputs: [
+      {
+        internalType: "uint256",
+        name: "tokenId",
+        type: "uint256"
+      },
+      {
+        internalType: "string",
+        name: "name_",
+        type: "string"
+      }
+    ],
+    name: "setName",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function"
   }
 ];
 
@@ -245,6 +263,9 @@ export function useAdventurerContract() {
   }
 
   async function nameLostMana(tokenId: number, itemsToName: any[]) {
+    if (contractState !== AdventurerContractState.APPROVED) {
+      return;
+    }
     const previousState = contractState;
     setContractState(AdventurerContractState.NAMING);
     try {
@@ -252,6 +273,27 @@ export function useAdventurerContract() {
         tokenId,
         itemsToName
       );
+      await result.wait();
+      setContractState(previousState);
+      return true;
+    } catch (e) {
+      console.log(e);
+      setContractState(previousState);
+      return false;
+    }
+  }
+
+  async function nameAdventurer(tokenId: number, name: string) {
+    if (
+      name.length > 42 ||
+      contractState !== AdventurerContractState.APPROVED
+    ) {
+      return;
+    }
+    const previousState = contractState;
+    setContractState(AdventurerContractState.NAMING);
+    try {
+      const result = await adventurerContract.setName(tokenId, name);
       await result.wait();
       setContractState(previousState);
       return true;
@@ -279,6 +321,7 @@ export function useAdventurerContract() {
     approveContract,
     approveATimeContract,
     resurrectGA,
-    nameLostMana
+    nameLostMana,
+    nameAdventurer
   };
 }

@@ -1531,7 +1531,7 @@ function GenesisAdventurerResurrectModal({
           <li className="flex flex-col py-4 border-t border-gray-200 text-base">
             {completedTokenId > 0 && (
               <div className="flex justify-center items-center gap-2">
-                Your Genesis Adventurer has been resurrected:
+                Your Genesis Adventurer has been summoned:
                 <a
                   className="underline text-right text-green-200 ml-2 flex justify-center items-center"
                   target="_blank"
@@ -1547,7 +1547,7 @@ function GenesisAdventurerResurrectModal({
                 onClick={onResurrectClick}
                 className="bg-blue-400 text-white px-4 py-2 font-extrabold rounded-md text-center w-full"
               >
-                Resurrect Your Genesis Adventurer
+                Summon your Genesis Adventurer
               </button>
             )}
             {isResurrecting && (
