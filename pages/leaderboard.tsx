@@ -422,13 +422,27 @@ function GenesisAdventurerTableRow({ adventurer, rank }) {
   );
 
   const adventurerImage = (adventurer) => {
-    const data = JSON.parse(atob(adventurer.tokenURI.split(",")[1]));
-    return data.image;
+    try {
+      const data = JSON.parse(
+        decodeURIComponent(escape(atob(adventurer.tokenURI.split(",")[1])))
+      );
+      return data.image;
+    } catch (e) {
+      console.log(e);
+      return "";
+    }
   };
 
   const adventurerName = (adventurer) => {
-    const data = JSON.parse(atob(adventurer.tokenURI.split(",")[1]));
-    return data.name;
+    try {
+      const data = JSON.parse(
+        decodeURIComponent(escape(atob(adventurer.tokenURI.split(",")[1])))
+      );
+      return data.name;
+    } catch (e) {
+      console.log(e);
+      return "";
+    }
   };
 
   const hasLostMana = (adventurer) =>
