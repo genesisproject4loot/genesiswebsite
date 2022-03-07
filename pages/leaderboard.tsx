@@ -435,10 +435,8 @@ function GenesisAdventurerTableRow({ adventurer, rank }) {
 
   const adventurerName = (adventurer) => {
     try {
-      const data = JSON.parse(
-        decodeURIComponent(escape(atob(adventurer.tokenURI.split(",")[1])))
-      );
-      return data.name;
+      const data = JSON.parse(atob(adventurer.tokenURI.split(",")[1]));
+      return decodeURIComponent(escape(data.name));
     } catch (e) {
       console.log(e);
       return "";
@@ -772,8 +770,12 @@ function NameAdventurerModal() {
     return isAtimeAppoved && name.length > 0 && name.length <= 42;
   }
   const adventurerName = (adventurer) => {
-    const data = JSON.parse(atob(adventurer.tokenURI.split(",")[1]));
-    return data.name;
+    try {
+      const data = JSON.parse(atob(adventurer.tokenURI.split(",")[1]));
+      return decodeURI(escape(data.name));
+    } catch (e) {
+      return "";
+    }
   };
 
   return (
