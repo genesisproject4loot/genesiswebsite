@@ -49,7 +49,7 @@ import LoadingIcon from "@components/icons/LoadingIcon";
 import { useAdventurerContract } from "hooks/useAdventurerContract";
 import ListIcon from "@components/icons/ListIcon";
 import GridIcon from "@components/icons/GridIcon";
-import { useEnsLookup } from "hooks/useEns";
+import { useEnsLookup, useEnsResolve } from "hooks/useEns";
 import _ from "lodash";
 
 type SelectOption = { value: string; label: string };
@@ -833,13 +833,13 @@ function GenesisManaCardsByInventory({
   address
 }: GenesisManaCardsByInventoryProps): ReactElement {
   const { state, dispatch } = useContext(ManaFinderContext);
-
+  const { address: resolvedAddress } = useEnsResolve(address);
   const {
     manas: manasWithPricing,
     loading: isManaLoading,
     refetch: refetchMana
   } = useManaWithPricing({
-    address
+    address: resolvedAddress
   });
   const {
     items: manas,
@@ -1034,7 +1034,7 @@ function GenesisManaListRow({ manas, onSelect, selectedMana }) {
 
 function ManaOwnerLink({ mana }) {
   const address = mana?.currentOwner?.id;
-  const { address: ensName } = useEnsLookup(address);
+  const { ensName } = useEnsLookup(address);
   return (
     <a
       className="underline text-right"
@@ -1352,6 +1352,12 @@ function AddWalletModal({ isOpen, onClose, onAdd }: AddWalletModalProps) {
             value={address}
             onChange={(e) => {
               setAddress(e.target.value);
+            }}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                onAdd(address);
+                e.preventDefault();
+              }
             }}
             placeholder="Enter Address e.g. 0x..."
           />

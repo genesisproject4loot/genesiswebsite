@@ -8,6 +8,7 @@ import { Mana } from "./manaFinderTypes";
 
 export function shortenAddress(address) {
   if (!address) return "";
+  if (address.indexOf(".eth") > 0) return address;
   return address.slice(0, 6) + "..." + address.slice(-4);
 }
 
