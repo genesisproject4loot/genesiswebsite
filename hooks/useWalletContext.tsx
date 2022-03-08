@@ -4,6 +4,10 @@ import WalletConnectProvider from "@walletconnect/web3-provider";
 import Web3Modal from "web3modal";
 import { shortenAddress } from "@utils/formatters";
 
+const PROVIDER_RPC_URL =
+  process.env.NEXT_PROVIDER_URL ??
+  "https://eth-mainnet.alchemyapi.io/v2/f-5JpA4L7_gst60QBQ-sbczctebU6JzY";
+
 const WEB3_MODAL_CONFIG = {
   network: "mainnet",
   cacheProvider: true,
@@ -13,7 +17,7 @@ const WEB3_MODAL_CONFIG = {
       options: {
         pollingInterval: 20000000,
         rpc: {
-          1: "https://eth-mainnet.alchemyapi.io/v2/f-5JpA4L7_gst60QBQ-sbczctebU6JzY"
+          1: PROVIDER_RPC_URL
         }
       }
     }
@@ -60,7 +64,9 @@ export const WalletProvider = (props: WalletProviderProps) => {
 function useWallet() {
   const [modal, setModal] = useState<Web3Modal>();
   const [signer, setSigner] = useState<ethers.providers.JsonRpcSigner>();
-  const [provider, setProvider] = useState<ethers.providers.Provider>();
+  const [provider, setProvider] = useState<ethers.providers.Provider>(
+    new ethers.providers.JsonRpcProvider(PROVIDER_RPC_URL)
+  );
   const [isConnected, setIsConnected] = useState(false);
   const [account, setAccount] = useState<string>("");
   const [displayName, setDisplayName] = useState("");

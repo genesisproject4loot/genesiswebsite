@@ -187,7 +187,7 @@ function GenesisAdventurerLeaderboard() {
 }
 
 function GenesisAdventurerLeaderboardRow({ wallet, showOverlay, maxValue }) {
-  const { address: ensName } = useEnsLookup(wallet.id);
+  const { ensName } = useEnsLookup(wallet.id);
   const counts = wallet.adventurers.reduce((map, adventurer) => {
     if (!map[adventurer.suffixId.id]) map[adventurer.suffixId.id] = 0;
     map[adventurer.suffixId.id]++;
@@ -414,7 +414,7 @@ function GLRProgressBar({ text, percentage }) {
 
 function GenesisAdventurerTableRow({ adventurer, rank }) {
   const { dispatch } = useContext(GenesisAdventurerPageContext);
-  const { address: ensName } = useEnsLookup(adventurer?.currentOwner?.id);
+  const { ensName } = useEnsLookup(adventurer?.currentOwner?.id);
   const { account, isConnected } = useWalletContext();
 
   const { isClaimed, claimById, amountPerToken } = useAtimeSeasonClaimed(
@@ -424,7 +424,7 @@ function GenesisAdventurerTableRow({ adventurer, rank }) {
   const adventurerImage = (adventurer) => {
     try {
       const data = JSON.parse(
-        decodeURIComponent(escape(atob(adventurer.tokenURI.split(",")[1])))
+        decodeURIComponent(atob(adventurer.tokenURI.split(",")[1]))
       );
       return data.image;
     } catch (e) {
@@ -761,7 +761,8 @@ function NameAdventurerModal() {
     nameAdventurer,
     approveATimeContract,
     isAtimeAppoved,
-    isAtimeUnAppoved
+    isAtimeUnAppoved,
+    isNameTooLong
   } = useAdventurerContract();
 
   const [name, setName] = useState("");
@@ -807,14 +808,14 @@ function NameAdventurerModal() {
         <input
           className="appearance-none border-2 border-gray-200 rounded w-full py-2 px-4 text-gray-700 leading-tight focus:outline-none focus:bg-white focus:border-blue-500"
           type="text"
-          placeholder={adventurerName(state.selectedNameAdventurer)}
+          placeholder="Name"
           maxLength={42}
           onChange={(event) => {
-            setName(event.target.value);
+            setName(event.target.value.trim());
           }}
         />
-        <div className="text-gray-400  text-sm text-right mb-16">
-          ({42 - name.length} chars left)
+        <div className="text-red-400  text-sm text-right mb-16">
+          {isNameTooLong(name.trim()) ? "Please shorten name" : ""}
         </div>
       </div>
       <button

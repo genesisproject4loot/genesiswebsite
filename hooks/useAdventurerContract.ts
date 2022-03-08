@@ -283,6 +283,23 @@ export function useAdventurerContract() {
     }
   }
 
+  function escapeName(name) {
+    let occurances = 0;
+    let escapedName = "";
+    for (let char of name.split("")) {
+      if (char === '"') {
+        char = occurances % 2 === 0 ? "“" : "”";
+        occurances++;
+      }
+      escapedName += char;
+    }
+    return escapedName;
+  }
+
+  function isNameTooLong(name) {
+    return new Blob([escapeName(name)]).size > 42;
+  }
+
   async function nameAdventurer(tokenId: number, name: string) {
     if (
       name.length > 42 ||
@@ -293,7 +310,10 @@ export function useAdventurerContract() {
     const previousState = contractState;
     setContractState(AdventurerContractState.NAMING);
     try {
-      const result = await adventurerContract.setName(tokenId, name);
+      const result = await adventurerContract.setName(
+        tokenId,
+        escapeName(name)
+      );
       await result.wait();
       setContractState(previousState);
       return true;
@@ -322,6 +342,7 @@ export function useAdventurerContract() {
     approveATimeContract,
     resurrectGA,
     nameLostMana,
-    nameAdventurer
+    nameAdventurer,
+    isNameTooLong
   };
 }
