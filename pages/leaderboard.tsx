@@ -103,8 +103,8 @@ function GenesisAdventurerHeader() {
     <div className={styles.hdr}>
       <h1 className="pb-4">Genesis Adventurers</h1>
       <div className={styles.chart}>
-        <div className="flex flex-col md:flex-row gap-2 md:gap-4 px-5">
-          <div className="w-full md:w-2/5 mt-2">
+        <div className="flex flex-col gap-2 px-5 md:flex-row md:gap-4">
+          <div className="w-full mt-2 md:w-2/5">
             <GenesisAdventurerLeaderboard />
           </div>
           <div className="w-full md:w-3/5">
@@ -154,7 +154,7 @@ function GenesisAdventurerLeaderboard() {
 
   return (
     <div>
-      <h1 className="text-xl font-bold text-center pb-2">Leaderboard</h1>
+      <h1 className="pb-2 text-xl font-bold text-center">Leaderboard</h1>
       <ul onMouseOut={onMouseOutLeaderboard}>
         {data?.wallets?.slice(offset, end).map((wallet, idx) => {
           const number = page * LIMIT + idx + 1;
@@ -162,7 +162,7 @@ function GenesisAdventurerLeaderboard() {
             <li
               key={wallet.id}
               onMouseOver={() => onMouseOverLeader(number)}
-              className="grid grid-cols-4 gap-1 w-full justify-center items-center relative"
+              className="relative grid items-center justify-center w-full grid-cols-4 gap-1"
               style={{
                 fontSize: 14,
                 gridTemplateColumns: "20px minmax(120px,auto) 1fr auto"
@@ -178,7 +178,7 @@ function GenesisAdventurerLeaderboard() {
           );
         })}
       </ul>
-      <div className="flex justify-end gap-4 text-base py-4 underline">
+      <div className="flex justify-end gap-4 py-4 text-base underline">
         <button onClick={prevPage}>Prev</button>{" "}
         <button onClick={nextPage}>Next</button>
       </div>
@@ -231,10 +231,10 @@ function GenesisAdventurerLeaderboardRow({ wallet, showOverlay, maxValue }) {
       </span>
       {showOverlay && (
         <div
-          className="absolute hidden md:block bg-white p-4 rounded-md text-black top-0 ml-5 z-50 left-full shadow-md"
+          className="absolute top-0 z-50 hidden p-4 ml-5 text-black bg-white rounded-md shadow-md md:block left-full"
           style={{ minWidth: 160 }}
         >
-          <h1 className="font-semibold pb-1 flex border-b border-gray-200 ">
+          <h1 className="flex pb-1 font-semibold border-b border-gray-200 ">
             <span className="flex-1">
               {ensName || shortenAddress(wallet.id)}
             </span>
@@ -245,7 +245,7 @@ function GenesisAdventurerLeaderboardRow({ wallet, showOverlay, maxValue }) {
               return (
                 <li
                   key={order.label + order.count}
-                  className="flex gap-4 w-full py-1"
+                  className="flex w-full gap-4 py-1"
                 >
                   <span className="flex-1">{order.label}:</span>
                   <span>{order.count}</span>
@@ -274,13 +274,11 @@ function GenesisAdventurersGrid() {
   const [selectedTab, setSelectedTab] = useState(0);
   const [sort, setSort] = useState({ sortBy: "rating", sortDirection: "desc" });
 
-  const tabs = ["All", "My"];
-  const { data, loading, refetch } = useAdventurerRawQuery(
-    selectedTab === 0
-      ? { currentOwner_not: "" }
-      : {
-          currentOwner: account?.toLowerCase()
-        },
+  const tabs = account ? ["My Wallet", "All"] : ["All"];
+  const { data, refetch } = useAdventurerRawQuery(
+    tabs[selectedTab] === "My Wallet"
+      ? { currentOwner: account?.toLowerCase() }
+      : { currentOwner_not: "" },
     { skip: selectedTab === 1 && !account, ...sort }
   );
 
@@ -306,7 +304,7 @@ function GenesisAdventurersGrid() {
 
   return (
     <>
-      <ul className="flex flex-row gap-4 text-lg pb-4">
+      <ul className="flex flex-row gap-4 pb-4 text-xl">
         {tabs.map((tab, idx) => {
           return (
             <li
@@ -315,8 +313,8 @@ function GenesisAdventurersGrid() {
               }}
               className={
                 idx === selectedTab
-                  ? "border-b text-black"
-                  : "text-gray-300  cursor-pointer"
+                  ? "border-b-2 text-black border-black"
+                  : "text-gray-300 cursor-pointer hover:text-black hover:border-b hover:border-black"
               }
               key={tab}
             >
@@ -326,7 +324,7 @@ function GenesisAdventurersGrid() {
         })}
       </ul>
       {/* {!isConnected && (
-        <h1 className="text-xl text-center pt-10">
+        <h1 className="pt-10 text-xl text-center">
           Connect your wallet to see your Adventurers.
         </h1>
       )} */}
@@ -338,7 +336,7 @@ function GenesisAdventurersGrid() {
             <td>Name</td>
             <td>Order</td>
             <td>Owner</td>
-            <td className="text-right pr-10 w-48">
+            <td className="w-48 pr-10 text-right">
               <div
                 className="cursor-pointer"
                 onClick={handleSortClick("greatness")}
@@ -349,7 +347,7 @@ function GenesisAdventurersGrid() {
                 )}
               </div>
             </td>
-            <td className="text-right pr-10 w-48">
+            <td className="w-48 pr-10 text-right">
               <div
                 className="cursor-pointer"
                 onClick={handleSortClick("level")}
@@ -360,7 +358,7 @@ function GenesisAdventurersGrid() {
                 )}
               </div>
             </td>
-            <td className="text-right pr-10 w-48">
+            <td className="w-48 pr-10 text-right">
               <div
                 className="cursor-pointer"
                 onClick={handleSortClick("rating")}
@@ -392,16 +390,16 @@ function GenesisAdventurersGrid() {
 function GLRProgressBar({ text, percentage }) {
   return (
     <div>
-      <div className="text-gray-400 text-sm text-right" style={{ width: 150 }}>
+      <div className="text-sm text-right text-gray-400" style={{ width: 150 }}>
         {text}
       </div>
 
       <div
-        className="rounded-lg h-4 relative"
+        className="relative h-4 rounded-lg"
         style={{ width: 150, backgroundColor: " rgb(229, 232, 235)" }}
       >
         <span
-          className="rounded-lg h-4 block"
+          className="block h-4 rounded-lg"
           style={{
             backgroundColor: "rgb(32, 129, 226)",
             width: percentage * 150
@@ -452,8 +450,8 @@ function GenesisAdventurerTableRow({ adventurer, rank }) {
 
   return (
     <tr>
-      <td className="align-top pt-5">{rank}.</td>
-      <td className="align-top pt-5">
+      <td className="pt-5 align-top">{rank}.</td>
+      <td className="pt-5 align-top">
         <a
           href={`https://opensea.io/assets/0x8db687aceb92c66f013e1d614137238cc698fedb/${adventurer.id}`}
           target="_blank"
@@ -467,7 +465,7 @@ function GenesisAdventurerTableRow({ adventurer, rank }) {
           />
         </a>
       </td>
-      <td className="align-top pt-5">
+      <td className="pt-5 align-top">
         {adventurerName(adventurer)}{" "}
         <div className="flex flex-row gap-2">
           {canRenameGA(adventurer) && (
@@ -478,7 +476,7 @@ function GenesisAdventurerTableRow({ adventurer, rank }) {
                   payload: adventurer
                 });
               }}
-              className="text-blue-400 text-sm flex"
+              className="flex text-sm text-blue-400"
             >
               [rename]
             </button>
@@ -491,21 +489,21 @@ function GenesisAdventurerTableRow({ adventurer, rank }) {
                   payload: adventurer
                 });
               }}
-              className="text-blue-400 text-sm flex"
+              className="flex text-sm text-blue-400"
             >
               [upgrade]
             </button>
           )}
         </div>
       </td>
-      <td className="align-top pt-5">
+      <td className="pt-5 align-top">
         of{" "}
         {
           SUFFICES.find((suffix) => suffix.value === String(adventurer.orderId))
             .label
         }
       </td>
-      <td className="align-top pt-5">
+      <td className="pt-5 align-top">
         <a
           href={`https://opensea.io/assets/0x8db687aceb92c66f013e1d614137238cc698fedb/${adventurer.id}`}
           target="_blank"
@@ -515,19 +513,19 @@ function GenesisAdventurerTableRow({ adventurer, rank }) {
           {ensName || shortenAddress(adventurer?.currentOwner?.id)}
         </a>
       </td>
-      <td className="align-top pt-5">
+      <td className="pt-5 align-top">
         <GLRProgressBar
           text={`${adventurer.greatness}/160`}
           percentage={adventurer.greatness / 160}
         />
       </td>
-      <td className="align-top pt-5">
+      <td className="pt-5 align-top">
         <GLRProgressBar
           text={`${adventurer.level}/36`}
           percentage={adventurer.level / 36}
         />
       </td>
-      <td className="align-top pt-5">
+      <td className="pt-5 align-top">
         <GLRProgressBar
           text={`${adventurer.rating}/720`}
           percentage={adventurer.rating / 720}
@@ -692,7 +690,7 @@ function LostManaNamingModal() {
     >
       {!isAtimeAppoved && (
         <button
-          className="my-2 p-2 font-extrabold rounded-md text-center w-full"
+          className="w-full p-2 my-2 font-extrabold text-center rounded-md"
           style={{
             backgroundColor: "rgb(96 165 250)",
             color: "#fff"
@@ -706,7 +704,7 @@ function LostManaNamingModal() {
           Approve $ATIME
         </button>
       )}
-      <ul className="flex flex-col gap-2 text-sm mt-2">
+      <ul className="flex flex-col gap-2 mt-2 text-sm">
         <li>{inventoryItemOrLostManaName(0)}</li>
         <li>{inventoryItemOrLostManaName(1)}</li>
         <li>{inventoryItemOrLostManaName(2)}</li>
@@ -716,14 +714,14 @@ function LostManaNamingModal() {
         <li>{inventoryItemOrLostManaName(6)}</li>
         <li>{inventoryItemOrLostManaName(7)}</li>
       </ul>
-      <ul className="flex text-sm font-semibold gap-2 p-2 mb-16 border-t border-gray-100 mt-4">
+      <ul className="flex gap-2 p-2 mt-4 mb-16 text-sm font-semibold border-t border-gray-100">
         <li>Greatness: {stats.greatness}</li>
         <li>Level: {stats.level}</li>
         <li>Rating: {stats.rating}</li>
       </ul>
       <button
         disabled={!canUpdate()}
-        className="px-4 py-2 font-extrabold rounded-md text-center w-full"
+        className="w-full px-4 py-2 font-extrabold text-center rounded-md"
         style={{
           backgroundColor: canUpdate() ? "rgb(96 165 250)" : "#ccc",
           color: canUpdate() ? "#fff" : "#fff"
@@ -789,7 +787,7 @@ function NameAdventurerModal() {
     >
       {isAtimeUnAppoved && (
         <button
-          className="my-2 mt-4 p-2 font-extrabold rounded-md text-center w-full"
+          className="w-full p-2 my-2 mt-4 font-extrabold text-center rounded-md"
           style={{
             backgroundColor: "rgb(96 165 250)",
             color: "#fff"
@@ -806,7 +804,7 @@ function NameAdventurerModal() {
 
       <div className="my-4">
         <input
-          className="appearance-none border-2 border-gray-200 rounded w-full py-2 px-4 text-gray-700 leading-tight focus:outline-none focus:bg-white focus:border-blue-500"
+          className="w-full px-4 py-2 leading-tight text-gray-700 border-2 border-gray-200 rounded appearance-none focus:outline-none focus:bg-white focus:border-blue-500"
           type="text"
           placeholder="Name"
           maxLength={42}
@@ -814,13 +812,13 @@ function NameAdventurerModal() {
             setName(event.target.value.trim());
           }}
         />
-        <div className="text-red-400  text-sm text-right mb-16">
+        <div className="mb-16 text-sm text-right text-red-400">
           {isNameTooLong(name.trim()) ? "Please shorten name" : ""}
         </div>
       </div>
       <button
         disabled={!canUpdate()}
-        className="px-4 py-2 font-extrabold rounded-md text-center w-full"
+        className="w-full px-4 py-2 font-extrabold text-center rounded-md"
         style={{
           backgroundColor: canUpdate() ? "rgb(96 165 250)" : "#ccc",
           color: canUpdate() ? "#fff" : "#fff"
