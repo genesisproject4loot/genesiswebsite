@@ -186,7 +186,7 @@ export function useAdventurerContract() {
         setATimeContractState(AdventurerContractATimeState.APPROVED);
       }
     });
-  }, [wallet, wallet.account, manaContract]);
+  }, [wallet, wallet.account, atimeContract]);
 
   async function getPublicPrice() {
     if (!adventurerContract) {
@@ -263,7 +263,7 @@ export function useAdventurerContract() {
   }
 
   async function nameLostMana(tokenId: number, itemsToName: any[]) {
-    if (contractState !== AdventurerContractState.APPROVED) {
+    if (contractState === AdventurerContractState.NAMING) {
       return;
     }
     const previousState = contractState;
@@ -301,10 +301,7 @@ export function useAdventurerContract() {
   }
 
   async function nameAdventurer(tokenId: number, name: string) {
-    if (
-      name.length > 42 ||
-      contractState !== AdventurerContractState.APPROVED
-    ) {
+    if (name.length > 42 || contractState === AdventurerContractState.NAMING) {
       return;
     }
     const previousState = contractState;
